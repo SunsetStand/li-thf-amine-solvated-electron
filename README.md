@@ -24,8 +24,8 @@ On a Linux workstation or HPC login node:
 git clone https://github.com/SunsetStand/li-thf-amine-solvated-electron.git
 cd li-thf-amine-solvated-electron
 
-./run.sh doctor
 ./run.sh bootstrap
+./run.sh doctor
 ./run.sh dry-run --campaign pilot
 ```
 
@@ -60,7 +60,7 @@ see `docs/hpc.md`. Load site chemistry modules before submitting.
 - Packmol input rendering and chemistry-engine capability checks.
 - Snakemake input-generation DAG plus local/SLURM profiles.
 - Provenance manifests with Git SHA, software versions, inputs, and checksums.
-- Dependency-light unit and integration tests that run with Python's standard library.
+- Dependency-light unit and integration tests using only core package dependencies.
 
 External chemistry binaries and licensed programs are not redistributed. Large
 trajectories, wavefunctions, restart files, and cube files stay on the group
