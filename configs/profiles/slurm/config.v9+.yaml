@@ -1,0 +1,19 @@
+executor: slurm
+jobs: 100
+latency-wait: 60
+printshellcmds: true
+rerun-incomplete: true
+keep-going: true
+default-resources:
+  - mem_mb=4000
+  - runtime=60
+  - disk_mb=2000
+set-resources:
+  cp2k_cdft:
+    tasks: 32
+    mem_mb: 128000
+    runtime: 1440
+  cp2k_vde:
+    tasks: 32
+    mem_mb: 128000
+    runtime: 720

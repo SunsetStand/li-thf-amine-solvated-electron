@@ -1,0 +1,25 @@
+[workspace]
+name = "li-thf-amine-solvated-electron"
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[dependencies]
+python = "3.12.*"
+numpy = ">=1.26"
+snakemake = ">=9,<10"
+snakemake-executor-plugin-slurm = ">=1"
+packmol = "*"
+openbabel = "*"
+ambertools = "*"
+gromacs = "*"
+cp2k = "*"
+xtb = "*"
+crest = "*"
+
+[pypi-dependencies]
+solvelec = { path = ".", editable = true }
+
+[tasks]
+doctor = "./run.sh doctor"
+test = "./run.sh test"
+dry-run = "./run.sh dry-run --campaign pilot"

@@ -1,0 +1,7 @@
+* text=auto
+*.sh text eol=lf
+*.py text eol=lf
+*.smk text eol=lf
+Snakefile text eol=lf
+*.tpl text eol=lf
+*.mdp text eol=lf

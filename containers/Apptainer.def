@@ -1,0 +1,21 @@
+Bootstrap: docker
+From: ghcr.io/prefix-dev/pixi:0.47.0
+
+%files
+    . /opt/solvelec
+
+%post
+    cd /opt/solvelec
+    pixi install --locked || pixi install
+
+%environment
+    export PATH=/opt/solvelec/.pixi/envs/default/bin:$PATH
+    export PYTHONPATH=/opt/solvelec/src
+
+%runscript
+    cd /opt/solvelec
+    exec ./run.sh "$@"
+
+%test
+    cd /opt/solvelec
+    ./run.sh test

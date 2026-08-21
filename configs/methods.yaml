@@ -1,0 +1,44 @@
+{
+  "classical_md": {
+    "engine": "gromacs",
+    "forcefield": "GAFF2",
+    "charges": "AM1-BCC",
+    "temperature_k": 298.15,
+    "pressure_bar": 1.0,
+    "timestep_fs": 2.0,
+    "nvt_ns": 0.5,
+    "npt_equilibration_ns": 5.0,
+    "production_ns": 20.0,
+    "checkpoint_minutes": 15,
+    "note": "Solvent-only seed generation until a Li force-field gate is passed."
+  },
+  "cp2k": {
+    "functional": "PBE0-D3",
+    "exact_exchange_fraction": 0.25,
+    "basis_set": "TZV2P-MOLOPT-GTH",
+    "aux_basis_set": "cFIT3",
+    "potential": "GTH-PBE",
+    "cutoff_ry": 600,
+    "rel_cutoff_ry": 60,
+    "hfx_cutoff_angstrom": 5.0,
+    "uks": true,
+    "admm": true,
+    "timestep_fs": 0.5,
+    "cdft_constraint": "keep Li valence population near Li+ target",
+    "production_status": "PROVISIONAL_UNTIL_BASIS_FUNCTIONAL_GATE"
+  },
+  "orca": {
+    "functional": "wB97X-D4",
+    "basis_set": "ma-def2-TZVPP",
+    "grid": "DEFGRID3",
+    "scf": "VeryTightSCF",
+    "benchmark": "DLPNO-CCSD(T)"
+  },
+  "localization_thresholds": {
+    "electron_count_min": 0.75,
+    "electron_count_max": 1.25,
+    "li_spin_collapse": 0.50,
+    "atomic_spin_localized": 0.50,
+    "cavity_interstitial_fraction": 0.55
+  }
+}

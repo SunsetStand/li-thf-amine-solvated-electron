@@ -1,0 +1,37 @@
+import json
+import sys
+from pathlib import Path
+
+configfile: "configs/campaign.yaml"
+
+CAMPAIGN = config.get("campaign", "pilot")
+if CAMPAIGN not in config["campaigns"]:
+    raise ValueError(f"Unknown campaign {CAMPAIGN!r}")
+
+DEFINITION = config["campaigns"][CAMPAIGN]
+SYSTEMS = DEFINITION["systems"]
+REPLICAS = DEFINITION.get("replicas", config.get("replicas", [1]))
+PAIRS = [(system, int(replica)) for system in SYSTEMS for replica in REPLICAS]
+SOLVELEC_SOURCES = sorted(str(path) for path in Path("src/solvelec").glob("*.py"))
+PYTHON = f'"{sys.executable}"'
+
+
+def pair_outputs(pattern):
+    return [pattern.format(campaign=CAMPAIGN, system=system, replica=replica) for system, replica in PAIRS]
+
+
+SPEC_OUTPUTS = pair_outputs("runs/{campaign}/specs/{system}/r{replica}.json")
+PACKMOL_OUTPUTS = pair_outputs("runs/{campaign}/inputs/{system}/r{replica}/packmol.inp")
+CP2K_OUTPUTS = pair_outputs("runs/{campaign}/inputs/{system}/r{replica}/cp2k_cdft.inp")
+
+
+rule all:
+    input:
+        f"runs/{CAMPAIGN}/input_bundle.done"
+
+
+include: "rules/00_validate.smk"
+include: "rules/10_specs.smk"
+include: "rules/20_inputs.smk"
+include: "rules/50_cp2k_cdft.smk"
+include: "rules/70_report.smk"

@@ -1,0 +1,6 @@
+# Placeholder profile: install and configure the Snakemake PBS executor plugin
+# used by your site, then replace this file with site-specific keys.
+executor: local
+cores: 1
+printshellcmds: true
+rerun-incomplete: true

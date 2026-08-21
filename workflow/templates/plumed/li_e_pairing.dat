@@ -1,0 +1,6 @@
+# Placeholder for the gated enhanced-sampling stage.
+# Do not use a fixed geometric ghost center as a surrogate for the electron.
+# The production collective variable must be tied to a validated spin-density
+# or cDFT population observable and calibrated in the pure-THF pilot.
+
+PRINT ARG=* FILE=COLVAR STRIDE=10

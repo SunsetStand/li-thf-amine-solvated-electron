@@ -1,0 +1,5 @@
+executor: local
+cores: 1
+latency-wait: 10
+printshellcmds: true
+rerun-incomplete: true

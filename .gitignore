@@ -1,0 +1,45 @@
+.venv/
+.pixi/
+.snakemake/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+
+# Workflow outputs and large chemistry files
+runs/
+results/
+scratch/
+work/
+*.sif
+*.wfn
+*.wfn.bak-*
+*.restart
+*.restart.bak-*
+*.cube
+*.trr
+*.xtc
+*.edr
+*.cpt
+*.tpr
+*.gbw
+*.densities
+
+# Tiny golden fixtures are intentionally versioned.
+!tests/fixtures/
+!tests/fixtures/*.cube
+
+# Local HPC settings and secrets
+configs/profiles/private-*/
+.env
+
+# Editors / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

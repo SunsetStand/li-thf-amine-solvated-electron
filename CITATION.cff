@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this workflow, please cite the repository release and the electronic-structure methods used."
+title: "Li/THF/amine solvated-electron workflow"
+type: software
+authors:
+  - name: "SunsetStand"
+repository-code: "https://github.com/SunsetStand/li-thf-amine-solvated-electron"
+license: MIT
+version: 0.1.0
+date-released: 2026-08-21

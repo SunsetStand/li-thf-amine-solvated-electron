@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "temperature_k": 298.15,
+  "pressure_bar": 1.0,
+  "thf_count": 64,
+  "li_electron_pairs": 1,
+  "target_concentrations_m": [1.5, 3.0],
+  "replicas": [1, 2, 3],
+  "concentration_tolerance_m": 0.05,
+  "campaigns": {
+    "smoke": {
+      "systems": ["pure_thf"],
+      "replicas": [1],
+      "stages": ["spec", "inputs"]
+    },
+    "pilot": {
+      "systems": ["pure_thf", "eda_1p5m"],
+      "replicas": [1, 2, 3],
+      "stages": ["spec", "inputs", "classical_md", "cdft", "vde", "analysis"]
+    },
+    "production": {
+      "systems": [
+        "pure_thf",
+        "eda_1p5m", "eda_3m",
+        "12pda_1p5m", "12pda_3m",
+        "13pda_1p5m", "13pda_3m",
+        "deta_1p5m", "deta_3m",
+        "tmeda_1p5m", "tmeda_3m"
+      ],
+      "replicas": [1, 2, 3],
+      "stages": ["spec", "inputs", "classical_md", "cdft", "vde", "analysis"]
+    }
+  },
+  "safety": {
+    "allow_unvalidated_li_forcefield": false,
+    "allow_unconstrained_electron_production": false,
+    "require_constraint_release_gate": true,
+    "require_finite_size_gate": true
+  }
+}
