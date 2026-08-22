@@ -31,11 +31,34 @@ Snakemake's executor plugin maps rule resources to SLURM options; see the
 Run:
 
 ```bash
-./run.sh doctor --strict-engines
+./run.sh doctor --require input_bundle --require hpc
 ./run.sh test
 ./run.sh dry-run --campaign pilot
 ./run.sh submit --campaign pilot --profile private-mygroup
 ```
+
+Then validate each expensive stage after loading its site modules:
+
+```bash
+./run.sh doctor --require classical_md
+./run.sh doctor --require cdft
+./run.sh doctor --require embedded_vde
+./run.sh doctor --require plane_wave_gate
+```
+
+Requirements can be combined in one command. `--require production` (and its
+legacy alias `--strict-engines`) checks every chemistry engine, so it is expected
+to fail on a host prepared only for input generation or one production stage.
+
+On many Linux systems `/usr/bin/orca` is the GNOME desktop screen reader, not
+the ORCA quantum-chemistry program. The environment check rejects that false
+positive. Load the licensed ORCA module, or prepend the real ORCA installation
+directory to `PATH`, before checking `embedded_vde`.
+
+Snakemake installed by `./run.sh bootstrap` lives inside the repository `.venv`.
+The environment check searches beside the active virtual-environment Python, so
+it reports the same Snakemake executable that `run.sh` actually uses even when
+`.venv/bin` is not globally present on `PATH`.
 
 The initial `input_bundle` target only creates validated specifications and
 engine inputs. Expensive chemistry rules should be enabled after G0–G2 and

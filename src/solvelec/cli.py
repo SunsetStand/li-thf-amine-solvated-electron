@@ -5,7 +5,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 from .classification import LocalizationMetrics, classify_localization
 from .composition import AVOGADRO_MOL_INV, NM3_TO_L, concentration_molar
@@ -17,7 +17,7 @@ from .config import (
     validate_repository_configs,
 )
 from .cube import analyze_spin_density, read_cube
-from .engines import doctor_report
+from .engines import DOCTOR_REQUIREMENTS, doctor_report
 from .parsers import parse_output
 from .provenance import write_manifest
 from .rendering import render_cp2k, render_orca, render_packmol
@@ -39,17 +39,12 @@ def cmd_validate(args: argparse.Namespace) -> int:
 
 
 def cmd_doctor(args: argparse.Namespace) -> int:
-    report = doctor_report()
+    requirements = list(args.require)
+    if args.strict_engines and "production" not in requirements:
+        requirements.append("production")
+    report = doctor_report(requirements=requirements)
     _json_dump(report)
-    if args.strict_engines:
-        engines = cast(list[dict[str, object]], report["engines"])
-        chemistry_missing = [
-            item["name"]
-            for item in engines
-            if item["category"] == "chemistry" and not item["found"]
-        ]
-        return 3 if chemistry_missing else 0
-    return 0
+    return 0 if report["ready"] else 3
 
 
 def _matrix_records(root: Path, campaign_name: str) -> list[dict[str, Any]]:
@@ -227,7 +222,19 @@ def build_parser() -> argparse.ArgumentParser:
     validate.set_defaults(func=cmd_validate)
 
     doctor = sub.add_parser("doctor", help="report workflow and chemistry-engine capabilities")
-    doctor.add_argument("--strict-engines", action="store_true")
+    doctor.add_argument(
+        "--require",
+        action="append",
+        choices=DOCTOR_REQUIREMENTS,
+        default=[],
+        metavar="STAGE",
+        help="fail unless STAGE is runnable; repeat to combine stages",
+    )
+    doctor.add_argument(
+        "--strict-engines",
+        action="store_true",
+        help="compatibility alias for --require production",
+    )
     doctor.set_defaults(func=cmd_doctor)
 
     matrix = sub.add_parser("matrix", help="emit the expanded campaign matrix")

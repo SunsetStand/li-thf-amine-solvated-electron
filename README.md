@@ -25,12 +25,16 @@ git clone https://github.com/SunsetStand/li-thf-amine-solvated-electron.git
 cd li-thf-amine-solvated-electron
 
 ./run.sh bootstrap
-./run.sh doctor
+./run.sh doctor --require input_bundle
 ./run.sh dry-run --campaign pilot
 ```
 
 `doctor` reports missing chemistry engines without silently substituting a
-different method. Use `./run.sh doctor --strict-engines` on the production host.
+different method. A plain `./run.sh doctor` is an inventory; `--require` turns
+one or more workflow stages into enforced gates. For example, use
+`./run.sh doctor --require classical_md --require hpc` before submitting the
+classical-MD stage. `--strict-engines` remains as a compatibility alias for
+`--require production`, which intentionally requires every chemistry engine.
 `bootstrap` creates or updates `.venv`, installs the declared dependencies, and
 runs the complete dependency-light test suite. Later checks only need
 `./run.sh test`; `./run.sh update` fast-forwards the repository, resynchronizes

@@ -131,7 +131,7 @@ Usage: ./run.sh COMMAND [options]
 
 Commands:
   bootstrap   Create/update .venv, install dependencies, and run tests
-  doctor      Report available chemistry engines; add --strict-engines to fail
+  doctor      Report engines; add --require STAGE to enforce a capability gate
   test        Validate configs and run dependency-light regression tests
   dry-run     Show Snakemake DAG, or the campaign matrix before bootstrap
   submit      Generate/submit the selected campaign through a profile
