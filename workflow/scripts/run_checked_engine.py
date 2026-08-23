@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import argparse
+import os
 import shlex
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -19,6 +21,14 @@ def main() -> int:
     parser.add_argument("--cwd", default=".")
     parser.add_argument("command", nargs=argparse.REMAINDER)
     args = parser.parse_args()
+    if not os.environ.get("SLURM_JOB_ID") and (
+        os.environ.get("SOLVELEC_REQUIRE_SLURM") == "1" or shutil.which("sbatch")
+    ):
+        print(
+            "Refusing to start a chemistry engine outside a Slurm allocation.",
+            file=sys.stderr,
+        )
+        return 2
     command = args.command[1:] if args.command[:1] == ["--"] else args.command
     if not command:
         parser.error("an engine command is required after --")

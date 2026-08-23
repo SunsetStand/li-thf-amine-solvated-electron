@@ -18,16 +18,29 @@ scientific comparison.
 
 ## Quick start
 
-On a Linux workstation or HPC login node:
+On a workstation, commands run directly when `sbatch` is absent. On the TMC-AMD
+server, the same task-like commands automatically submit themselves to Slurm;
+only the lightweight shell wrapper and `sbatch` run on the login node:
 
 ```bash
 git clone https://github.com/SunsetStand/li-thf-amine-solvated-electron.git
 cd li-thf-amine-solvated-electron
 
 ./run.sh bootstrap
+./run.sh queue
+```
+
+Wait for bootstrap to finish, then submit compute-node inspection and input-DAG
+checks:
+
+```bash
+./run.sh probe
 ./run.sh doctor --require input_bundle
 ./run.sh dry-run --campaign pilot
 ```
+
+Each command prints its job ID and log paths under `runs/slurm/`. Do not run the
+underlying Python or Snakemake commands manually on the TMC login node.
 
 `doctor` reports missing chemistry engines without silently substituting a
 different method. A plain `./run.sh doctor` is an inventory; `--require` turns
@@ -36,22 +49,27 @@ one or more workflow stages into enforced gates. For example, use
 classical-MD stage. `--strict-engines` remains as a compatibility alias for
 `--require production`, which intentionally requires every chemistry engine.
 `bootstrap` creates or updates `.venv`, installs the declared dependencies, and
-runs the complete dependency-light test suite. Later checks only need
-`./run.sh test`; `./run.sh update` fast-forwards the repository, resynchronizes
-the environment, and retests it.
+runs the complete dependency-light test suite inside its allocation. Later
+checks only need `./run.sh test`; `./run.sh update` performs only the lightweight
+Git fast-forward locally, then submits bootstrap through Slurm.
 
 To submit the pilot through the bundled SLURM profile:
 
 ```bash
-./run.sh submit --campaign pilot --profile slurm
+./run.sh submit --campaign pilot
 ```
 
-The bootstrap command installs the SLURM executor plugin only when `sbatch` is
-present. This keeps local/Windows dry-runs independent of cluster commands.
+On TMC-AMD this first submits the Snakemake controller as a four-CPU `amd` job.
+That controller then submits every workflow rule as a child Slurm job. Child
+rules use `configs/profiles/tmc-amd`; no workflow rule is marked local.
 
 For site-specific account/partition settings, copy the SLURM profile to an
 untracked `configs/profiles/private-<site>/` directory and select that profile;
 see `docs/hpc.md`. Load site chemistry modules before submitting.
+
+> Current scope: the committed DAG validates configuration and generates input
+> files. It does not yet execute Packmol, GROMACS, CP2K, ORCA, or Quantum
+> ESPRESSO production calculations.
 
 ## What is implemented in v0.1
 

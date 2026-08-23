@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -312,6 +314,14 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    if not os.environ.get("SLURM_JOB_ID") and (
+        os.environ.get("SOLVELEC_REQUIRE_SLURM") == "1" or shutil.which("sbatch")
+    ):
+        print(
+            "ERROR: refusing to run solvelec outside a Slurm allocation; use ./run.sh instead.",
+            file=sys.stderr,
+        )
+        return 2
     parser = build_parser()
     args = parser.parse_args(argv)
     try:

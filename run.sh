@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PYTHON_SOURCE="${ROOT}/src"
 PIP_PROJECT="${ROOT}"
+SLURM_DRIVER="${SOLVELEC_SLURM_DRIVER:-${ROOT}/configs/slurm/tmc-amd-driver.sbatch}"
 if command -v cygpath >/dev/null 2>&1; then
   PYTHON_SOURCE="$(cygpath -w "${PYTHON_SOURCE}")"
   PIP_PROJECT="$(cygpath -w "${PIP_PROJECT}")"
@@ -39,9 +40,90 @@ find_snakemake() {
   fi
 }
 
-PYTHON_BIN="$(find_python)"
 COMMAND="${1:-help}"
 if [[ $# -gt 0 ]]; then shift; fi
+
+submit_via_slurm() {
+  local action="$1"
+  shift
+  local runtime="${SOLVELEC_QUICK_TIME:-00:30:00}"
+  local memory="${SOLVELEC_QUICK_MEM:-4G}"
+  case "${action}" in
+    bootstrap)
+      runtime="${SOLVELEC_BOOTSTRAP_TIME:-02:00:00}"
+      memory="${SOLVELEC_BOOTSTRAP_MEM:-8G}"
+      ;;
+    submit|resume)
+      runtime="${SOLVELEC_CONTROLLER_TIME:-12:00:00}"
+      memory="${SOLVELEC_CONTROLLER_MEM:-8G}"
+      ;;
+  esac
+
+  if [[ ! -f "${SLURM_DRIVER}" ]]; then
+    printf 'ERROR: Slurm driver not found: %s\n' "${SLURM_DRIVER}" >&2
+    return 2
+  fi
+  mkdir -p "${ROOT}/runs/slurm"
+  local submission
+  submission="$(
+    cd "${ROOT}"
+    sbatch --parsable \
+      --partition="${SOLVELEC_SLURM_PARTITION:-amd}" \
+      --job-name="solvelec-${action}" \
+      --ntasks=1 \
+      --cpus-per-task="${SOLVELEC_SLURM_CPUS:-4}" \
+      --time="${runtime}" \
+      --mem="${memory}" \
+      --output="${ROOT}/runs/slurm/%x-%j.out" \
+      --error="${ROOT}/runs/slurm/%x-%j.err" \
+      --export=ALL,SOLVELEC_REQUIRE_SLURM=1 \
+      "${SLURM_DRIVER}" "${action}" "$@"
+  )"
+  printf 'Submitted %s as Slurm job %s.\n' "${action}" "${submission}"
+  printf 'Logs: %s/runs/slurm/solvelec-%s-%s.{out,err}\n' \
+    "${ROOT}" "${action}" "${submission%%;*}"
+}
+
+is_login_safe_command() {
+  case "$1" in
+    help|-h|--help|queue|update) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+is_known_command() {
+  case "$1" in
+    bootstrap|doctor|probe|test|dry-run|submit|resume|status|report|update|matrix|queue|help|-h|--help)
+      return 0
+      ;;
+    *) return 1 ;;
+  esac
+}
+
+if ! is_known_command "${COMMAND}"; then
+  printf 'ERROR: unknown command %s\n' "${COMMAND}" >&2
+  exit 2
+fi
+
+# On a Slurm host, task-like commands are submission requests.  The same entry
+# point still runs directly on workstations and in CI, where sbatch is absent.
+if [[ -z "${SLURM_JOB_ID:-}" ]] && command -v sbatch >/dev/null 2>&1 \
+  && ! is_login_safe_command "${COMMAND}"; then
+  submit_via_slurm "${COMMAND}" "$@"
+  exit $?
+fi
+
+if [[ "${SOLVELEC_REQUIRE_SLURM:-0}" == "1" && -z "${SLURM_JOB_ID:-}" ]] \
+  && ! is_login_safe_command "${COMMAND}"; then
+  printf 'ERROR: refusing to run %s outside a Slurm allocation.\n' "${COMMAND}" >&2
+  exit 2
+fi
+
+PYTHON_BIN=""
+case "${COMMAND}" in
+  help|-h|--help|queue|update|probe) ;;
+  *) PYTHON_BIN="$(find_python)" ;;
+esac
 
 campaign_from_args() {
   local campaign="pilot"
@@ -71,6 +153,34 @@ case "${COMMAND}" in
   doctor)
     "${PYTHON_BIN}" -m solvelec.cli doctor "$@"
     ;;
+  probe)
+    if [[ -z "${SLURM_JOB_ID:-}" ]]; then
+      printf 'ERROR: probe must run inside a Slurm allocation.\n' >&2
+      exit 2
+    fi
+    printf '=== solvelec compute-node probe ===\n'
+    printf 'Date: %s\n' "$(date --iso-8601=seconds 2>/dev/null || date)"
+    printf 'Host: %s\n' "$(hostname)"
+    printf 'Working directory: %s\n' "${ROOT}"
+    printf 'Slurm job: %s\n' "${SLURM_JOB_ID:-missing}"
+    printf 'CPUs: %s\n' "${SLURM_CPUS_ON_NODE:-unknown}"
+    printf '\n=== Slurm allocation ===\n'
+    scontrol show job "${SLURM_JOB_ID}" || true
+    printf '\n=== Loaded modules ===\n'
+    module list 2>&1 || true
+    printf '\n=== Relevant available modules ===\n'
+    module -t avail 2>&1 \
+      | grep -Ei 'python|miniconda|apptainer|packmol|openbabel|amber|gromacs|cp2k|orca|espresso|xtb|crest|mpi' \
+      || true
+    printf '\n=== Executables ===\n'
+    for executable in git python3 python apptainer singularity packmol obabel antechamber \
+      gmx gmx_mpi cp2k.psmp cp2k.popt cp2k orca pw.x xtb crest sbatch srun sacct \
+      mpirun; do
+      printf '%-16s %s\n' "${executable}" "$(command -v "${executable}" || printf 'NOT_FOUND')"
+    done
+    printf '\n=== Filesystems ===\n'
+    df -h "${ROOT}" /data/home/storage 2>/dev/null || true
+    ;;
   test)
     "${PYTHON_BIN}" -m solvelec.cli validate
     "${PYTHON_BIN}" -m solvelec.cli test
@@ -87,7 +197,7 @@ case "${COMMAND}" in
     ;;
   submit|resume)
     campaign="$(campaign_from_args "$@")"
-    profile="slurm"
+    profile="${SOLVELEC_DEFAULT_PROFILE:-slurm}"
     previous=""
     for item in "$@"; do
       if [[ "${previous}" == "--profile" ]]; then profile="${item}"; fi
@@ -122,6 +232,9 @@ case "${COMMAND}" in
     git -C "${ROOT}" pull --ff-only
     exec "${ROOT}/run.sh" bootstrap
     ;;
+  queue)
+    squeue -u "${USER}"
+    ;;
   matrix)
     "${PYTHON_BIN}" -m solvelec.cli matrix "$@"
     ;;
@@ -130,16 +243,22 @@ case "${COMMAND}" in
 Usage: ./run.sh COMMAND [options]
 
 Commands:
-  bootstrap   Create/update .venv, install dependencies, and run tests
-  doctor      Report engines; add --require STAGE to enforce a capability gate
+  bootstrap   Install dependencies and test (auto-submitted on a Slurm host)
+  probe       Inspect modules, executables, allocation, and filesystems on a compute node
+  doctor      Check engines; add --require STAGE to enforce a capability gate
   test        Validate configs and run dependency-light regression tests
-  dry-run     Show Snakemake DAG, or the campaign matrix before bootstrap
-  submit      Generate/submit the selected campaign through a profile
-  resume      Resume incomplete Snakemake jobs using the selected profile
-  status      Show Snakemake output status
+  dry-run     Build the Snakemake DAG without executing workflow jobs
+  submit      Run the Snakemake controller, which submits child Slurm jobs
+  resume      Resume through the same Slurm-controller mechanism
+  status      Generate Snakemake output status inside a short Slurm job
   report      Generate a readiness report (never fabricates scientific results)
   matrix      Print the expanded composition/replica matrix
-  update      Fast-forward only, sync dependencies, then rerun tests
+  update      Fast-forward locally, then submit bootstrap through Slurm
+  queue       Show the current user's Slurm queue (login-node-safe)
+
+On a host with sbatch, every task-like command above is automatically wrapped
+in configs/slurm/tmc-amd-driver.sbatch. Only help, queue, update's Git operation,
+and the sbatch submission itself run on the login node.
 EOF
     ;;
   *)

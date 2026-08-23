@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# This file is sourced inside the Slurm controller allocation. Replace the
+# placeholders with names reported by `./run.sh probe`; do not guess versions.
+
+# module load packmol
+# module load openbabel
+# module load ambertools
+# module load gromacs
+# module load cp2k
+# module load orca
+# module load quantum-espresso
+# module load xtb
+# module load crest

@@ -1,0 +1,26 @@
+executor: slurm
+jobs: 100
+latency-wait: 60
+printshellcmds: true
+rerun-incomplete: true
+keep-going: true
+slurm-no-account: true
+default-resources:
+  - slurm_partition=amd
+  - cpus_per_task=4
+  - mem_mb=4000
+  - runtime=60
+  - disk_mb=2000
+set-resources:
+  cp2k_cdft:
+    slurm_partition: amd
+    tasks: 32
+    cpus_per_task: 1
+    mem_mb: 128000
+    runtime: 720
+  cp2k_vde:
+    slurm_partition: amd
+    tasks: 32
+    cpus_per_task: 1
+    mem_mb: 128000
+    runtime: 720
