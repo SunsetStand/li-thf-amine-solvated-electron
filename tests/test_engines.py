@@ -91,6 +91,11 @@ class DoctorRequirementTests(unittest.TestCase):
         required = required_engine_names(["cdft", "hpc"])
         self.assertEqual(required, frozenset({"git", "snakemake", "cp2k", "slurm", "mpi"}))
 
+    def test_mpi_is_part_of_parallel_engine_stage_gates(self) -> None:
+        for stage in ("classical_md", "cdft", "embedded_vde", "plane_wave_gate"):
+            with self.subTest(stage=stage):
+                self.assertIn("mpi", required_engine_names([stage]))
+
     def test_unknown_requirement_is_rejected(self) -> None:
         with self.assertRaisesRegex(ValueError, "unknown doctor requirement"):
             required_engine_names(["not-a-stage"])

@@ -50,6 +50,8 @@ one or more workflow stages into enforced gates. For example, use
 `./run.sh doctor --require classical_md --require hpc` before submitting the
 classical-MD stage. `--strict-engines` remains as a compatibility alias for
 `--require production`, which intentionally requires every chemistry engine.
+On TMC-AMD, run CP2K, GROMACS, and ORCA gates separately because their site
+modules provide different OpenMPI versions.
 `bootstrap` creates or updates `.venv`, installs the declared dependencies, and
 runs the complete dependency-light test suite inside its allocation. Later
 checks only need `./run.sh test`; `./run.sh update` performs only the lightweight

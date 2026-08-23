@@ -16,13 +16,14 @@ from solvelec.cli import main
 ROOT = Path(__file__).resolve().parents[1]
 RUN_SH = ROOT / "run.sh"
 SLURM_DRIVER = ROOT / "configs" / "slurm" / "tmc-amd-driver.sbatch"
+STAGE_MODULES = ROOT / "configs" / "slurm" / "tmc-amd-stage-modules.sh"
 TMC_PROFILE = ROOT / "configs" / "profiles" / "tmc-amd" / "config.v9+.yaml"
 ENGINE_RUNNER = ROOT / "workflow" / "scripts" / "run_checked_engine.py"
 
 
 class SlurmSafetyTests(unittest.TestCase):
     def test_shell_entry_points_have_valid_bash_syntax(self) -> None:
-        for script in (RUN_SH, SLURM_DRIVER):
+        for script in (RUN_SH, SLURM_DRIVER, STAGE_MODULES):
             with self.subTest(script=script):
                 completed = subprocess.run(
                     ["bash", "-n", str(script)], capture_output=True, text=True, check=False
@@ -34,6 +35,14 @@ class SlurmSafetyTests(unittest.TestCase):
         self.assertIn("slurm_partition=amd", profile)
         self.assertIn("cpus_per_task=4", profile)
         self.assertIn("slurm-no-account: true", profile)
+
+    def test_tmc_engine_stages_pin_separate_mpi_module_families(self) -> None:
+        modules = STAGE_MODULES.read_text(encoding="utf-8")
+        self.assertIn("module load cp2k/2023.2", modules)
+        self.assertIn("module load gromacs/2023", modules)
+        self.assertIn("module load orca/6.1.1", modules)
+        driver = SLURM_DRIVER.read_text(encoding="utf-8")
+        self.assertIn("incompatible MPI modules", driver)
 
     def test_logs_command_is_lightweight_and_available_without_python(self) -> None:
         environment = os.environ.copy()

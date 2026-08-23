@@ -13,6 +13,8 @@
   from Slurm's copied `/var/spool/.../slurm_script` path.
 - Add a login-safe `logs` command and isolated candidate-module activation to
   the compute-node probe.
+- Pin TMC-AMD CP2K, GROMACS, and ORCA modules per workflow stage and reject
+  doctor requests that would mix their incompatible OpenMPI versions.
 
 ## 0.1.0 - 2026-08-21
 

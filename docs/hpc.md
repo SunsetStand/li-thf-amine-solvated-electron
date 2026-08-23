@@ -53,8 +53,16 @@ Inspect the actual compute-node environment:
 `probe` records the allocation, loaded and available relevant modules,
 executable paths, and shared filesystems. It also loads the known CP2K, GROMACS,
 and ORCA candidates one at a time in isolated subshells, reporting the resulting
-executable paths and dependency modules without mixing their environments. Use
-its output to create the untracked site module file:
+executable paths and dependency modules without mixing their environments.
+
+The validated mappings are stage-specific because their MPI dependencies are
+incompatible: CP2K 2023.2 uses OpenMPI 4.1.5, GROMACS 2023 uses 4.1.4, and ORCA
+6.1.1 uses 4.1.8. The Slurm driver loads the correct family automatically for
+each stage-specific doctor job. A production-wide doctor is rejected on this
+host; run the separate gates shown below.
+
+An optional untracked module file can contain only site-wide modules compatible
+with every engine:
 
 ```bash
 mkdir -p configs/profiles/private-tmc-amd
@@ -62,8 +70,9 @@ cp configs/profiles/tmc-amd/modules.sh.example \
   configs/profiles/private-tmc-amd/modules.sh
 ```
 
-Edit only module names confirmed by the probe. In particular, `/usr/bin/orca`
-is a desktop screen reader and must not be used as the quantum-chemistry ORCA.
+Do not put CP2K, GROMACS, ORCA, or MPI in that private file. In particular,
+`/usr/bin/orca` is a desktop screen reader and must not be used as the
+quantum-chemistry ORCA.
 
 After configuring modules, submit capability gates:
 
@@ -123,6 +132,8 @@ The automatic wrapper defaults to the TMC driver; another cluster must also set
 Requirements can be combined in one command. `--require production` (and its
 legacy alias `--strict-engines`) checks every chemistry engine, so it is expected
 to fail on a host prepared only for input generation or one production stage.
+On TMC-AMD it is rejected before execution because it would mix incompatible MPI
+families; use one engine-stage requirement per command.
 
 On many Linux systems `/usr/bin/orca` is the GNOME desktop screen reader, not
 the ORCA quantum-chemistry program. The environment check rejects that false

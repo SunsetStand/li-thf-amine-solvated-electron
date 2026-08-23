@@ -39,7 +39,49 @@ export PYTHONUNBUFFERED=1
 export SOLVELEC_DEFAULT_PROFILE="${SOLVELEC_DEFAULT_PROFILE:-tmc-amd}"
 export SOLVELEC_REQUIRE_SLURM=1
 
+load_doctor_stage_modules() {
+  local selected_stage=""
+  local previous=""
+  local requirement=""
+  for argument in "$@"; do
+    requirement=""
+    if [[ "${previous}" == "--require" ]]; then
+      requirement="${argument}"
+    elif [[ "${argument}" == --require=* ]]; then
+      requirement="${argument#--require=}"
+    elif [[ "${argument}" == "--strict-engines" ]]; then
+      requirement="production"
+    fi
+
+    case "${requirement}" in
+      classical_md|cdft|embedded_vde)
+        if [[ -n "${selected_stage}" && "${selected_stage}" != "${requirement}" ]]; then
+          printf 'ERROR: TMC engine stages use incompatible MPI modules: %s and %s.\n' \
+            "${selected_stage}" "${requirement}" >&2
+          printf 'Run one doctor command per engine stage.\n' >&2
+          return 2
+        fi
+        selected_stage="${requirement}"
+        ;;
+      production)
+        printf 'ERROR: TMC production-wide doctor would mix incompatible MPI modules.\n' >&2
+        printf 'Run the documented stage-specific doctor commands instead.\n' >&2
+        return 2
+        ;;
+    esac
+    previous="${argument}"
+  done
+
+  if [[ -n "${selected_stage}" ]]; then
+    # shellcheck source=tmc-amd-stage-modules.sh
+    source "${ROOT}/configs/slurm/tmc-amd-stage-modules.sh" "${selected_stage}"
+  fi
+}
+
 cd "${ROOT}"
+if [[ "$1" == "doctor" ]]; then
+  load_doctor_stage_modules "${@:2}"
+fi
 printf '=== solvelec Slurm driver ===\n'
 printf 'Date: %s  Node: %s  Job: %s\n' "$(date)" "$(hostname)" "${SLURM_JOB_ID}"
 printf 'Command:'

@@ -1,13 +1,7 @@
 #!/usr/bin/env bash
-# This file is sourced inside the Slurm controller allocation. Replace the
-# placeholders with names reported by `./run.sh probe`; do not guess versions.
-
-# module load packmol
-# module load openbabel
-# module load ambertools
-# module load gromacs
-# module load cp2k
-# module load orca
-# module load quantum-espresso
-# module load xtb
-# module load crest
+# This file is sourced inside every Slurm controller allocation. Put only
+# site-wide modules that are compatible with every engine here.
+#
+# Do not load CP2K, GROMACS, ORCA, or an MPI implementation in this file. Their
+# validated TMC mappings live in configs/slurm/tmc-amd-stage-modules.sh because
+# each engine requires a different OpenMPI version.
