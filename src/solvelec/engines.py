@@ -14,6 +14,7 @@ class EngineSpec:
     name: str
     executables: tuple[str, ...]
     version_args: tuple[str, ...] = ("--version",)
+    timeout_seconds: float = 15.0
     category: str = "chemistry"
     required_for: str = "production"
     accepted_output_markers: tuple[str, ...] = ()
@@ -40,19 +41,34 @@ ENGINE_SPECS: tuple[EngineSpec, ...] = (
     EngineSpec("openbabel", ("obabel",), required_for="molecule_generation"),
     EngineSpec("ambertools", ("antechamber",), version_args=("-h",), required_for="classical_md"),
     EngineSpec("gromacs", ("gmx", "gmx_mpi"), required_for="classical_md"),
-    EngineSpec("cp2k", ("cp2k.psmp", "cp2k.popt", "cp2k"), required_for="cdft"),
+    EngineSpec(
+        "cp2k",
+        ("cp2k.psmp", "cp2k.popt", "cp2k"),
+        timeout_seconds=30.0,
+        required_for="cdft",
+    ),
     EngineSpec(
         "orca",
         ("orca",),
         version_args=(),
         required_for="embedded_vde",
-        accepted_output_markers=("program version", "o   r   c   a"),
+        accepted_output_markers=(
+            "program version",
+            "o   r   c   a",
+            "requires the name of a parameterfile as argument",
+        ),
         rejected_output_markers=("screen reader",),
     ),
     EngineSpec("quantum_espresso", ("pw.x",), version_args=("-h",), required_for="plane_wave_gate"),
     EngineSpec("xtb", ("xtb",), required_for="conformer_search"),
     EngineSpec("crest", ("crest",), required_for="conformer_search"),
-    EngineSpec("snakemake", ("snakemake",), category="workflow", required_for="workflow"),
+    EngineSpec(
+        "snakemake",
+        ("snakemake",),
+        timeout_seconds=30.0,
+        category="workflow",
+        required_for="workflow",
+    ),
     EngineSpec(
         "apptainer", ("apptainer", "singularity"), category="workflow", required_for="container"
     ),
@@ -152,7 +168,7 @@ def required_engine_names(requirements: Sequence[str]) -> frozenset[str]:
     return frozenset(required)
 
 
-def detect_engine(spec: EngineSpec, timeout_seconds: float = 5.0) -> EngineStatus:
+def detect_engine(spec: EngineSpec, timeout_seconds: float | None = None) -> EngineStatus:
     executable = _find_executable(spec)
     if not executable:
         return EngineStatus(
@@ -172,7 +188,7 @@ def detect_engine(spec: EngineSpec, timeout_seconds: float = 5.0) -> EngineStatu
             [executable, *spec.version_args],
             capture_output=True,
             text=True,
-            timeout=timeout_seconds,
+            timeout=spec.timeout_seconds if timeout_seconds is None else timeout_seconds,
             check=False,
         )
         stdout = completed.stdout or ""

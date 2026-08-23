@@ -61,6 +61,12 @@ incompatible: CP2K 2023.2 uses OpenMPI 4.1.5, GROMACS 2023 uses 4.1.4, and ORCA
 each stage-specific doctor job. A production-wide doctor is rejected on this
 host; run the separate gates shown below.
 
+The TMC builds can start slowly on the shared filesystem. Engine probes allow
+15 seconds by default and 30 seconds for CP2K and repository Snakemake. ORCA
+6.1.1 is recognized both by its normal banner and by its distinctive
+`parameterfile` diagnostic when it is intentionally launched without an input;
+the GNOME screen reader remains explicitly rejected.
+
 An optional untracked module file can contain only site-wide modules compatible
 with every engine:
 

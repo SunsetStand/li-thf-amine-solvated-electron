@@ -15,6 +15,8 @@
   the compute-node probe.
 - Pin TMC-AMD CP2K, GROMACS, and ORCA modules per workflow stage and reject
   doctor requests that would mix their incompatible OpenMPI versions.
+- Recognize the ORCA 6.1.1 no-input signature and lengthen probes for CP2K and
+  Snakemake on slow shared filesystems.
 
 ## 0.1.0 - 2026-08-21
 

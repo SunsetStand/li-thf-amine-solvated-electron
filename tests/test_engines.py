@@ -82,6 +82,45 @@ class EngineDetectionTests(unittest.TestCase):
         self.assertTrue(status.found)
         self.assertIsNone(status.error)
 
+    def test_accepts_orca_611_missing_parameterfile_signature(self) -> None:
+        spec = EngineSpec(
+            "orca",
+            ("orca",),
+            version_args=(),
+            accepted_output_markers=(
+                "program version",
+                "o   r   c   a",
+                "requires the name of a parameterfile as argument",
+            ),
+            rejected_output_markers=("screen reader",),
+        )
+        completed = subprocess.CompletedProcess(
+            ["/opt/orca/orca"],
+            255,
+            stdout="This program requires the name of a parameterfile as argument\n",
+            stderr="",
+        )
+        with (
+            patch("solvelec.engines.shutil.which", return_value="/opt/orca/orca"),
+            patch("solvelec.engines.subprocess.run", return_value=completed),
+        ):
+            status = detect_engine(spec)
+
+        self.assertTrue(status.found)
+        self.assertIsNone(status.error)
+
+    def test_engine_specific_timeout_is_used(self) -> None:
+        spec = EngineSpec("slow", ("slow",), timeout_seconds=30.0)
+        completed = subprocess.CompletedProcess(["/opt/slow", "--version"], 0, "slow 1\n", "")
+        with (
+            patch("solvelec.engines.shutil.which", return_value="/opt/slow"),
+            patch("solvelec.engines.subprocess.run", return_value=completed) as run,
+        ):
+            status = detect_engine(spec)
+
+        self.assertTrue(status.found)
+        self.assertEqual(run.call_args.kwargs["timeout"], 30.0)
+
 
 class DoctorRequirementTests(unittest.TestCase):
     def test_input_bundle_requires_only_git_and_snakemake(self) -> None:
