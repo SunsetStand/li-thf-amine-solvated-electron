@@ -76,7 +76,7 @@ submit_via_slurm() {
       --mem="${memory}" \
       --output="${ROOT}/runs/slurm/%x-%j.out" \
       --error="${ROOT}/runs/slurm/%x-%j.err" \
-      --export=ALL,SOLVELEC_REQUIRE_SLURM=1 \
+      --export="ALL,SOLVELEC_REQUIRE_SLURM=1,SOLVELEC_ROOT=${ROOT}" \
       "${SLURM_DRIVER}" "${action}" "$@"
   )"
   printf 'Submitted %s as Slurm job %s.\n' "${action}" "${submission}"

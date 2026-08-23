@@ -9,6 +9,8 @@
   Snakemake controller itself.
 - Add a TMC-AMD four-CPU profile, compute-node probe, private module hook, and
   hard refusal to start chemistry engines outside Slurm.
+- Pass the repository root explicitly into Slurm jobs instead of deriving it
+  from Slurm's copied `/var/spool/.../slurm_script` path.
 
 ## 0.1.0 - 2026-08-21
 

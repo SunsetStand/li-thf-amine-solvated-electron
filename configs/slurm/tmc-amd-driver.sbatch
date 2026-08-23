@@ -8,7 +8,14 @@
 
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+ROOT="${SOLVELEC_ROOT:-${SLURM_SUBMIT_DIR:-}}"
+if [[ -z "${ROOT}" || ! -f "${ROOT}/run.sh" ]]; then
+  printf 'ERROR: repository root is invalid: %s\n' "${ROOT:-unset}" >&2
+  printf 'SOLVELEC_ROOT=%s  SLURM_SUBMIT_DIR=%s\n' \
+    "${SOLVELEC_ROOT:-unset}" "${SLURM_SUBMIT_DIR:-unset}" >&2
+  exit 2
+fi
+ROOT="$(cd "${ROOT}" && pwd -P)"
 if [[ $# -lt 1 ]]; then
   printf 'ERROR: expected a run.sh command.\n' >&2
   exit 2

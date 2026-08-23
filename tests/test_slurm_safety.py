@@ -69,8 +69,15 @@ class SlurmSafetyTests(unittest.TestCase):
             arguments = capture.read_text(encoding="utf-8").splitlines()
             self.assertIn("--partition=amd", arguments)
             self.assertIn("--cpus-per-task=4", arguments)
+            self.assertIn(f"--export=ALL,SOLVELEC_REQUIRE_SLURM=1,SOLVELEC_ROOT={ROOT}", arguments)
             self.assertIn("doctor", arguments)
             self.assertIn("input_bundle", arguments)
+
+    def test_driver_uses_exported_or_slurm_submission_directory(self) -> None:
+        driver = SLURM_DRIVER.read_text(encoding="utf-8")
+        self.assertIn("SOLVELEC_ROOT", driver)
+        self.assertIn("SLURM_SUBMIT_DIR", driver)
+        self.assertNotIn('dirname "${BASH_SOURCE[0]}"', driver)
 
     def test_engine_runner_refuses_outside_required_slurm_allocation(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
