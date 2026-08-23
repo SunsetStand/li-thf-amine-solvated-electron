@@ -11,6 +11,8 @@
   hard refusal to start chemistry engines outside Slurm.
 - Pass the repository root explicitly into Slurm jobs instead of deriving it
   from Slurm's copied `/var/spool/.../slurm_script` path.
+- Add a login-safe `logs` command and isolated candidate-module activation to
+  the compute-node probe.
 
 ## 0.1.0 - 2026-08-21
 

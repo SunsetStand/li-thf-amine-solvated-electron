@@ -34,6 +34,14 @@ git pull --ff-only
 
 The submission message contains the job ID and exact `.out`/`.err` paths under
 `runs/slurm/`. Wait for bootstrap to complete before submitting the next check.
+Completed jobs disappear from `squeue`; `./run.sh queue` itself is a lightweight
+query and creates no output file. Locate persistent logs with:
+
+```bash
+./run.sh logs
+./run.sh logs bootstrap
+./run.sh logs probe
+```
 
 Inspect the actual compute-node environment:
 
@@ -43,8 +51,10 @@ Inspect the actual compute-node environment:
 ```
 
 `probe` records the allocation, loaded and available relevant modules,
-executable paths, and shared filesystems. Use its output to create the untracked
-site module file:
+executable paths, and shared filesystems. It also loads the known CP2K, GROMACS,
+and ORCA candidates one at a time in isolated subshells, reporting the resulting
+executable paths and dependency modules without mixing their environments. Use
+its output to create the untracked site module file:
 
 ```bash
 mkdir -p configs/profiles/private-tmc-amd

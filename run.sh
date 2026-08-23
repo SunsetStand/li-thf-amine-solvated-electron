@@ -86,14 +86,14 @@ submit_via_slurm() {
 
 is_login_safe_command() {
   case "$1" in
-    help|-h|--help|queue|update) return 0 ;;
+    help|-h|--help|queue|logs|update) return 0 ;;
     *) return 1 ;;
   esac
 }
 
 is_known_command() {
   case "$1" in
-    bootstrap|doctor|probe|test|dry-run|submit|resume|status|report|update|matrix|queue|help|-h|--help)
+    bootstrap|doctor|probe|test|dry-run|submit|resume|status|report|update|matrix|queue|logs|help|-h|--help)
       return 0
       ;;
     *) return 1 ;;
@@ -121,7 +121,7 @@ fi
 
 PYTHON_BIN=""
 case "${COMMAND}" in
-  help|-h|--help|queue|update|probe) ;;
+  help|-h|--help|queue|logs|update|probe) ;;
   *) PYTHON_BIN="$(find_python)" ;;
 esac
 
@@ -172,6 +172,23 @@ case "${COMMAND}" in
     module -t avail 2>&1 \
       | grep -Ei 'python|miniconda|apptainer|packmol|openbabel|amber|gromacs|cp2k|orca|espresso|xtb|crest|mpi' \
       || true
+    printf '\n=== Candidate module activation (isolated) ===\n'
+    for candidate in cp2k/2023.1_openmpi cp2k/2023.2 gromacs/2023 orca/6.1.1; do
+      (
+        printf '\n--- %s ---\n' "${candidate}"
+        module purge
+        if module load "${candidate}"; then
+          module list 2>&1 || true
+          for executable in cp2k.psmp cp2k.popt cp2k gmx gmx_mpi orca mpirun; do
+            if command -v "${executable}" >/dev/null 2>&1; then
+              printf '%-16s %s\n' "${executable}" "$(command -v "${executable}")"
+            fi
+          done
+        else
+          printf 'MODULE_LOAD_FAILED\n'
+        fi
+      )
+    done
     printf '\n=== Executables ===\n'
     for executable in git python3 python apptainer singularity packmol obabel antechamber \
       gmx gmx_mpi cp2k.psmp cp2k.popt cp2k orca pw.x xtb crest sbatch srun sacct \
@@ -235,6 +252,33 @@ case "${COMMAND}" in
   queue)
     squeue -u "${USER}"
     ;;
+  logs)
+    if [[ $# -gt 1 ]]; then
+      printf 'ERROR: usage: ./run.sh logs [command]\n' >&2
+      exit 2
+    fi
+    log_filter="${1:-*}"
+    case "${log_filter}" in
+      \*|bootstrap|doctor|probe|test|dry-run|submit|resume|status|report|matrix) ;;
+      *)
+        printf 'ERROR: unknown log command %s\n' "${log_filter}" >&2
+        exit 2
+        ;;
+    esac
+    shopt -s nullglob
+    if [[ "${log_filter}" == "*" ]]; then
+      log_files=("${ROOT}/runs/slurm"/solvelec-*.out)
+      log_files+=("${ROOT}/runs/slurm"/solvelec-*.err)
+    else
+      log_files=("${ROOT}/runs/slurm"/solvelec-"${log_filter}"-*.out)
+      log_files+=("${ROOT}/runs/slurm"/solvelec-"${log_filter}"-*.err)
+    fi
+    if [[ ${#log_files[@]} -eq 0 ]]; then
+      printf 'No matching logs under %s/runs/slurm\n' "${ROOT}"
+    else
+      ls -1t -- "${log_files[@]}"
+    fi
+    ;;
   matrix)
     "${PYTHON_BIN}" -m solvelec.cli matrix "$@"
     ;;
@@ -255,10 +299,11 @@ Commands:
   matrix      Print the expanded composition/replica matrix
   update      Fast-forward locally, then submit bootstrap through Slurm
   queue       Show the current user's Slurm queue (login-node-safe)
+  logs        List Slurm logs; optionally filter by command, e.g. logs probe
 
 On a host with sbatch, every task-like command above is automatically wrapped
 in configs/slurm/tmc-amd-driver.sbatch. Only help, queue, update's Git operation,
-and the sbatch submission itself run on the login node.
+logs, and the sbatch submission itself run on the login node.
 EOF
     ;;
   *)

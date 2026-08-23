@@ -35,6 +35,20 @@ class SlurmSafetyTests(unittest.TestCase):
         self.assertIn("cpus_per_task=4", profile)
         self.assertIn("slurm-no-account: true", profile)
 
+    def test_logs_command_is_lightweight_and_available_without_python(self) -> None:
+        environment = os.environ.copy()
+        environment.pop("SLURM_JOB_ID", None)
+        environment.pop("SOLVELEC_REQUIRE_SLURM", None)
+        completed = subprocess.run(
+            ["bash", str(RUN_SH), "logs", "probe"],
+            cwd=ROOT,
+            env=environment,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+
     @unittest.skipIf(os.name == "nt", "fake executable routing is covered by Linux CI")
     def test_task_command_is_submitted_when_sbatch_is_available(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

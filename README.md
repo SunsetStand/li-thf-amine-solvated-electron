@@ -41,6 +41,8 @@ checks:
 
 Each command prints its job ID and log paths under `runs/slurm/`. Do not run the
 underlying Python or Snakemake commands manually on the TMC login node.
+Use `./run.sh logs probe` or `./run.sh logs bootstrap` to list matching absolute
+log paths. `./run.sh queue` is only a live scheduler query and creates no log.
 
 `doctor` reports missing chemistry engines without silently substituting a
 different method. A plain `./run.sh doctor` is an inventory; `--require` turns
