@@ -65,7 +65,10 @@ The TMC builds can start slowly on the shared filesystem. Engine probes allow
 15 seconds by default and 30 seconds for CP2K and repository Snakemake. ORCA
 6.1.1 is recognized both by its normal banner and by its distinctive
 `parameterfile` diagnostic when it is intentionally launched without an input;
-the GNOME screen reader remains explicitly rejected.
+the GNOME screen reader remains explicitly rejected. If a resolved executable
+does not print its banner before the timeout, `doctor` keeps it as found and
+records the timeout as an unconfirmed version instead of falsely calling the
+program missing.
 
 An optional untracked module file can contain only site-wide modules compatible
 with every engine:
@@ -169,6 +172,11 @@ SOLVELEC_SLURM_PARTITION=amd ./run.sh probe
 These variables modify Slurm requests; they do not permit local execution.
 
 ## Storage gate before production
+
+On the current TMC account, the repository and command working directory stay
+at `/data/home/wangcx/li-thf-amine-solvated-electron`. A future production-data
+root under `/data/home/storage` is a separate physical storage location, not a
+replacement working directory; the workflow will reference it explicitly.
 
 The current input-generation pilot writes only small files below `runs/` in the
 repository. Before enabling trajectories, wavefunctions, restart files, or cube

@@ -121,6 +121,28 @@ class EngineDetectionTests(unittest.TestCase):
         self.assertTrue(status.found)
         self.assertEqual(run.call_args.kwargs["timeout"], 30.0)
 
+    def test_timeout_does_not_turn_a_resolved_orca_into_missing(self) -> None:
+        spec = EngineSpec(
+            "orca",
+            ("orca",),
+            version_args=(),
+            accepted_output_markers=("program version",),
+            rejected_output_markers=("screen reader",),
+        )
+        timeout = subprocess.TimeoutExpired(["/data/softwares/orca/6.1.1/orca"], 15.0)
+        with (
+            patch(
+                "solvelec.engines.shutil.which",
+                return_value="/data/softwares/orca/6.1.1/orca",
+            ),
+            patch("solvelec.engines.subprocess.run", side_effect=timeout),
+        ):
+            status = detect_engine(spec)
+
+        self.assertTrue(status.found)
+        self.assertEqual(status.executable, "/data/softwares/orca/6.1.1/orca")
+        self.assertIn("timed out", status.error or "")
+
 
 class DoctorRequirementTests(unittest.TestCase):
     def test_input_bundle_requires_only_git_and_snakemake(self) -> None:

@@ -201,6 +201,12 @@ def detect_engine(spec: EngineSpec, timeout_seconds: float | None = None) -> Eng
             error = signature_error
         if completed.returncode not in (0, 1) and version is None:
             error = f"version command exited {completed.returncode}"
+    except subprocess.TimeoutExpired as exc:
+        # A congested compute node or shared filesystem can make an otherwise
+        # valid program slow to print its banner.  The executable was still
+        # resolved successfully, so preserve that inventory fact and report
+        # only that its version/signature remains unconfirmed.
+        error = str(exc)
     except (OSError, subprocess.SubprocessError) as exc:
         error = str(exc)
         if spec.accepted_output_markers:

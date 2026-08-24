@@ -17,6 +17,8 @@
   doctor requests that would mix their incompatible OpenMPI versions.
 - Recognize the ORCA 6.1.1 no-input signature and lengthen probes for CP2K and
   Snakemake on slow shared filesystems.
+- Treat a version-probe timeout as an unconfirmed version rather than a missing
+  executable, while still rejecting completed probes with invalid signatures.
 
 ## 0.1.0 - 2026-08-21
 
