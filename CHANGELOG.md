@@ -22,6 +22,10 @@
 - Add Slurm-only TMC storage initialization under each user's `Backup_Data`
   directory and stage-separated Conda installation for chemistry tools,
   no-MPI AmberTools, and Quantum ESPRESSO.
+- Match AmberTools 26's full `cuda_None_nompi_py312*` build string instead of
+  incorrectly assuming that the build identifier begins with `nompi_`.
+- Delay loading Miniconda until after the Slurm-side Bash entry point starts so
+  its bundled `libtinfo` is not selected while launching `run.sh`.
 
 ## 0.1.0 - 2026-08-21
 

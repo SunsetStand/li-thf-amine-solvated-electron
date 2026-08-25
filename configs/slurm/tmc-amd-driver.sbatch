@@ -34,10 +34,6 @@ if [[ -f "${SITE_MODULES}" ]]; then
   # shellcheck source=/dev/null
   source "${SITE_MODULES}"
 fi
-if [[ "$1" == "tools-install" ]]; then
-  module load miniconda3
-fi
-
 export PYTHONUNBUFFERED=1
 export SOLVELEC_DEFAULT_PROFILE="${SOLVELEC_DEFAULT_PROFILE:-tmc-amd}"
 export SOLVELEC_REQUIRE_SLURM=1

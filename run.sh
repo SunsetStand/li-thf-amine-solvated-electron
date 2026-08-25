@@ -182,6 +182,10 @@ case "${COMMAND}" in
         exit 2
         ;;
     esac
+    # Load Conda only after this Bash process has started. Loading it in the
+    # outer Slurm driver changes LD_LIBRARY_PATH before run.sh's shebang is
+    # evaluated and makes Bash pick up Miniconda's incompatible libtinfo.
+    module load miniconda3
     if ! command -v conda >/dev/null 2>&1; then
       printf 'ERROR: conda was not found; the TMC driver must load miniconda3.\n' >&2
       exit 2

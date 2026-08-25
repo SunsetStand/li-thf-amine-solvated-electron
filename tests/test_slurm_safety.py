@@ -57,7 +57,7 @@ class SlurmSafetyTests(unittest.TestCase):
         ambertools = (ENVIRONMENT_DIR / "tmc-ambertools.yml").read_text(encoding="utf-8")
         chem = (ENVIRONMENT_DIR / "tmc-chem-tools.yml").read_text(encoding="utf-8")
         qe = (ENVIRONMENT_DIR / "tmc-qe.yml").read_text(encoding="utf-8")
-        self.assertIn("ambertools=26.*=nompi_*", ambertools)
+        self.assertIn("ambertools=26.0=cuda_None_nompi_py312*", ambertools)
         self.assertNotIn("packmol", ambertools)
         for package in ("packmol", "openbabel", "xtb", "crest"):
             self.assertIn(package, chem)
@@ -75,7 +75,11 @@ class SlurmSafetyTests(unittest.TestCase):
         runner = RUN_SH.read_text(encoding="utf-8")
         for command in ("storage-init", "tools-install"):
             self.assertIn(f"{command} must run inside a Slurm allocation", runner)
-        self.assertIn("module load miniconda3", SLURM_DRIVER.read_text(encoding="utf-8"))
+        self.assertIn("module load miniconda3", runner)
+        self.assertNotIn(
+            'if [[ "$1" == "tools-install" ]]',
+            SLURM_DRIVER.read_text(encoding="utf-8"),
+        )
 
     def test_logs_command_is_lightweight_and_available_without_python(self) -> None:
         environment = os.environ.copy()

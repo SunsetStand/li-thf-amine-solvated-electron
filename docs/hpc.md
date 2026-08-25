@@ -123,13 +123,16 @@ Then submit the open-source installation as a separate Slurm job:
 ./run.sh logs tools-install
 ```
 
-The driver loads the public `miniconda3` module only inside the installation
+The installation command loads the public `miniconda3` module only after its
+Slurm-side Bash process has started. This prevents Miniconda's `libtinfo` from
+being injected into the Bash startup while keeping all Conda work inside the
 allocation. It writes exact Conda package manifests under
 `software/manifests/`. Re-running the command updates the existing prefixes;
 individual recovery targets are `chem`, `ambertools`, and `qe`.
 
 Three environments are deliberate. `chem-tools` provides Packmol, OpenBabel,
-xTB, and CREST. `ambertools` selects the serial/no-MPI AmberTools build and is
+xTB, and CREST. `ambertools` selects AmberTools 26.0's Python 3.12 no-MPI build
+by its full `cuda_None_nompi_py312*` identifier and is
 separate because current packaging constrains coexistence with standalone
 Packmol. `qe` contains Quantum ESPRESSO and its own OpenMPI. For a
 `classical_md` doctor job, the support-tool paths are added first and the site
