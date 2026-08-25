@@ -11,7 +11,7 @@
     "smoke": {
       "systems": ["pure_thf"],
       "replicas": [1],
-      "stages": ["spec", "inputs"]
+      "stages": ["spec", "inputs", "classical_smoke"]
     },
     "pilot": {
       "systems": ["pure_thf", "eda_1p5m"],

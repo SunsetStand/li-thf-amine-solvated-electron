@@ -151,5 +151,26 @@ def render_packmol(
     output.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def render_gromacs_mdp(
+    template_path: str | Path,
+    output_path: str | Path,
+    temperature_k: float,
+    pressure_bar: float,
+    seed: int,
+) -> None:
+    if temperature_k <= 0 or pressure_bar <= 0:
+        raise ValueError("temperature and pressure must be positive")
+    if seed <= 0:
+        raise ValueError("GROMACS velocity seed must be positive")
+    rendered = _load_template(template_path).substitute(
+        temperature_k=f"{temperature_k:.2f}",
+        pressure_bar=f"{pressure_bar:.6f}",
+        seed=seed,
+    )
+    output = Path(output_path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(rendered.rstrip() + "\n", encoding="utf-8")
+
+
 def load_spec(path: str | Path) -> dict[str, Any]:
     return json.loads(Path(path).read_text(encoding="utf-8"))

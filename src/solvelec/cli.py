@@ -22,7 +22,7 @@ from .cube import analyze_spin_density, read_cube
 from .engines import DOCTOR_REQUIREMENTS, doctor_report
 from .parsers import parse_output
 from .provenance import write_manifest
-from .rendering import render_cp2k, render_orca, render_packmol
+from .rendering import render_cp2k, render_gromacs_mdp, render_orca, render_packmol
 
 
 def _json_dump(value: Any) -> None:
@@ -70,6 +70,7 @@ def cmd_write_spec(args: argparse.Namespace) -> int:
     root = _root(args.root)
     campaign, systems, _ = load_repository_configs(root)
     spec = make_system_spec(args.system, campaign, systems).as_dict()
+    spec["initial_box_angstrom"] = _initial_box_angstrom(spec, systems)
     spec["replica"] = args.replica
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -93,14 +94,14 @@ def cmd_render_packmol(args: argparse.Namespace) -> int:
     campaign, systems, _ = load_repository_configs(root)
     spec = make_system_spec(args.system, campaign, systems).as_dict()
     box = args.box_angstrom or _initial_box_angstrom(spec, systems)
-    amine_structure = None
+    amine_structure = args.amine_structure
     if spec["amine"]:
-        amine_structure = f"molecules/{spec['amine']}.pdb"
+        amine_structure = amine_structure or f"molecules/{spec['amine']}.pdb"
     render_packmol(
         args.output,
-        output_pdb=f"{args.system}_r{args.replica}.pdb",
+        output_pdb=args.output_pdb or f"{args.system}_r{args.replica}.pdb",
         box_angstrom=box,
-        thf_structure="molecules/thf.pdb",
+        thf_structure=args.thf_structure,
         thf_count=int(spec["thf_count"]),
         amine_structure=amine_structure,
         amine_count=int(spec["amine_count_initial"]),
@@ -122,6 +123,20 @@ def cmd_render_cp2k(args: argparse.Namespace) -> int:
         methods["cp2k"],
         args.li_atom_index,
         args.constrained,
+    )
+    return 0
+
+
+def cmd_render_gromacs_mdp(args: argparse.Namespace) -> int:
+    root = _root(args.root)
+    campaign, _, _ = load_repository_configs(root)
+    template = root / "workflow" / "templates" / "gromacs" / f"smoke_{args.stage}.mdp.tpl"
+    render_gromacs_mdp(
+        template,
+        args.output,
+        temperature_k=float(campaign["temperature_k"]),
+        pressure_bar=float(campaign["pressure_bar"]),
+        seed=args.seed or (2_026_000 + args.replica),
     )
     return 0
 
@@ -255,7 +270,17 @@ def build_parser() -> argparse.ArgumentParser:
     packmol.add_argument("--output", required=True)
     packmol.add_argument("--box-angstrom", type=float)
     packmol.add_argument("--seed", type=int)
+    packmol.add_argument("--output-pdb")
+    packmol.add_argument("--thf-structure", default="molecules/thf.pdb")
+    packmol.add_argument("--amine-structure")
     packmol.set_defaults(func=cmd_render_packmol)
+
+    gromacs = sub.add_parser("render-gromacs-mdp")
+    gromacs.add_argument("--stage", choices=["nvt", "npt"], required=True)
+    gromacs.add_argument("--replica", type=int, required=True)
+    gromacs.add_argument("--seed", type=int)
+    gromacs.add_argument("--output", required=True)
+    gromacs.set_defaults(func=cmd_render_gromacs_mdp)
 
     cp2k = sub.add_parser("render-cp2k")
     cp2k.add_argument("--state", choices=["solvated_electron", "detached"], required=True)
@@ -288,7 +313,9 @@ def build_parser() -> argparse.ArgumentParser:
     classify.set_defaults(func=cmd_classify)
 
     output_parser = sub.add_parser("parse-output")
-    output_parser.add_argument("--engine", choices=["cp2k", "orca"], required=True)
+    output_parser.add_argument(
+        "--engine", choices=["cp2k", "orca", "packmol", "gromacs"], required=True
+    )
     output_parser.add_argument("path")
     output_parser.set_defaults(func=cmd_parse_output)
 

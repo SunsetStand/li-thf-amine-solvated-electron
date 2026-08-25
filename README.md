@@ -87,9 +87,20 @@ For site-specific account/partition settings, copy the SLURM profile to an
 untracked `configs/profiles/private-<site>/` directory and select that profile;
 see `docs/hpc.md`. Load site chemistry modules before submitting.
 
-> Current scope: the committed DAG validates configuration and generates input
-> files. It does not yet execute Packmol, GROMACS, CP2K, ORCA, or Quantum
-> ESPRESSO production calculations.
+The first executable chemistry target is a deliberately short, neutral-solvent
+smoke chain:
+
+```bash
+./run.sh dry-run --campaign smoke --target classical_smoke
+./run.sh submit --campaign smoke --target classical_smoke
+```
+
+It parameterizes THF with GAFF2/AM1-BCC, packs 64 molecules, converts the Amber
+topology to GROMACS, minimizes, and runs 2 ps NVT plus 2 ps NPT. It proves
+software interoperability only; it is not equilibrated scientific sampling.
+No Li is included while `allow_unvalidated_li_forcefield` is false. CP2K,
+ORCA, and Quantum ESPRESSO execution remain behind their scientific input and
+benchmark gates. See `docs/classical-smoke.md`.
 
 ## What is implemented in v0.1
 
@@ -99,8 +110,8 @@ see `docs/hpc.md`. Load site chemistry modules before submitting.
 - Periodic Gaussian-cube spin-density integration, centroid, radius, and IPR.
 - Cavity/Li/molecular-anion localization classification with explicit uncertainty.
 - CP2K PBE0/ADMM/cDFT and ORCA ΔSCF input rendering.
-- Packmol input rendering and chemistry-engine capability checks.
-- Snakemake input-generation DAG plus local/SLURM profiles.
+- Packmol execution and checked AmberTools/ParmEd-to-GROMACS topology conversion.
+- Neutral-solvent GROMACS smoke execution plus input-generation DAG and SLURM profiles.
 - Provenance manifests with Git SHA, software versions, inputs, and checksums.
 - Dependency-light unit and integration tests using only core package dependencies.
 

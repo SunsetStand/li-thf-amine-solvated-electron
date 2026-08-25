@@ -12,6 +12,36 @@ default-resources:
   - runtime=60
   - disk_mb=2000
 set-resources:
+  prepare_molecule:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 120
+  run_packmol:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
+  build_gromacs_system:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 120
+  gromacs_smoke_em:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 60
+  gromacs_smoke_nvt:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 60
+  gromacs_smoke_npt:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 60
   cp2k_cdft:
     slurm_partition: amd
     tasks: 32

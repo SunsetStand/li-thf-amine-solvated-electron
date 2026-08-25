@@ -9,6 +9,30 @@ default-resources:
   - runtime=60
   - disk_mb=2000
 set-resources:
+  prepare_molecule:
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 120
+  run_packmol:
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
+  build_gromacs_system:
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 120
+  gromacs_smoke_em:
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 60
+  gromacs_smoke_nvt:
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 60
+  gromacs_smoke_npt:
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 60
   cp2k_cdft:
     tasks: 32
     mem_mb: 128000

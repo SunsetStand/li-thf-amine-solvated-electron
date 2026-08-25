@@ -20,12 +20,13 @@ STAGE_MODULES = ROOT / "configs" / "slurm" / "tmc-amd-stage-modules.sh"
 STORAGE_HELPER = ROOT / "configs" / "slurm" / "tmc-amd-storage.sh"
 TMC_PROFILE = ROOT / "configs" / "profiles" / "tmc-amd" / "config.v9+.yaml"
 ENGINE_RUNNER = ROOT / "workflow" / "scripts" / "run_checked_engine.py"
+STAGE_RUNNER = ROOT / "workflow" / "scripts" / "run_tmc_stage.sh"
 ENVIRONMENT_DIR = ROOT / "configs" / "environments"
 
 
 class SlurmSafetyTests(unittest.TestCase):
     def test_shell_entry_points_have_valid_bash_syntax(self) -> None:
-        for script in (RUN_SH, SLURM_DRIVER, STAGE_MODULES, STORAGE_HELPER):
+        for script in (RUN_SH, SLURM_DRIVER, STAGE_MODULES, STORAGE_HELPER, STAGE_RUNNER):
             with self.subTest(script=script):
                 completed = subprocess.run(
                     ["bash", "-n", str(script)], capture_output=True, text=True, check=False
@@ -169,6 +170,20 @@ class SlurmSafetyTests(unittest.TestCase):
             self.assertEqual(completed.returncode, 2)
             self.assertIn("outside a Slurm allocation", completed.stderr)
             self.assertFalse(output.exists())
+
+    def test_stage_runner_refuses_outside_slurm(self) -> None:
+        environment = os.environ.copy()
+        environment.pop("SLURM_JOB_ID", None)
+        completed = subprocess.run(
+            ["bash", str(STAGE_RUNNER), "classical_md", "--", "true"],
+            cwd=ROOT,
+            env=environment,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(completed.returncode, 2)
+        self.assertIn("outside a Slurm allocation", completed.stderr)
 
     def test_direct_python_cli_refuses_when_sbatch_is_visible(self) -> None:
         environment = {"SOLVELEC_REQUIRE_SLURM": "0"}

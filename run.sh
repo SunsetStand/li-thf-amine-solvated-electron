@@ -140,6 +140,43 @@ campaign_from_args() {
   printf '%s\n' "${campaign}"
 }
 
+workflow_target_from_args() {
+  local target="input_bundle"
+  local previous=""
+  for item in "$@"; do
+    if [[ "${previous}" == "--target" ]]; then target="${item}"; fi
+    if [[ "${item}" == --target=* ]]; then target="${item#--target=}"; fi
+    previous="${item}"
+  done
+  case "${target}" in
+    input_bundle|classical_smoke) ;;
+    *)
+      printf 'ERROR: unknown workflow target %s; choose input_bundle or classical_smoke.\n' \
+        "${target}" >&2
+      return 2
+      ;;
+  esac
+  printf '%s\n' "${target}"
+}
+
+workflow_storage_root() {
+  if [[ -n "${SLURM_JOB_ID:-}" ]]; then
+    # shellcheck source=configs/slurm/tmc-amd-storage.sh
+    source "${TMC_STORAGE_HELPER}"
+    solvelec_validated_storage_root
+  else
+    printf '%s\n' "${ROOT}"
+  fi
+}
+
+workflow_run_root() {
+  if [[ -n "${SOLVELEC_RUN_ROOT:-}" ]]; then
+    printf '%s\n' "${SOLVELEC_RUN_ROOT%/}"
+  else
+    printf '%s/runs\n' "$(workflow_storage_root)"
+  fi
+}
+
 case "${COMMAND}" in
   bootstrap)
     if [[ ! -x "${ROOT}/.venv/bin/python" && ! -x "${ROOT}/.venv/Scripts/python.exe" ]]; then
@@ -285,9 +322,13 @@ case "${COMMAND}" in
     ;;
   dry-run)
     campaign="$(campaign_from_args "$@")"
+    target="$(workflow_target_from_args "$@")"
+    storage_root="$(workflow_storage_root)"
+    run_root="$(workflow_run_root)"
     if SNAKEMAKE_BIN="$(find_snakemake)"; then
       "${SNAKEMAKE_BIN}" --snakefile "${ROOT}/workflow/Snakefile" --directory "${ROOT}" \
-        --config campaign="${campaign}" --dry-run --printshellcmds
+        "${target}" --config campaign="${campaign}" run_root="${run_root}" \
+        storage_root="${storage_root}" --dry-run --printshellcmds
     else
       printf 'Snakemake not installed; showing the expanded dependency matrix instead.\n' >&2
       "${PYTHON_BIN}" -m solvelec.cli matrix --campaign "${campaign}"
@@ -295,6 +336,9 @@ case "${COMMAND}" in
     ;;
   submit|resume)
     campaign="$(campaign_from_args "$@")"
+    target="$(workflow_target_from_args "$@")"
+    storage_root="$(workflow_storage_root)"
+    run_root="$(workflow_run_root)"
     profile="${SOLVELEC_DEFAULT_PROFILE:-slurm}"
     previous=""
     for item in "$@"; do
@@ -306,21 +350,27 @@ case "${COMMAND}" in
       exit 2
     fi
     "${SNAKEMAKE_BIN}" --snakefile "${ROOT}/workflow/Snakefile" --directory "${ROOT}" \
-      --config campaign="${campaign}" --profile "${ROOT}/configs/profiles/${profile}"
+      "${target}" --config campaign="${campaign}" run_root="${run_root}" \
+      storage_root="${storage_root}" --profile "${ROOT}/configs/profiles/${profile}"
     ;;
   status)
     campaign="$(campaign_from_args "$@")"
+    target="$(workflow_target_from_args "$@")"
+    storage_root="$(workflow_storage_root)"
+    run_root="$(workflow_run_root)"
     if ! SNAKEMAKE_BIN="$(find_snakemake)"; then
       printf 'ERROR: snakemake is required. Run ./run.sh bootstrap or load its module.\n' >&2
       exit 2
     fi
     "${SNAKEMAKE_BIN}" --snakefile "${ROOT}/workflow/Snakefile" --directory "${ROOT}" \
-      --config campaign="${campaign}" --summary
+      "${target}" --config campaign="${campaign}" run_root="${run_root}" \
+      storage_root="${storage_root}" --summary
     ;;
   report)
     campaign="$(campaign_from_args "$@")"
+    run_root="$(workflow_run_root)"
     "${PYTHON_BIN}" -m solvelec.cli report --campaign "${campaign}" \
-      --output "${ROOT}/runs/${campaign}/report/README.md"
+      --output "${run_root}/${campaign}/report/README.md"
     ;;
   update)
     if [[ -n "$(git -C "${ROOT}" status --porcelain)" ]]; then
@@ -374,10 +424,10 @@ Commands:
   probe       Inspect modules, executables, allocation, and filesystems on a compute node
   doctor      Check engines; add --require STAGE to enforce a capability gate
   test        Validate configs and run dependency-light regression tests
-  dry-run     Build the Snakemake DAG without executing workflow jobs
-  submit      Run the Snakemake controller, which submits child Slurm jobs
+  dry-run     Build the Snakemake DAG; add --target classical_smoke for real-chain preview
+  submit      Run the controller; --target defaults to the input_bundle
   resume      Resume through the same Slurm-controller mechanism
-  status      Generate Snakemake output status inside a short Slurm job
+  status      Generate target status inside a short Slurm job
   report      Generate a readiness report (never fabricates scientific results)
   matrix      Print the expanded composition/replica matrix
   update      Fast-forward locally, then submit bootstrap through Slurm
@@ -387,6 +437,11 @@ Commands:
 On a host with sbatch, every task-like command above is automatically wrapped
 in configs/slurm/tmc-amd-driver.sbatch. Only help, queue, update's Git operation,
 logs, and the sbatch submission itself run on the login node.
+
+Large workflow outputs on TMC are written below
+/data/home/storage/Backup_Data/$USER/li-thf-amine-solvated-electron/runs.
+The repository remains the command working directory. The first executable
+chemistry target is: ./run.sh submit --campaign smoke --target classical_smoke
 EOF
     ;;
   *)

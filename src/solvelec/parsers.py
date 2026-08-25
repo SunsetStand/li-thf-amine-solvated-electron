@@ -75,12 +75,43 @@ def parse_orca_text(text: str) -> EngineResult:
     )
 
 
+def parse_packmol_text(text: str) -> EngineResult:
+    normalized = text.casefold()
+    normal = "success!" in normalized
+    failure = any(marker in normalized for marker in ("error", "stop 171", "segmentation fault"))
+    problems: list[str] = []
+    if not normal:
+        problems.append("missing Packmol success marker")
+    if failure:
+        problems.append("Packmol reported a fatal failure")
+    return EngineResult("packmol", normal and not failure, normal, None, tuple(problems))
+
+
+def parse_gromacs_text(text: str) -> EngineResult:
+    normalized = text.casefold()
+    normal = "finished mdrun" in normalized
+    failure = any(
+        marker in normalized
+        for marker in ("fatal error", "segmentation fault", "nan detected", "core dumped")
+    )
+    problems: list[str] = []
+    if not normal:
+        problems.append("missing GROMACS Finished mdrun marker")
+    if failure:
+        problems.append("GROMACS reported a fatal failure")
+    return EngineResult("gromacs", normal and not failure, normal, None, tuple(problems))
+
+
 def parse_output(engine: str, path: str | Path) -> EngineResult:
     text = Path(path).read_text(encoding="utf-8", errors="replace")
     if engine == "cp2k":
         return parse_cp2k_text(text)
     if engine == "orca":
         return parse_orca_text(text)
+    if engine == "packmol":
+        return parse_packmol_text(text)
+    if engine == "gromacs":
+        return parse_gromacs_text(text)
     raise ValueError(f"Unsupported engine parser {engine!r}")
 
 

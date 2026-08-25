@@ -5,7 +5,7 @@ rule validate_config:
         "configs/methods.yaml",
         SOLVELEC_SOURCES
     output:
-        f"runs/{CAMPAIGN}/meta/config.valid.json"
+        f"{RUN_ROOT}/{CAMPAIGN}/meta/config.valid.json"
     shell:
         "{PYTHON} -m solvelec.cli validate > {output}"
 
@@ -17,6 +17,6 @@ rule provenance_manifest:
         "configs/systems.yaml",
         "configs/methods.yaml"
     output:
-        f"runs/{CAMPAIGN}/meta/manifest.json"
+        f"{RUN_ROOT}/{CAMPAIGN}/meta/manifest.json"
     shell:
         "{PYTHON} -m solvelec.cli manifest --campaign {CAMPAIGN} --output {output} {input}"

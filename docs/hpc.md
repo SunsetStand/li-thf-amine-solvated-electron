@@ -153,16 +153,18 @@ After installation, submit one capability stage per job:
 
 Do not activate these Conda environments manually on the login node.
 
-Finally, submit the current input-generation pilot:
+Finally, preview the input bundle or the first executable chemistry smoke chain:
 
 ```bash
 ./run.sh dry-run --campaign pilot
-./run.sh submit --campaign pilot
+./run.sh dry-run --campaign smoke --target classical_smoke
+./run.sh submit --campaign smoke --target classical_smoke
 ```
 
-Both commands are asynchronous Slurm submissions. The current DAG produces
-validated input bundles only; expensive chemistry execution rules are not yet
-enabled.
+All three commands are asynchronous Slurm submissions on TMC. The smoke target
+submits child jobs for molecule parameterization, Packmol, topology conversion,
+energy minimization, 2 ps NVT, and 2 ps NPT. It contains neutral solvent only
+and is an execution test, not an equilibrated production trajectory.
 
 ## Supported execution modes
 
@@ -214,9 +216,10 @@ The environment check searches beside the active virtual-environment Python, so
 it reports the same Snakemake executable that `run.sh` actually uses even when
 `.venv/bin` is not globally present on `PATH`.
 
-The initial `input_bundle` target only creates validated specifications and
-engine inputs. Expensive chemistry rules should be enabled after G0–G2 and
-site-specific engine commands have been reviewed.
+The default `input_bundle` target only creates validated specifications and
+engine inputs. `classical_smoke` is opt-in through `--target`; expensive
+classical or electronic production remains disabled until the applicable
+scientific gates pass.
 
 ## Controller resource overrides
 
@@ -234,16 +237,14 @@ These variables modify Slurm requests; they do not permit local execution.
 ## Storage gate before production
 
 On the current TMC account, the repository and command working directory stay
-at `/data/home/wangcx/li-thf-amine-solvated-electron`. A future production-data
-root under `/data/home/storage` is a separate physical storage location, not a
-replacement working directory; the workflow will reference it explicitly.
+at `/data/home/wangcx/li-thf-amine-solvated-electron`. The approved data root
+under `/data/home/storage` is a separate physical storage location, not a
+replacement working directory; the workflow references it explicitly.
 
-The current input-generation pilot writes only small files below `runs/` in the
-repository. Before enabling trajectories, wavefunctions, restart files, or cube
-outputs, select a user-owned project directory under `/data/home/storage` and
-record its quota/backup policy. Do not guess or automatically create a shared
-production location. The `probe` output includes filesystem usage needed for
-that decision.
+On TMC, workflow products are written below the approved storage project root,
+not below the repository: `/data/home/storage/Backup_Data/$USER/li-thf-amine-
+solvated-electron/runs`. The repository remains the working directory and holds
+only code, configuration, and small Slurm-controller logs.
 
 ## Restarts and provenance
 

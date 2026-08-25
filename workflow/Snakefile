@@ -1,4 +1,5 @@
 import json
+import shlex
 import sys
 from pathlib import Path
 
@@ -12,26 +13,122 @@ DEFINITION = config["campaigns"][CAMPAIGN]
 SYSTEMS = DEFINITION["systems"]
 REPLICAS = DEFINITION.get("replicas", config.get("replicas", [1]))
 PAIRS = [(system, int(replica)) for system in SYSTEMS for replica in REPLICAS]
+ROOT = Path(workflow.basedir).parent.resolve()
+RUN_ROOT_PATH = Path(str(config.get("run_root", "runs")))
+if not RUN_ROOT_PATH.is_absolute():
+    RUN_ROOT_PATH = ROOT / RUN_ROOT_PATH
+RUN_ROOT = RUN_ROOT_PATH.resolve().as_posix()
+STORAGE_ROOT_PATH = Path(str(config.get("storage_root", RUN_ROOT_PATH.parent)))
+if not STORAGE_ROOT_PATH.is_absolute():
+    STORAGE_ROOT_PATH = ROOT / STORAGE_ROOT_PATH
+STORAGE_ROOT = STORAGE_ROOT_PATH.resolve().as_posix()
+SHARED_ROOT = f"{RUN_ROOT}/_shared"
+SYSTEM_CATALOG = json.loads((ROOT / "configs" / "systems.yaml").read_text(encoding="utf-8"))
 SOLVELEC_SOURCES = sorted(str(path) for path in Path("src/solvelec").glob("*.py"))
-PYTHON = f'"{sys.executable}"'
+PYTHON = shlex.quote(sys.executable)
+STAGE_RUNNER = (ROOT / "workflow" / "scripts" / "run_tmc_stage.sh").as_posix()
+PREPARE_MOLECULE = (ROOT / "workflow" / "scripts" / "prepare_molecule.py").as_posix()
+BUILD_GROMACS = (ROOT / "workflow" / "scripts" / "build_gromacs_system.py").as_posix()
+RUN_GROMACS = (ROOT / "workflow" / "scripts" / "run_gromacs_stage.py").as_posix()
+AMBER_PYTHON = f"{STORAGE_ROOT}/software/conda/envs/ambertools/bin/python"
+STAGE_RUNTIME_INPUTS = [
+    STAGE_RUNNER,
+    "configs/slurm/tmc-amd-stage-modules.sh",
+    "configs/slurm/tmc-amd-storage.sh",
+]
 
 
 def pair_outputs(pattern):
     return [pattern.format(campaign=CAMPAIGN, system=system, replica=replica) for system, replica in PAIRS]
 
 
-SPEC_OUTPUTS = pair_outputs("runs/{campaign}/specs/{system}/r{replica}.json")
-PACKMOL_OUTPUTS = pair_outputs("runs/{campaign}/inputs/{system}/r{replica}/packmol.inp")
-CP2K_OUTPUTS = pair_outputs("runs/{campaign}/inputs/{system}/r{replica}/cp2k_cdft.inp")
+SPEC_OUTPUTS = pair_outputs(f"{RUN_ROOT}/{{campaign}}/specs/{{system}}/r{{replica}}.json")
+PACKMOL_OUTPUTS = pair_outputs(
+    f"{RUN_ROOT}/{{campaign}}/inputs/{{system}}/r{{replica}}/packmol.inp"
+)
+CP2K_OUTPUTS = pair_outputs(
+    f"{RUN_ROOT}/{{campaign}}/inputs/{{system}}/r{{replica}}/cp2k_cdft.inp"
+)
+CLASSICAL_SMOKE_OUTPUTS = pair_outputs(
+    f"{RUN_ROOT}/{{campaign}}/classical/{{system}}/r{{replica}}/npt/npt.gro"
+)
+CLASSICAL_SMOKE_VALIDATIONS = pair_outputs(
+    f"{RUN_ROOT}/{{campaign}}/classical/{{system}}/r{{replica}}/npt/validation.json"
+)
+
+
+def amine_for_system(system):
+    if system == "pure_thf":
+        return None
+    return system.rsplit("_", 1)[0]
+
+
+def molecule_record(molecule):
+    if molecule == "thf":
+        return SYSTEM_CATALOG["thf"]
+    return SYSTEM_CATALOG["amines"][molecule]
+
+
+def molecule_path(molecule, suffix):
+    return f"{SHARED_ROOT}/molecules/{molecule}/{molecule}.{suffix}"
+
+
+def molecules_for_system(system):
+    molecules = ["thf"]
+    amine = amine_for_system(system)
+    if amine:
+        molecules.append(amine)
+    return molecules
+
+
+def molecule_pdb_inputs(wildcards):
+    return [molecule_path(name, "pdb") for name in molecules_for_system(wildcards.system)]
+
+
+def molecule_parameter_inputs(wildcards):
+    paths = []
+    for name in molecules_for_system(wildcards.system):
+        paths.extend([molecule_path(name, "mol2"), molecule_path(name, "frcmod")])
+    return paths
+
+
+def packmol_amine_argument(wildcards):
+    amine = amine_for_system(wildcards.system)
+    if not amine:
+        return ""
+    return f"--amine-structure {shlex.quote(molecule_path(amine, 'pdb'))}"
+
+
+def tleap_molecule_arguments(wildcards):
+    arguments = []
+    for name in molecules_for_system(wildcards.system):
+        record = molecule_record(name)
+        count = config["thf_count"] if name == "thf" else None
+        if count is None:
+            # The build script verifies this count against the generated topology;
+            # the value is calculated by the same config model used for the spec.
+            from solvelec.config import make_system_spec
+
+            spec = make_system_spec(wildcards.system, config, SYSTEM_CATALOG)
+            count = spec.amine_count_initial
+        values = [
+            record["residue"],
+            molecule_path(name, "mol2"),
+            molecule_path(name, "frcmod"),
+            str(count),
+        ]
+        arguments.append("--molecule " + " ".join(shlex.quote(value) for value in values))
+    return " ".join(arguments)
 
 
 rule all:
     input:
-        f"runs/{CAMPAIGN}/input_bundle.done"
+        f"{RUN_ROOT}/{CAMPAIGN}/input_bundle.done"
 
 
 include: "rules/00_validate.smk"
 include: "rules/10_specs.smk"
 include: "rules/20_inputs.smk"
+include: "rules/30_classical_md.smk"
 include: "rules/50_cp2k_cdft.smk"
 include: "rules/70_report.smk"
