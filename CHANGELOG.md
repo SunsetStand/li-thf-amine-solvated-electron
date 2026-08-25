@@ -26,6 +26,8 @@
   incorrectly assuming that the build identifier begins with `nompi_`.
 - Delay loading Miniconda until after the Slurm-side Bash entry point starts so
   its bundled `libtinfo` is not selected while launching `run.sh`.
+- Use the backward-compatible `CONDA_ALWAYS_YES` setting because the TMC Conda
+  environment subcommands do not recognize the newer `--yes` option.
 
 ## 0.1.0 - 2026-08-21
 

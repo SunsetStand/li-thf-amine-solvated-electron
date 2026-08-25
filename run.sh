@@ -196,6 +196,9 @@ case "${COMMAND}" in
     storage_root="$(solvelec_validated_storage_root)"
     export CONDA_PKGS_DIRS="${storage_root}/cache/conda-pkgs"
     export CONDA_CHANNEL_PRIORITY=strict
+    # The site Miniconda can predate the env subcommands' --yes option.
+    # CONDA_ALWAYS_YES is supported by both old and current Conda releases.
+    export CONDA_ALWAYS_YES=true
 
     install_tool_environment() {
       local environment_name="$1"
@@ -207,9 +210,9 @@ case "${COMMAND}" in
       printf '\n=== Installing %s ===\n' "${environment_name}"
       printf 'Definition: %s\nPrefix: %s\n' "${definition}" "${prefix}"
       if [[ -d "${prefix}/conda-meta" ]]; then
-        conda env update --yes --prefix "${prefix}" --file "${definition}"
+        conda env update --prefix "${prefix}" --file "${definition}"
       else
-        conda env create --yes --prefix "${prefix}" --file "${definition}"
+        conda env create --prefix "${prefix}" --file "${definition}"
       fi
       conda list --prefix "${prefix}" --explicit > "${manifest}.tmp"
       mv -- "${manifest}.tmp" "${manifest}"

@@ -129,6 +129,9 @@ being injected into the Bash startup while keeping all Conda work inside the
 allocation. It writes exact Conda package manifests under
 `software/manifests/`. Re-running the command updates the existing prefixes;
 individual recovery targets are `chem`, `ambertools`, and `qe`.
+Non-interactive confirmation uses `CONDA_ALWAYS_YES=true` rather than the newer
+`--yes` subcommand option, so the workflow remains compatible with the site's
+older public Conda installation.
 
 Three environments are deliberate. `chem-tools` provides Packmol, OpenBabel,
 xTB, and CREST. `ambertools` selects AmberTools 26.0's Python 3.12 no-MPI build

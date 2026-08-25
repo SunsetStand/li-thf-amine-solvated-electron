@@ -76,6 +76,9 @@ class SlurmSafetyTests(unittest.TestCase):
         for command in ("storage-init", "tools-install"):
             self.assertIn(f"{command} must run inside a Slurm allocation", runner)
         self.assertIn("module load miniconda3", runner)
+        self.assertIn("CONDA_ALWAYS_YES=true", runner)
+        self.assertNotIn("conda env update --yes", runner)
+        self.assertNotIn("conda env create --yes", runner)
         self.assertNotIn(
             'if [[ "$1" == "tools-install" ]]',
             SLURM_DRIVER.read_text(encoding="utf-8"),
