@@ -93,6 +93,60 @@ After configuring modules, submit capability gates:
 ./run.sh doctor --require plane_wave_gate
 ```
 
+## TMC storage and open-source tools
+
+The approved default project root is
+`/data/home/storage/Backup_Data/$USER/li-thf-amine-solvated-electron`. The
+storage helper rejects roots outside the current user's `Backup_Data`
+subdirectory and creates only these project-owned paths:
+
+```text
+runs/
+software/conda/envs/
+software/manifests/
+cache/conda-pkgs/
+```
+
+Initialize it through Slurm:
+
+```bash
+./run.sh storage-init
+./run.sh queue
+./run.sh logs storage-init
+```
+
+Then submit the open-source installation as a separate Slurm job:
+
+```bash
+./run.sh tools-install all
+./run.sh queue
+./run.sh logs tools-install
+```
+
+The driver loads the public `miniconda3` module only inside the installation
+allocation. It writes exact Conda package manifests under
+`software/manifests/`. Re-running the command updates the existing prefixes;
+individual recovery targets are `chem`, `ambertools`, and `qe`.
+
+Three environments are deliberate. `chem-tools` provides Packmol, OpenBabel,
+xTB, and CREST. `ambertools` selects the serial/no-MPI AmberTools build and is
+separate because current packaging constrains coexistence with standalone
+Packmol. `qe` contains Quantum ESPRESSO and its own OpenMPI. For a
+`classical_md` doctor job, the support-tool paths are added first and the site
+GROMACS module is loaded afterward, leaving the site's OpenMPI first on `PATH`.
+CP2K and ORCA continue to use only their validated site module families.
+
+After installation, submit one capability stage per job:
+
+```bash
+./run.sh doctor --require molecule_generation
+./run.sh doctor --require conformer_search
+./run.sh doctor --require classical_md
+./run.sh doctor --require plane_wave_gate
+```
+
+Do not activate these Conda environments manually on the login node.
+
 Finally, submit the current input-generation pilot:
 
 ```bash
@@ -109,7 +163,7 @@ enabled.
 All modes below are launched inside Slurm allocations:
 
 1. Host modules plus the repository `.venv`.
-2. Pixi environment containing open-source engines.
+2. Stage-separated Conda environments containing open-source engines.
 3. Apptainer image built from `containers/Apptainer.def`.
 
 ORCA and VASP are never redistributed. Point the workflow at site-provided

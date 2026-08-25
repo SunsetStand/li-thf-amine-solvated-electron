@@ -1,0 +1,7 @@
+name: solvelec-qe
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - "qe>=7,<8"
+  - "openmpi>=4,<5"

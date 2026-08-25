@@ -5,6 +5,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PYTHON_SOURCE="${ROOT}/src"
 PIP_PROJECT="${ROOT}"
 SLURM_DRIVER="${SOLVELEC_SLURM_DRIVER:-${ROOT}/configs/slurm/tmc-amd-driver.sbatch}"
+TMC_STORAGE_HELPER="${ROOT}/configs/slurm/tmc-amd-storage.sh"
 if command -v cygpath >/dev/null 2>&1; then
   PYTHON_SOURCE="$(cygpath -w "${PYTHON_SOURCE}")"
   PIP_PROJECT="$(cygpath -w "${PIP_PROJECT}")"
@@ -53,6 +54,10 @@ submit_via_slurm() {
       runtime="${SOLVELEC_BOOTSTRAP_TIME:-02:00:00}"
       memory="${SOLVELEC_BOOTSTRAP_MEM:-8G}"
       ;;
+    tools-install)
+      runtime="${SOLVELEC_TOOLS_TIME:-12:00:00}"
+      memory="${SOLVELEC_TOOLS_MEM:-16G}"
+      ;;
     submit|resume)
       runtime="${SOLVELEC_CONTROLLER_TIME:-12:00:00}"
       memory="${SOLVELEC_CONTROLLER_MEM:-8G}"
@@ -93,7 +98,7 @@ is_login_safe_command() {
 
 is_known_command() {
   case "$1" in
-    bootstrap|doctor|probe|test|dry-run|submit|resume|status|report|update|matrix|queue|logs|help|-h|--help)
+    bootstrap|storage-init|tools-install|doctor|probe|test|dry-run|submit|resume|status|report|update|matrix|queue|logs|help|-h|--help)
       return 0
       ;;
     *) return 1 ;;
@@ -121,7 +126,7 @@ fi
 
 PYTHON_BIN=""
 case "${COMMAND}" in
-  help|-h|--help|queue|logs|update|probe) ;;
+  help|-h|--help|queue|logs|update|probe|storage-init|tools-install) ;;
   *) PYTHON_BIN="$(find_python)" ;;
 esac
 
@@ -149,6 +154,75 @@ case "${COMMAND}" in
     "${PYTHON_BIN}" -m pip install -e "${PIP_PROJECT}[${extras}]"
     "${PYTHON_BIN}" -m solvelec.cli validate
     "${PYTHON_BIN}" -m solvelec.cli test
+    ;;
+  storage-init)
+    if [[ -z "${SLURM_JOB_ID:-}" ]]; then
+      printf 'ERROR: storage-init must run inside a Slurm allocation.\n' >&2
+      exit 2
+    fi
+    # shellcheck source=configs/slurm/tmc-amd-storage.sh
+    source "${TMC_STORAGE_HELPER}"
+    solvelec_init_storage
+    ;;
+  tools-install)
+    if [[ -z "${SLURM_JOB_ID:-}" ]]; then
+      printf 'ERROR: tools-install must run inside a Slurm allocation.\n' >&2
+      exit 2
+    fi
+    if [[ $# -gt 1 ]]; then
+      printf 'ERROR: usage: ./run.sh tools-install [chem|ambertools|qe|all]\n' >&2
+      exit 2
+    fi
+    tool_group="${1:-all}"
+    case "${tool_group}" in
+      chem|ambertools|qe|all) ;;
+      *)
+        printf 'ERROR: unknown tool group %s; choose chem, ambertools, qe, or all.\n' \
+          "${tool_group}" >&2
+        exit 2
+        ;;
+    esac
+    if ! command -v conda >/dev/null 2>&1; then
+      printf 'ERROR: conda was not found; the TMC driver must load miniconda3.\n' >&2
+      exit 2
+    fi
+    # shellcheck source=configs/slurm/tmc-amd-storage.sh
+    source "${TMC_STORAGE_HELPER}"
+    solvelec_init_storage
+    storage_root="$(solvelec_validated_storage_root)"
+    export CONDA_PKGS_DIRS="${storage_root}/cache/conda-pkgs"
+    export CONDA_CHANNEL_PRIORITY=strict
+
+    install_tool_environment() {
+      local environment_name="$1"
+      local definition="$2"
+      local prefix
+      local manifest
+      prefix="$(solvelec_tool_prefix "${environment_name}")"
+      manifest="${storage_root}/software/manifests/${environment_name}.explicit.txt"
+      printf '\n=== Installing %s ===\n' "${environment_name}"
+      printf 'Definition: %s\nPrefix: %s\n' "${definition}" "${prefix}"
+      if [[ -d "${prefix}/conda-meta" ]]; then
+        conda env update --yes --prefix "${prefix}" --file "${definition}"
+      else
+        conda env create --yes --prefix "${prefix}" --file "${definition}"
+      fi
+      conda list --prefix "${prefix}" --explicit > "${manifest}.tmp"
+      mv -- "${manifest}.tmp" "${manifest}"
+      printf 'Manifest: %s\n' "${manifest}"
+    }
+
+    if [[ "${tool_group}" == "chem" || "${tool_group}" == "all" ]]; then
+      install_tool_environment chem-tools \
+        "${ROOT}/configs/environments/tmc-chem-tools.yml"
+    fi
+    if [[ "${tool_group}" == "ambertools" || "${tool_group}" == "all" ]]; then
+      install_tool_environment ambertools \
+        "${ROOT}/configs/environments/tmc-ambertools.yml"
+    fi
+    if [[ "${tool_group}" == "qe" || "${tool_group}" == "all" ]]; then
+      install_tool_environment qe "${ROOT}/configs/environments/tmc-qe.yml"
+    fi
     ;;
   doctor)
     "${PYTHON_BIN}" -m solvelec.cli doctor "$@"
@@ -259,7 +333,7 @@ case "${COMMAND}" in
     fi
     log_filter="${1:-*}"
     case "${log_filter}" in
-      \*|bootstrap|doctor|probe|test|dry-run|submit|resume|status|report|matrix) ;;
+      \*|bootstrap|storage-init|tools-install|doctor|probe|test|dry-run|submit|resume|status|report|matrix) ;;
       *)
         printf 'ERROR: unknown log command %s\n' "${log_filter}" >&2
         exit 2
@@ -288,6 +362,8 @@ Usage: ./run.sh COMMAND [options]
 
 Commands:
   bootstrap   Install dependencies and test (auto-submitted on a Slurm host)
+  storage-init  Create the validated TMC project tree on /data/home/storage
+  tools-install Install staged open-source engines; optional: chem|ambertools|qe|all
   probe       Inspect modules, executables, allocation, and filesystems on a compute node
   doctor      Check engines; add --require STAGE to enforce a capability gate
   test        Validate configs and run dependency-light regression tests

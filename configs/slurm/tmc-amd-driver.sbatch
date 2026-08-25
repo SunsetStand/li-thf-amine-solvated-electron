@@ -34,6 +34,9 @@ if [[ -f "${SITE_MODULES}" ]]; then
   # shellcheck source=/dev/null
   source "${SITE_MODULES}"
 fi
+if [[ "$1" == "tools-install" ]]; then
+  module load miniconda3
+fi
 
 export PYTHONUNBUFFERED=1
 export SOLVELEC_DEFAULT_PROFILE="${SOLVELEC_DEFAULT_PROFILE:-tmc-amd}"
@@ -54,11 +57,11 @@ load_doctor_stage_modules() {
     fi
 
     case "${requirement}" in
-      classical_md|cdft|embedded_vde)
+      molecule_generation|conformer_search|classical_md|cdft|embedded_vde|plane_wave_gate)
         if [[ -n "${selected_stage}" && "${selected_stage}" != "${requirement}" ]]; then
-          printf 'ERROR: TMC engine stages use incompatible MPI modules: %s and %s.\n' \
+          printf 'ERROR: select one TMC capability stage per doctor job: %s and %s.\n' \
             "${selected_stage}" "${requirement}" >&2
-          printf 'Run one doctor command per engine stage.\n' >&2
+          printf 'Run one doctor command per stage.\n' >&2
           return 2
         fi
         selected_stage="${requirement}"

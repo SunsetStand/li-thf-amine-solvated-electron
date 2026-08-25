@@ -1,0 +1,9 @@
+name: solvelec-chem-tools
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - packmol
+  - "openbabel>=3.1,<4"
+  - "xtb>=6,<7"
+  - "crest>=3,<4"

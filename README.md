@@ -52,6 +52,22 @@ classical-MD stage. `--strict-engines` remains as a compatibility alias for
 `--require production`, which intentionally requires every chemistry engine.
 On TMC-AMD, run CP2K, GROMACS, and ORCA gates separately because their site
 modules provide different OpenMPI versions.
+
+For the validated TMC account, the repository working directory remains
+`/data/home/wangcx/li-thf-amine-solvated-electron`. Initialize the separate
+large-data and open-source-tool tree on the storage disk, then install the
+staged environments inside Slurm:
+
+```bash
+./run.sh storage-init
+./run.sh tools-install all
+```
+
+Wait for each submitted job to finish. The default storage root is
+`/data/home/storage/Backup_Data/$USER/li-thf-amine-solvated-electron`; it is not
+the command working directory. AmberTools, general chemistry tools, and Quantum
+ESPRESSO are kept in separate environments so their package and MPI constraints
+cannot replace the site MPI used by GROMACS, CP2K, or ORCA.
 `bootstrap` creates or updates `.venv`, installs the declared dependencies, and
 runs the complete dependency-light test suite inside its allocation. Later
 checks only need `./run.sh test`; `./run.sh update` performs only the lightweight

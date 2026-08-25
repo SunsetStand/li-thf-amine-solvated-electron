@@ -19,6 +19,9 @@
   Snakemake on slow shared filesystems.
 - Treat a version-probe timeout as an unconfirmed version rather than a missing
   executable, while still rejecting completed probes with invalid signatures.
+- Add Slurm-only TMC storage initialization under each user's `Backup_Data`
+  directory and stage-separated Conda installation for chemistry tools,
+  no-MPI AmberTools, and Quantum ESPRESSO.
 
 ## 0.1.0 - 2026-08-21
 

@@ -1,0 +1,7 @@
+name: solvelec-ambertools
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - "python=3.12"
+  - "ambertools=26.*=nompi_*"

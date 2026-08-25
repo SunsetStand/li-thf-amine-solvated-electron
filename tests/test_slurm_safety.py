@@ -17,13 +17,15 @@ ROOT = Path(__file__).resolve().parents[1]
 RUN_SH = ROOT / "run.sh"
 SLURM_DRIVER = ROOT / "configs" / "slurm" / "tmc-amd-driver.sbatch"
 STAGE_MODULES = ROOT / "configs" / "slurm" / "tmc-amd-stage-modules.sh"
+STORAGE_HELPER = ROOT / "configs" / "slurm" / "tmc-amd-storage.sh"
 TMC_PROFILE = ROOT / "configs" / "profiles" / "tmc-amd" / "config.v9+.yaml"
 ENGINE_RUNNER = ROOT / "workflow" / "scripts" / "run_checked_engine.py"
+ENVIRONMENT_DIR = ROOT / "configs" / "environments"
 
 
 class SlurmSafetyTests(unittest.TestCase):
     def test_shell_entry_points_have_valid_bash_syntax(self) -> None:
-        for script in (RUN_SH, SLURM_DRIVER, STAGE_MODULES):
+        for script in (RUN_SH, SLURM_DRIVER, STAGE_MODULES, STORAGE_HELPER):
             with self.subTest(script=script):
                 completed = subprocess.run(
                     ["bash", "-n", str(script)], capture_output=True, text=True, check=False
@@ -43,6 +45,37 @@ class SlurmSafetyTests(unittest.TestCase):
         self.assertIn("module load orca/6.1.1", modules)
         driver = SLURM_DRIVER.read_text(encoding="utf-8")
         self.assertIn("incompatible MPI modules", driver)
+
+    def test_tmc_storage_is_scoped_below_the_current_user(self) -> None:
+        helper = STORAGE_HELPER.read_text(encoding="utf-8")
+        self.assertIn("/data/home/storage/Backup_Data/${user_name}/", helper)
+        self.assertIn("Rejected storage root", helper)
+        self.assertIn('"${root}/runs"', helper)
+        self.assertIn('"${root}/software/conda/envs"', helper)
+
+    def test_tmc_tool_environments_are_split_at_mpi_boundaries(self) -> None:
+        ambertools = (ENVIRONMENT_DIR / "tmc-ambertools.yml").read_text(encoding="utf-8")
+        chem = (ENVIRONMENT_DIR / "tmc-chem-tools.yml").read_text(encoding="utf-8")
+        qe = (ENVIRONMENT_DIR / "tmc-qe.yml").read_text(encoding="utf-8")
+        self.assertIn("ambertools=26.*=nompi_*", ambertools)
+        self.assertNotIn("packmol", ambertools)
+        for package in ("packmol", "openbabel", "xtb", "crest"):
+            self.assertIn(package, chem)
+        self.assertIn("qe>=7,<8", qe)
+        self.assertIn("openmpi>=4,<5", qe)
+
+        stages = STAGE_MODULES.read_text(encoding="utf-8")
+        self.assertLess(
+            stages.index("solvelec_activate_support_tools"),
+            stages.index("module load gromacs/2023"),
+        )
+        self.assertIn("solvelec_activate_qe", stages)
+
+    def test_storage_and_tool_install_commands_require_slurm(self) -> None:
+        runner = RUN_SH.read_text(encoding="utf-8")
+        for command in ("storage-init", "tools-install"):
+            self.assertIn(f"{command} must run inside a Slurm allocation", runner)
+        self.assertIn("module load miniconda3", SLURM_DRIVER.read_text(encoding="utf-8"))
 
     def test_logs_command_is_lightweight_and_available_without_python(self) -> None:
         environment = os.environ.copy()
