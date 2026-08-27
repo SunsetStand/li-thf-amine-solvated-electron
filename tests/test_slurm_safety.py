@@ -144,7 +144,6 @@ class SlurmSafetyTests(unittest.TestCase):
             self.assertIn("doctor", arguments)
             self.assertIn("input_bundle", arguments)
 
-    @unittest.skipIf(os.name == "nt", "fake executable routing is covered by Linux CI")
     def test_nested_slurm_controller_does_not_inherit_parent_job_context(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             temporary = Path(temporary_directory)
@@ -153,12 +152,16 @@ class SlurmSafetyTests(unittest.TestCase):
 
             slurm_config = temporary / "configs" / "slurm"
             profile = temporary / "configs" / "profiles" / "tmc-amd"
-            fake_bin = temporary / "bin"
+            fake_bin = temporary / ".venv" / "bin"
             slurm_config.mkdir(parents=True)
             profile.mkdir(parents=True)
-            fake_bin.mkdir()
+            fake_bin.mkdir(parents=True)
             shutil.copy2(STORAGE_HELPER, slurm_config / STORAGE_HELPER.name)
             (profile / "config.v9+.yaml").write_text("executor: slurm\n", encoding="utf-8")
+
+            python = fake_bin / "python"
+            python.write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8")
+            python.chmod(python.stat().st_mode | stat.S_IXUSR)
 
             capture = temporary / "snakemake-environment.txt"
             snakemake = fake_bin / "snakemake"
@@ -169,10 +172,10 @@ class SlurmSafetyTests(unittest.TestCase):
             snakemake.chmod(snakemake.stat().st_mode | stat.S_IXUSR)
 
             environment = os.environ.copy()
-            environment["PATH"] = f"{fake_bin}{os.pathsep}{environment['PATH']}"
             environment["SLURM_JOB_ID"] = "parent-123"
             environment["SLURM_JOB_NAME"] = "solvelec-submit"
             environment["SLURM_CPUS_PER_TASK"] = "4"
+            environment["SOLVELEC_DEFAULT_PROFILE"] = "tmc-amd"
             environment["SOLVELEC_REQUIRE_SLURM"] = "1"
             environment["SOLVELEC_CAPTURE"] = str(capture)
             environment["USER"] = "solvelec-test"
@@ -199,12 +202,12 @@ class SlurmSafetyTests(unittest.TestCase):
 
             self.assertEqual(completed.returncode, 0, completed.stderr)
             controller_environment = capture.read_text(encoding="utf-8").splitlines()
+            self.assertIn("Workflow rules remain protected", completed.stdout)
             self.assertFalse(
                 any(item.startswith("SLURM_") for item in controller_environment),
-                controller_environment,
+                f"{completed.stdout}\n{controller_environment}",
             )
             self.assertIn("SOLVELEC_REQUIRE_SLURM=1", controller_environment)
-            self.assertIn("Workflow rules remain protected", completed.stdout)
 
     def test_driver_uses_exported_or_slurm_submission_directory(self) -> None:
         driver = SLURM_DRIVER.read_text(encoding="utf-8")
