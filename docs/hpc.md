@@ -11,7 +11,9 @@ Repository commands enforce the following boundary:
   `matrix` are submitted as short Slurm jobs.
 - `submit` and `resume` submit a Slurm-hosted Snakemake controller. The
   controller is allowed to submit child jobs, and every Snakemake rule uses the
-  Slurm executor.
+  Slurm executor. The wrapper removes inherited `SLURM_*` job-context variables
+  from the Snakemake subprocess before its status thread starts; child jobs get
+  fresh Slurm variables from `sbatch`.
 - Both the Python CLI and the checked chemistry-engine launcher refuse to start
   outside an allocation whenever `sbatch` is visible or
   `SOLVELEC_REQUIRE_SLURM=1` is set.
@@ -233,6 +235,25 @@ SOLVELEC_SLURM_PARTITION=amd ./run.sh probe
 ```
 
 These variables modify Slurm requests; they do not permit local execution.
+
+### Nested-controller status safety
+
+The site policy requires the Snakemake controller itself to run as a Slurm job.
+Some Slurm-executor versions can submit the first child jobs but then lose their
+status-monitor thread when they clean the parent allocation environment too
+late. The visible symptom is a controller that remains `RUNNING` after its
+first child outputs have appeared, with no downstream rules submitted.
+
+The repository applies both safeguards: the Slurm plugin is constrained to
+version 2.7 or newer, and `run.sh` removes the parent `SLURM_*` context in a
+subshell before starting Snakemake. `SOLVELEC_REQUIRE_SLURM=1` is deliberately
+not removed. Therefore the controller can call `sbatch`, while every chemistry
+stage still refuses to execute until its child job has a new `SLURM_JOB_ID`.
+
+After updating from an older wrapper, cancel only the hung `solvelec-submit`
+controller (not unrelated jobs), then run the same target with `resume`.
+Existing valid outputs remain in storage and Snakemake continues at the first
+missing or stale rule.
 
 ## Storage gate before production
 

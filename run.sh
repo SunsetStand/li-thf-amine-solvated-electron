@@ -41,6 +41,43 @@ find_snakemake() {
   fi
 }
 
+profile_uses_slurm_executor() {
+  local profile_directory="$1"
+  local profile_config="${profile_directory}/config.v9+.yaml"
+  [[ -f "${profile_config}" ]] \
+    && grep -Eq '^[[:space:]]*executor:[[:space:]]*slurm([[:space:]]|$)' \
+      "${profile_config}"
+}
+
+run_snakemake_controller() {
+  local profile_directory="$1"
+  shift
+
+  if [[ -n "${SLURM_JOB_ID:-}" ]] && profile_uses_slurm_executor "${profile_directory}"; then
+    # Snakemake's Slurm executor also removes inherited SLURM_* variables, but
+    # older or mismatched plugin code can do so after its status thread starts.
+    # That race submits the first jobs and then waits forever.  Clear the parent
+    # allocation only in this subshell, before Snakemake can create any thread.
+    # SOLVELEC_REQUIRE_SLURM remains exported, and every workflow rule receives
+    # a fresh SLURM_JOB_ID from its own child allocation.
+    (
+      local parent_job_id="${SLURM_JOB_ID}"
+      local variable
+      local -a slurm_variables=()
+      mapfile -t slurm_variables < <(compgen -A variable SLURM_)
+      printf 'Preparing nested Slurm controller from job %s; clearing inherited SLURM_* context before Snakemake starts.\n' \
+        "${parent_job_id}"
+      printf 'Workflow rules remain protected and will run as Slurm child jobs.\n'
+      for variable in "${slurm_variables[@]}"; do
+        unset "${variable}"
+      done
+      "$@"
+    )
+  else
+    "$@"
+  fi
+}
+
 COMMAND="${1:-help}"
 if [[ $# -gt 0 ]]; then shift; fi
 
@@ -349,9 +386,11 @@ case "${COMMAND}" in
       printf 'ERROR: snakemake is required. Run ./run.sh bootstrap or load its module.\n' >&2
       exit 2
     fi
-    "${SNAKEMAKE_BIN}" --snakefile "${ROOT}/workflow/Snakefile" --directory "${ROOT}" \
+    profile_directory="${ROOT}/configs/profiles/${profile}"
+    run_snakemake_controller "${profile_directory}" \
+      "${SNAKEMAKE_BIN}" --snakefile "${ROOT}/workflow/Snakefile" --directory "${ROOT}" \
       "${target}" --config campaign="${campaign}" run_root="${run_root}" \
-      storage_root="${storage_root}" --profile "${ROOT}/configs/profiles/${profile}"
+      storage_root="${storage_root}" --profile "${profile_directory}"
     ;;
   status)
     campaign="$(campaign_from_args "$@")"

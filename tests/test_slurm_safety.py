@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 import stat
 import subprocess
 import sys
@@ -38,6 +39,12 @@ class SlurmSafetyTests(unittest.TestCase):
         self.assertIn("slurm_partition=amd", profile)
         self.assertIn("cpus_per_task=4", profile)
         self.assertIn("slurm-no-account: true", profile)
+
+    def test_slurm_plugin_has_compute_node_hang_fix(self) -> None:
+        project = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+        pixi = (ROOT / "pixi.toml").read_text(encoding="utf-8")
+        self.assertIn("snakemake-executor-plugin-slurm>=2.7,<3", project)
+        self.assertIn('snakemake-executor-plugin-slurm = ">=2.7,<3"', pixi)
 
     def test_tmc_engine_stages_pin_separate_mpi_module_families(self) -> None:
         modules = STAGE_MODULES.read_text(encoding="utf-8")
@@ -136,6 +143,68 @@ class SlurmSafetyTests(unittest.TestCase):
             self.assertIn(f"--export=ALL,SOLVELEC_REQUIRE_SLURM=1,SOLVELEC_ROOT={ROOT}", arguments)
             self.assertIn("doctor", arguments)
             self.assertIn("input_bundle", arguments)
+
+    @unittest.skipIf(os.name == "nt", "fake executable routing is covered by Linux CI")
+    def test_nested_slurm_controller_does_not_inherit_parent_job_context(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            temporary = Path(temporary_directory)
+            temporary_run = temporary / "run.sh"
+            shutil.copy2(RUN_SH, temporary_run)
+
+            slurm_config = temporary / "configs" / "slurm"
+            profile = temporary / "configs" / "profiles" / "tmc-amd"
+            fake_bin = temporary / "bin"
+            slurm_config.mkdir(parents=True)
+            profile.mkdir(parents=True)
+            fake_bin.mkdir()
+            shutil.copy2(STORAGE_HELPER, slurm_config / STORAGE_HELPER.name)
+            (profile / "config.v9+.yaml").write_text("executor: slurm\n", encoding="utf-8")
+
+            capture = temporary / "snakemake-environment.txt"
+            snakemake = fake_bin / "snakemake"
+            snakemake.write_text(
+                '#!/usr/bin/env bash\nenv | sort > "$SOLVELEC_CAPTURE"\n',
+                encoding="utf-8",
+            )
+            snakemake.chmod(snakemake.stat().st_mode | stat.S_IXUSR)
+
+            environment = os.environ.copy()
+            environment["PATH"] = f"{fake_bin}{os.pathsep}{environment['PATH']}"
+            environment["SLURM_JOB_ID"] = "parent-123"
+            environment["SLURM_JOB_NAME"] = "solvelec-submit"
+            environment["SLURM_CPUS_PER_TASK"] = "4"
+            environment["SOLVELEC_REQUIRE_SLURM"] = "1"
+            environment["SOLVELEC_CAPTURE"] = str(capture)
+            environment["USER"] = "solvelec-test"
+            environment["SOLVELEC_STORAGE_ROOT"] = (
+                "/data/home/storage/Backup_Data/solvelec-test/project"
+            )
+
+            completed = subprocess.run(
+                [
+                    "bash",
+                    str(temporary_run),
+                    "submit",
+                    "--campaign",
+                    "smoke",
+                    "--target",
+                    "classical_smoke",
+                ],
+                cwd=temporary,
+                env=environment,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            controller_environment = capture.read_text(encoding="utf-8").splitlines()
+            self.assertFalse(
+                any(item.startswith("SLURM_") for item in controller_environment),
+                controller_environment,
+            )
+            self.assertIn("SOLVELEC_REQUIRE_SLURM=1", controller_environment)
+            self.assertIn("Workflow rules remain protected", completed.stdout)
 
     def test_driver_uses_exported_or_slurm_submission_directory(self) -> None:
         driver = SLURM_DRIVER.read_text(encoding="utf-8")

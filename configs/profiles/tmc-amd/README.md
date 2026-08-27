@@ -4,6 +4,12 @@ This profile routes every Snakemake rule to the `amd` partition. Lightweight
 rules reserve four CPUs, following the site's four-CPU allocation guidance.
 Future MPI CP2K rules reserve 32 single-threaded ranks.
 
+The TMC policy also places the Snakemake controller in a Slurm allocation.
+`run.sh` strips that parent allocation's `SLURM_*` variables from the Snakemake
+subprocess before the Slurm executor starts its status thread. The controller
+still uses this profile to submit every rule as a child Slurm job; the stage
+guard remains enabled and rejects chemistry outside a child allocation.
+
 Site modules are loaded by `configs/slurm/tmc-amd-driver.sbatch`. Validated
 engine-specific choices are pinned in `configs/slurm/tmc-amd-stage-modules.sh`:
 

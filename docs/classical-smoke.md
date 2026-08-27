@@ -39,7 +39,11 @@ cd /data/home/wangcx/li-thf-amine-solvated-electron
 
 Each command returns immediately after submitting a Slurm controller job. The
 controller submits child jobs; no chemistry command is launched on the login
-node. Re-run the same submit command to resume missing or incomplete outputs.
+node. The wrapper removes only the parent controller's inherited `SLURM_*`
+context before Snakemake starts so its status monitor cannot confuse the parent
+with a child; all rules are still submitted through Slurm. Re-run with
+`./run.sh resume --campaign smoke --target classical_smoke` to continue missing
+or incomplete outputs.
 
 ## Outputs and checks
 

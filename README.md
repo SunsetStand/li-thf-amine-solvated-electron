@@ -81,7 +81,12 @@ To submit the pilot through the bundled SLURM profile:
 
 On TMC-AMD this first submits the Snakemake controller as a four-CPU `amd` job.
 That controller then submits every workflow rule as a child Slurm job. Child
-rules use `configs/profiles/tmc-amd`; no workflow rule is marked local.
+rules use `configs/profiles/tmc-amd`; no workflow rule is marked local. Before
+Snakemake starts, the wrapper removes the controller allocation's inherited
+`SLURM_*` variables from the Snakemake subprocess. Each child receives a fresh
+Slurm environment from `sbatch`, while `SOLVELEC_REQUIRE_SLURM=1` remains in
+force. This prevents nested-controller status-thread hangs without permitting
+login-node or in-allocation local chemistry execution.
 
 For site-specific account/partition settings, copy the SLURM profile to an
 untracked `configs/profiles/private-<site>/` directory and select that profile;
