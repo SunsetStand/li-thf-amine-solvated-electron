@@ -30,6 +30,11 @@ work/
 *.gbw
 *.densities
 
+# Legacy AmberTools fixed-name scratch files (new runs isolate and clean them)
+/sqm.in
+/sqm.out
+/sqm.pdb
+
 # Tiny golden fixtures are intentionally versioned.
 !tests/fixtures/
 !tests/fixtures/*.cube

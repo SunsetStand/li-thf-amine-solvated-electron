@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import ModuleType
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -33,6 +34,18 @@ class ClassicalWorkflowTests(unittest.TestCase):
                 encoding="utf-8",
             )
             self.assertEqual(module.mol2_summary(mol2), (2, 0.0))
+
+    def test_parameterization_command_uses_isolated_working_directory(self) -> None:
+        module = load_script("prepare_molecule")
+        with tempfile.TemporaryDirectory() as directory:
+            working_directory = Path(directory) / "scratch"
+            working_directory.mkdir()
+            log = Path(directory) / "parameterize.log"
+            with patch.object(module.subprocess, "run") as run:
+                run.return_value.returncode = 0
+                module.run_checked(["antechamber", "-h"], log, working_directory)
+
+            self.assertEqual(run.call_args.kwargs["cwd"], working_directory)
 
     def test_tleap_input_registers_gaff2_templates_and_box(self) -> None:
         module = load_script("build_gromacs_system")

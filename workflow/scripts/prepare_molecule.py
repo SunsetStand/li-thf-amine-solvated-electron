@@ -8,6 +8,7 @@ import json
 import shlex
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -31,11 +32,17 @@ def mol2_summary(path: Path) -> tuple[int, float]:
     return atom_count, charge_sum
 
 
-def run_checked(command: list[str], log: Path) -> None:
+def run_checked(command: list[str], log: Path, working_directory: Path) -> None:
     with log.open("a", encoding="utf-8") as handle:
         handle.write(f"$ {shlex.join(command)}\n")
         handle.flush()
-        completed = subprocess.run(command, stdout=handle, stderr=subprocess.STDOUT, check=False)
+        completed = subprocess.run(
+            command,
+            cwd=working_directory,
+            stdout=handle,
+            stderr=subprocess.STDOUT,
+            check=False,
+        )
     if completed.returncode != 0:
         raise RuntimeError(f"command exited {completed.returncode}: {shlex.join(command)}")
 
@@ -103,8 +110,13 @@ def main() -> int:
         ],
     ]
     try:
-        for command in commands:
-            run_checked(command, log)
+        # AmberTools writes fixed-name scratch files such as sqm.in, sqm.out,
+        # and sqm.pdb to its current directory. Keep that directory beside the
+        # molecule outputs on storage and remove it automatically afterwards.
+        with tempfile.TemporaryDirectory(prefix=".parameterize-", dir=output_dir) as scratch:
+            working_directory = Path(scratch)
+            for command in commands:
+                run_checked(command, log, working_directory)
         for required in (initial, mol2, frcmod, pdb):
             if not required.is_file() or required.stat().st_size == 0:
                 raise RuntimeError(f"expected non-empty output is missing: {required}")
