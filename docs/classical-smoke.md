@@ -79,3 +79,13 @@ If the chain fails, inspect the first failed child rule in the controller log,
 then its stage directory. Do not delete successful upstream outputs; after a
 code update, submit the same target and Snakemake will continue from the first
 missing or stale product.
+
+If a cancelled controller leaves a `LockException`, first confirm with
+`./run.sh queue` that no `solvelec-submit` or `solvelec-resume` job remains.
+Then submit the guarded metadata repair and wait for it to finish:
+
+```bash
+./run.sh unlock --campaign smoke --target classical_smoke
+./run.sh logs unlock
+./run.sh resume --campaign smoke --target classical_smoke
+```

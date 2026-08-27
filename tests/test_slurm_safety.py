@@ -215,6 +215,15 @@ class SlurmSafetyTests(unittest.TestCase):
         self.assertIn("SLURM_SUBMIT_DIR", driver)
         self.assertNotIn('dirname "${BASH_SOURCE[0]}"', driver)
 
+    def test_unlock_checks_for_active_controllers_before_clearing_lock(self) -> None:
+        runner = RUN_SH.read_text(encoding="utf-8")
+        queue_check = 'squeue -h -u "${USER}" -n solvelec-submit,solvelec-resume'
+        self.assertIn(queue_check, runner)
+        self.assertLess(
+            runner.index(queue_check), runner.index('storage_root="${storage_root}" --unlock')
+        )
+        self.assertIn("refusing to unlock while workflow controllers are active", runner)
+
     def test_engine_runner_refuses_outside_required_slurm_allocation(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             output = Path(temporary_directory) / "engine.out"

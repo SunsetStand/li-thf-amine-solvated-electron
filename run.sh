@@ -135,7 +135,7 @@ is_login_safe_command() {
 
 is_known_command() {
   case "$1" in
-    bootstrap|storage-init|tools-install|doctor|probe|test|dry-run|submit|resume|status|report|update|matrix|queue|logs|help|-h|--help)
+    bootstrap|storage-init|tools-install|doctor|probe|test|dry-run|submit|resume|unlock|status|report|update|matrix|queue|logs|help|-h|--help)
       return 0
       ;;
     *) return 1 ;;
@@ -392,6 +392,31 @@ case "${COMMAND}" in
       "${target}" --config campaign="${campaign}" run_root="${run_root}" \
       storage_root="${storage_root}" --profile "${profile_directory}"
     ;;
+  unlock)
+    campaign="$(campaign_from_args "$@")"
+    target="$(workflow_target_from_args "$@")"
+    storage_root="$(workflow_storage_root)"
+    run_root="$(workflow_run_root)"
+    if ! SNAKEMAKE_BIN="$(find_snakemake)"; then
+      printf 'ERROR: snakemake is required. Run ./run.sh bootstrap or load its module.\n' >&2
+      exit 2
+    fi
+    if ! active_controllers="$(
+      squeue -h -u "${USER}" -n solvelec-submit,solvelec-resume -o '%A %j %T'
+    )"; then
+      printf 'ERROR: unable to verify the Slurm controller queue; refusing to unlock.\n' >&2
+      exit 2
+    fi
+    if [[ -n "${active_controllers}" ]]; then
+      printf 'ERROR: refusing to unlock while workflow controllers are active:\n' >&2
+      printf '%s\n' "${active_controllers}" >&2
+      printf 'Cancel or wait for those jobs, then submit unlock again.\n' >&2
+      exit 2
+    fi
+    "${SNAKEMAKE_BIN}" --snakefile "${ROOT}/workflow/Snakefile" --directory "${ROOT}" \
+      "${target}" --config campaign="${campaign}" run_root="${run_root}" \
+      storage_root="${storage_root}" --unlock
+    ;;
   status)
     campaign="$(campaign_from_args "$@")"
     target="$(workflow_target_from_args "$@")"
@@ -429,7 +454,7 @@ case "${COMMAND}" in
     fi
     log_filter="${1:-*}"
     case "${log_filter}" in
-      \*|bootstrap|storage-init|tools-install|doctor|probe|test|dry-run|submit|resume|status|report|matrix) ;;
+      \*|bootstrap|storage-init|tools-install|doctor|probe|test|dry-run|submit|resume|unlock|status|report|matrix) ;;
       *)
         printf 'ERROR: unknown log command %s\n' "${log_filter}" >&2
         exit 2
@@ -466,6 +491,7 @@ Commands:
   dry-run     Build the Snakemake DAG; add --target classical_smoke for real-chain preview
   submit      Run the controller; --target defaults to the input_bundle
   resume      Resume through the same Slurm-controller mechanism
+  unlock      Safely clear a stale Snakemake lock after checking no controller is active
   status      Generate target status inside a short Slurm job
   report      Generate a readiness report (never fabricates scientific results)
   matrix      Print the expanded composition/replica matrix

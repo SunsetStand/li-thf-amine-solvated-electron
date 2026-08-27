@@ -251,9 +251,20 @@ not removed. Therefore the controller can call `sbatch`, while every chemistry
 stage still refuses to execute until its child job has a new `SLURM_JOB_ID`.
 
 After updating from an older wrapper, cancel only the hung `solvelec-submit`
-controller (not unrelated jobs), then run the same target with `resume`.
-Existing valid outputs remain in storage and Snakemake continues at the first
-missing or stale rule.
+controller (not unrelated jobs). A killed controller can leave a Snakemake
+working-directory lock. Once `./run.sh queue` shows no `solvelec-submit` or
+`solvelec-resume`, clear it through a short guarded Slurm job and then resume:
+
+```bash
+./run.sh unlock --campaign smoke --target classical_smoke
+./run.sh queue
+./run.sh logs unlock
+./run.sh resume --campaign smoke --target classical_smoke
+```
+
+`unlock` refuses to act if either controller job name is still active. Existing
+valid outputs remain in storage and Snakemake continues at the first missing or
+stale rule.
 
 ## Storage gate before production
 
