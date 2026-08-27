@@ -121,6 +121,22 @@ class EngineDetectionTests(unittest.TestCase):
         self.assertTrue(status.found)
         self.assertEqual(run.call_args.kwargs["timeout"], 30.0)
 
+    def test_version_probe_uses_a_cleaned_isolated_directory(self) -> None:
+        spec = EngineSpec("cp2k", ("cp2k.psmp",))
+        completed = subprocess.CompletedProcess(
+            ["/opt/cp2k.psmp", "--version"], 0, "CP2K version 2023.2\n", ""
+        )
+        with (
+            patch("solvelec.engines.shutil.which", return_value="/opt/cp2k.psmp"),
+            patch("solvelec.engines.subprocess.run", return_value=completed) as run,
+        ):
+            status = detect_engine(spec)
+
+        probe_directory = Path(run.call_args.kwargs["cwd"])
+        self.assertTrue(status.found)
+        self.assertIn("solvelec-doctor-cp2k-", probe_directory.name)
+        self.assertFalse(probe_directory.exists())
+
     def test_timeout_does_not_turn_a_resolved_orca_into_missing(self) -> None:
         spec = EngineSpec(
             "orca",

@@ -4,6 +4,7 @@ import platform
 import shutil
 import subprocess
 import sys
+import tempfile
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -184,13 +185,20 @@ def detect_engine(spec: EngineSpec, timeout_seconds: float | None = None) -> Eng
     error = None
     found = True
     try:
-        completed = subprocess.run(
-            [executable, *spec.version_args],
-            capture_output=True,
-            text=True,
-            timeout=spec.timeout_seconds if timeout_seconds is None else timeout_seconds,
-            check=False,
-        )
+        # Some chemistry executables create CRASH, input_tmp.in, or scratch
+        # files even for a version probe. Keep those artifacts out of the Git
+        # worktree so a diagnostic cannot block the next safe update.
+        with tempfile.TemporaryDirectory(
+            prefix=f"solvelec-doctor-{spec.name}-", ignore_cleanup_errors=True
+        ) as probe_directory:
+            completed = subprocess.run(
+                [executable, *spec.version_args],
+                cwd=probe_directory,
+                capture_output=True,
+                text=True,
+                timeout=spec.timeout_seconds if timeout_seconds is None else timeout_seconds,
+                check=False,
+            )
         stdout = completed.stdout or ""
         stderr = completed.stderr or ""
         combined_output = f"{stdout}\n{stderr}"
