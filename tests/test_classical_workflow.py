@@ -100,6 +100,114 @@ class ClassicalWorkflowTests(unittest.TestCase):
         self.assertEqual(mdrun[mdrun.index("-ntomp") + 1], "4")
         self.assertEqual(mdrun[mdrun.index("-ntmpi") + 1], "1")
 
+    def test_production_gromacs_command_resumes_from_internal_checkpoint(self) -> None:
+        module = load_script("run_gromacs_stage")
+        _grompp, mdrun = module.build_commands(
+            "production",
+            Path("production.mdp"),
+            Path("npt.gro"),
+            Path("topol.top"),
+            Path("production"),
+            4,
+            Path("npt.cpt"),
+            Path(".resume/production.cpt"),
+            10,
+        )
+        self.assertEqual(Path(mdrun[mdrun.index("-cpi") + 1]), Path(".resume/production.cpt"))
+        self.assertIn("-append", mdrun)
+        self.assertEqual(mdrun[mdrun.index("-cpt") + 1], "10")
+
+    def test_restart_workspace_is_reused_only_for_matching_inputs(self) -> None:
+        module = load_script("run_gromacs_stage")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            inputs = []
+            for name in ("nvt.mdp", "em.gro", "topol.top"):
+                path = root / name
+                path.write_text(name, encoding="utf-8")
+                inputs.append(path)
+            fingerprint = module.input_fingerprint(
+                "nvt", inputs[0], inputs[1], inputs[2], None, 4, 15
+            )
+            workspace, resumed = module.prepare_restart_workspace(root / "output", fingerprint)
+            self.assertFalse(resumed)
+            (workspace / "nvt.tpr").write_text("tpr", encoding="utf-8")
+            (workspace / "nvt.cpt").write_text("cpt", encoding="utf-8")
+
+            same_workspace, resumed = module.prepare_restart_workspace(root / "output", fingerprint)
+            self.assertTrue(resumed)
+            self.assertEqual(same_workspace, workspace)
+
+            inputs[0].write_text("changed", encoding="utf-8")
+            changed = module.input_fingerprint("nvt", inputs[0], inputs[1], inputs[2], None, 4, 15)
+            _, resumed = module.prepare_restart_workspace(root / "output", changed)
+            self.assertFalse(resumed)
+            self.assertFalse((workspace / "nvt.cpt").exists())
+
+    def test_restart_outputs_are_promoted_only_with_manifest_and_logs(self) -> None:
+        module = load_script("run_gromacs_stage")
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "output"
+            workspace = output / ".resume"
+            workspace.mkdir(parents=True)
+            for name in (
+                "nvt.tpr",
+                "nvt.gro",
+                "nvt.edr",
+                "nvt.log",
+                "nvt.cpt",
+                "nvt.xtc",
+                "grompp.log",
+                "mdrun.stdout.log",
+                "manifest.json",
+            ):
+                (workspace / name).write_text(name, encoding="utf-8")
+
+            module.promote_outputs(
+                workspace, output, "nvt", ["tpr", "gro", "edr", "log", "cpt", "xtc"]
+            )
+
+            self.assertFalse(workspace.exists())
+            self.assertTrue((output / "nvt.xtc").is_file())
+            self.assertTrue((output / "manifest.json").is_file())
+
+    def test_classical_pilot_metrics_and_replica_gate(self) -> None:
+        module = load_script("validate_classical_pilot")
+        metrics = module.replica_metrics(
+            total_mass_g_mol=64 * 72.107,
+            volumes_nm3=[8.80, 8.82, 8.81, 8.79, 8.80],
+            times_ps=[0.0, 5000.0, 10000.0, 15000.0, 20000.0],
+            amine_count=0,
+            target_concentration_m=0.0,
+            expected_duration_ns=20.0,
+            concentration_tolerance_m=0.05,
+            minimum_trajectory_fraction=0.98,
+            density_half_relative_tolerance=0.02,
+            engine_converged=True,
+        )
+        self.assertTrue(metrics["ready"])
+        self.assertAlmostEqual(metrics["sampled_duration_ns"], 20.0)
+        self.assertGreater(metrics["mean_density_g_ml"], 0.8)
+
+        records = [
+            {
+                "system_id": "pure_thf",
+                "replica": replica,
+                "metrics": {**metrics, "mean_density_g_ml": density},
+            }
+            for replica, density in enumerate((0.87, 0.875, 0.872), start=1)
+        ]
+        summary = module.summarize_records(records, 0.03)
+        self.assertTrue(summary["ready"])
+        self.assertEqual(summary["systems"]["pure_thf"]["replicas"], [1, 2, 3])
+
+        records[0]["metrics"] = {"ready": False, "error": "trajectory unreadable"}
+        failed_summary = module.summarize_records(records, 0.03)
+        self.assertFalse(failed_summary["ready"])
+        self.assertFalse(
+            failed_summary["systems"]["pure_thf"]["checks"]["replica_density_consistent"]
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

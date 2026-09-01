@@ -25,6 +25,12 @@ The smoke schedule is:
 The short MD stages check execution only. Density, concentration, and replica
 convergence require the longer protocols in `configs/methods.yaml`.
 
+Two smoke campaigns are committed:
+
+- `smoke` exercises the one-template pure-THF path;
+- `mixed_smoke` exercises the two-template THF/EDA path at the 1.5 M seed
+  composition, including independent THF and EDA GAFF2/AM1-BCC parameters.
+
 ## Submit on TMC-AMD
 
 After all stage-specific doctor jobs report `ready: true`:
@@ -34,6 +40,7 @@ cd /data/home/wangcx/li-thf-amine-solvated-electron
 ./run.sh update
 ./run.sh dry-run --campaign smoke --target classical_smoke
 ./run.sh submit --campaign smoke --target classical_smoke
+./run.sh submit --campaign mixed_smoke --target classical_smoke
 ./run.sh queue
 ```
 

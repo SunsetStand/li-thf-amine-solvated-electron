@@ -107,6 +107,19 @@ No Li is included while `allow_unvalidated_li_forcefield` is false. CP2K,
 ORCA, and Quantum ESPRESSO execution remain behind their scientific input and
 benchmark gates. See `docs/classical-smoke.md`.
 
+After the pure and mixed-solvent smoke chains pass, the explicitly selected
+`classical_pilot` target runs pure THF and THF/EDA 1.5 M with three replicas,
+using 0.5 ns NVT, 5 ns NPT equilibration, and 20 ns production:
+
+```bash
+./run.sh submit --campaign mixed_smoke --target classical_smoke
+./run.sh submit --campaign pilot --target classical_pilot
+```
+
+The pilot has hash-guarded checkpoint continuation and density, concentration,
+trajectory-length, and replica-consistency gates. It remains a solvent-only
+ensemble for later electronic-structure seeds. See `docs/classical-pilot.md`.
+
 ## What is implemented in v0.1
 
 - Config-driven 11-system matrix (pure THF plus five amines at 1.5/3.0 M).
@@ -116,7 +129,8 @@ benchmark gates. See `docs/classical-smoke.md`.
 - Cavity/Li/molecular-anion localization classification with explicit uncertainty.
 - CP2K PBE0/ADMM/cDFT and ORCA ΔSCF input rendering.
 - Packmol execution and checked AmberTools/ParmEd-to-GROMACS topology conversion.
-- Neutral-solvent GROMACS smoke execution plus input-generation DAG and SLURM profiles.
+- Neutral-solvent GROMACS smoke and six-replica classical pilot execution with
+  checkpoint-safe continuation and quantitative acceptance gates.
 - Provenance manifests with Git SHA, software versions, inputs, and checksums.
 - Dependency-light unit and integration tests using only core package dependencies.
 

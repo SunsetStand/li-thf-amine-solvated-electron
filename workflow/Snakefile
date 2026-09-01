@@ -30,6 +30,9 @@ STAGE_RUNNER = (ROOT / "workflow" / "scripts" / "run_tmc_stage.sh").as_posix()
 PREPARE_MOLECULE = (ROOT / "workflow" / "scripts" / "prepare_molecule.py").as_posix()
 BUILD_GROMACS = (ROOT / "workflow" / "scripts" / "build_gromacs_system.py").as_posix()
 RUN_GROMACS = (ROOT / "workflow" / "scripts" / "run_gromacs_stage.py").as_posix()
+VALIDATE_CLASSICAL = (
+    ROOT / "workflow" / "scripts" / "validate_classical_pilot.py"
+).as_posix()
 AMBER_PYTHON = f"{STORAGE_ROOT}/software/conda/envs/ambertools/bin/python"
 STAGE_RUNTIME_INPUTS = [
     STAGE_RUNNER,
@@ -54,6 +57,9 @@ CLASSICAL_SMOKE_OUTPUTS = pair_outputs(
 )
 CLASSICAL_SMOKE_VALIDATIONS = pair_outputs(
     f"{RUN_ROOT}/{{campaign}}/classical/{{system}}/r{{replica}}/npt/validation.json"
+)
+CLASSICAL_PILOT_VALIDATIONS = pair_outputs(
+    f"{RUN_ROOT}/{{campaign}}/classical/{{system}}/r{{replica}}/pilot/validation.json"
 )
 
 
@@ -119,6 +125,45 @@ def tleap_molecule_arguments(wildcards):
         ]
         arguments.append("--molecule " + " ".join(shlex.quote(value) for value in values))
     return " ".join(arguments)
+
+
+def pilot_previous_coordinates(wildcards):
+    previous = {"nvt": "em", "npt": "nvt", "production": "npt"}[wildcards.stage]
+    return (
+        f"{RUN_ROOT}/{CAMPAIGN}/classical/{wildcards.system}/r{wildcards.replica}/"
+        f"pilot/{previous}/{previous}.gro"
+    )
+
+
+def pilot_previous_checkpoint(wildcards):
+    previous = {"npt": "nvt", "production": "npt"}.get(wildcards.stage)
+    if previous is None:
+        return []
+    return (
+        f"{RUN_ROOT}/{CAMPAIGN}/classical/{wildcards.system}/r{wildcards.replica}/"
+        f"pilot/{previous}/{previous}.cpt"
+    )
+
+
+def pilot_previous_validation(wildcards):
+    previous = {"nvt": "em", "npt": "nvt", "production": "npt"}[wildcards.stage]
+    return (
+        f"{RUN_ROOT}/{CAMPAIGN}/classical/{wildcards.system}/r{wildcards.replica}/"
+        f"pilot/{previous}/engine.validation.json"
+    )
+
+
+def pilot_checkpoint_argument(wildcards):
+    checkpoint_path = pilot_previous_checkpoint(wildcards)
+    return "" if not checkpoint_path else f"--checkpoint {shlex.quote(checkpoint_path)}"
+
+
+def require_pilot_campaign(_wildcards):
+    if CAMPAIGN != "pilot":
+        raise ValueError(
+            f"classical_pilot is restricted to campaign 'pilot', not {CAMPAIGN!r}"
+        )
+    return CAMPAIGN
 
 
 rule all:

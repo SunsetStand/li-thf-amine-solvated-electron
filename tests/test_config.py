@@ -23,6 +23,7 @@ class ConfigTests(unittest.TestCase):
 
     def test_campaign_cardinality(self) -> None:
         campaign, systems, _ = load_repository_configs(ROOT)
+        self.assertEqual(len(campaign_matrix("mixed_smoke", campaign, systems)), 1)
         self.assertEqual(len(campaign_matrix("pilot", campaign, systems)), 6)
         self.assertEqual(len(campaign_matrix("production", campaign, systems)), 33)
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -129,14 +130,44 @@ def cmd_render_cp2k(args: argparse.Namespace) -> int:
 
 def cmd_render_gromacs_mdp(args: argparse.Namespace) -> int:
     root = _root(args.root)
-    campaign, _, _ = load_repository_configs(root)
-    template = root / "workflow" / "templates" / "gromacs" / f"smoke_{args.stage}.mdp.tpl"
+    campaign, _, methods = load_repository_configs(root)
+    classical = methods["classical_md"]
+    nsteps = None
+    trajectory_stride_steps = 5000
+    if args.protocol == "smoke":
+        if args.stage == "production":
+            raise ValueError("the smoke protocol has no production stage")
+        template_name = f"smoke_{args.stage}.mdp.tpl"
+    else:
+        duration_key = {
+            "nvt": "nvt_ns",
+            "npt": "npt_equilibration_ns",
+            "production": "production_ns",
+        }[args.stage]
+        timestep_fs = float(classical["timestep_fs"])
+        exact_steps = float(classical[duration_key]) * 1_000_000.0 / timestep_fs
+        nsteps = round(exact_steps)
+        if nsteps <= 0 or abs(exact_steps - nsteps) > 1.0e-9:
+            raise ValueError(f"{duration_key} is not an integer number of MD steps")
+        stride_exact = float(classical["trajectory_stride_ps"]) * 1000.0 / timestep_fs
+        trajectory_stride_steps = round(stride_exact)
+        if trajectory_stride_steps <= 0 or abs(stride_exact - trajectory_stride_steps) > 1.0e-9:
+            raise ValueError("trajectory_stride_ps is not an integer number of MD steps")
+        template_name = f"pilot_{args.stage}.mdp.tpl"
+    template = root / "workflow" / "templates" / "gromacs" / template_name
+    seed_material = f"{args.system}:r{args.replica}".encode()
+    deterministic_seed = 1 + int.from_bytes(hashlib.sha256(seed_material).digest()[:4], "big") % (
+        2**31 - 2
+    )
     render_gromacs_mdp(
         template,
         args.output,
         temperature_k=float(campaign["temperature_k"]),
         pressure_bar=float(campaign["pressure_bar"]),
-        seed=args.seed or (2_026_000 + args.replica),
+        seed=args.seed or deterministic_seed,
+        timestep_fs=float(classical["timestep_fs"]),
+        nsteps=nsteps,
+        trajectory_stride_steps=trajectory_stride_steps,
     )
     return 0
 
@@ -276,7 +307,9 @@ def build_parser() -> argparse.ArgumentParser:
     packmol.set_defaults(func=cmd_render_packmol)
 
     gromacs = sub.add_parser("render-gromacs-mdp")
-    gromacs.add_argument("--stage", choices=["nvt", "npt"], required=True)
+    gromacs.add_argument("--protocol", choices=["smoke", "pilot"], default="smoke")
+    gromacs.add_argument("--stage", choices=["nvt", "npt", "production"], required=True)
+    gromacs.add_argument("--system", default="pure_thf")
     gromacs.add_argument("--replica", type=int, required=True)
     gromacs.add_argument("--seed", type=int)
     gromacs.add_argument("--output", required=True)

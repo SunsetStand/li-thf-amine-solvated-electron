@@ -155,18 +155,23 @@ After installation, submit one capability stage per job:
 
 Do not activate these Conda environments manually on the login node.
 
-Finally, preview the input bundle or the first executable chemistry smoke chain:
+Finally, preview the input bundle, smoke chains, or restricted classical pilot:
 
 ```bash
 ./run.sh dry-run --campaign pilot
 ./run.sh dry-run --campaign smoke --target classical_smoke
+./run.sh dry-run --campaign mixed_smoke --target classical_smoke
+./run.sh dry-run --campaign pilot --target classical_pilot
 ./run.sh submit --campaign smoke --target classical_smoke
 ```
 
-All three commands are asynchronous Slurm submissions on TMC. The smoke target
+All commands above are asynchronous Slurm submissions on TMC. The smoke target
 submits child jobs for molecule parameterization, Packmol, topology conversion,
 energy minimization, 2 ps NVT, and 2 ps NPT. It contains neutral solvent only
 and is an execution test, not an equilibrated production trajectory.
+The `classical_pilot` target is restricted to the six pure-THF/EDA pilot
+replicas and writes restartable long trajectories to project storage. Submit it
+only after both smoke campaigns pass; see `docs/classical-pilot.md`.
 
 ## Supported execution modes
 
@@ -286,6 +291,8 @@ only code, configuration, and small Slurm-controller logs.
 - Every run directory contains a manifest with code commit, dirty state,
   software capabilities, inputs, and SHA256 checksums.
 - Pin production campaigns to a release tag; do not run them from a moving `main`.
+- Treat `classical_pilot.validation.json` as a gate: retain failed reports and
+  refine composition or sampling rather than creating the `.done` marker by hand.
 
 Different hardware is not expected to produce bitwise-identical trajectories.
 Reproducibility means pinned inputs, seeds, software, and statistically defined

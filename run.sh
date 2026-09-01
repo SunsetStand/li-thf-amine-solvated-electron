@@ -186,9 +186,9 @@ workflow_target_from_args() {
     previous="${item}"
   done
   case "${target}" in
-    input_bundle|classical_smoke) ;;
+    input_bundle|classical_smoke|classical_pilot) ;;
     *)
-      printf 'ERROR: unknown workflow target %s; choose input_bundle or classical_smoke.\n' \
+      printf 'ERROR: unknown workflow target %s; choose input_bundle, classical_smoke, or classical_pilot.\n' \
         "${target}" >&2
       return 2
       ;;
@@ -488,7 +488,7 @@ Commands:
   probe       Inspect modules, executables, allocation, and filesystems on a compute node
   doctor      Check engines; add --require STAGE to enforce a capability gate
   test        Validate configs and run dependency-light regression tests
-  dry-run     Build the Snakemake DAG; add --target classical_smoke for real-chain preview
+  dry-run     Build the Snakemake DAG; select input_bundle, classical_smoke, or classical_pilot
   submit      Run the controller; --target defaults to the input_bundle
   resume      Resume through the same Slurm-controller mechanism
   unlock      Safely clear a stale Snakemake lock after checking no controller is active
@@ -507,6 +507,8 @@ Large workflow outputs on TMC are written below
 /data/home/storage/Backup_Data/$USER/li-thf-amine-solvated-electron/runs.
 The repository remains the command working directory. The first executable
 chemistry target is: ./run.sh submit --campaign smoke --target classical_smoke
+The restricted long solvent target is:
+./run.sh submit --campaign pilot --target classical_pilot
 EOF
     ;;
   *)

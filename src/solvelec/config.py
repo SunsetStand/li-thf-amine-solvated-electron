@@ -164,6 +164,32 @@ def validate_repository_configs(root: Path | None = None) -> list[str]:
         "PROVISIONAL_UNTIL_BASIS_FUNCTIONAL_GATE"
     ):
         errors.append("CP2K production status must remain explicitly provisional until G4")
+    classical = methods.get("classical_md", {})
+    for key in (
+        "timestep_fs",
+        "nvt_ns",
+        "npt_equilibration_ns",
+        "production_ns",
+        "checkpoint_minutes",
+        "trajectory_stride_ps",
+    ):
+        try:
+            if float(classical[key]) <= 0:
+                raise ValueError
+        except (KeyError, TypeError, ValueError):
+            errors.append(f"methods.classical_md.{key} must be positive")
+    classical_validation = methods.get("classical_validation", {})
+    for key in (
+        "minimum_trajectory_fraction",
+        "density_half_relative_tolerance",
+        "replica_density_relative_tolerance",
+    ):
+        try:
+            value = float(classical_validation[key])
+            if not 0 < value <= 1:
+                raise ValueError
+        except (KeyError, TypeError, ValueError):
+            errors.append(f"methods.classical_validation.{key} must be in (0, 1]")
     thresholds = methods.get("localization_thresholds", {})
     if float(thresholds.get("electron_count_min", 2)) >= float(
         thresholds.get("electron_count_max", 0)

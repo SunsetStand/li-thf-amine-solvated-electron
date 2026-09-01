@@ -1,6 +1,8 @@
 wildcard_constraints:
     molecule="thf|eda|12pda|13pda|deta|tmeda",
-    stage="nvt|npt"
+    system="[a-z0-9_]+",
+    replica="[1-9][0-9]*",
+    stage="em|nvt|npt|production"
 
 
 rule prepare_molecule:
@@ -92,6 +94,8 @@ rule render_gromacs_smoke_mdp:
         sources=SOLVELEC_SOURCES
     output:
         f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/{{stage}}/{{stage}}.mdp"
+    wildcard_constraints:
+        stage="nvt|npt"
     shell:
         "{PYTHON} -m solvelec.cli render-gromacs-mdp --stage {wildcards.stage} "
         "--replica {wildcards.replica} --output {output:q}"
@@ -219,3 +223,220 @@ rule classical_smoke:
         CLASSICAL_SMOKE_VALIDATIONS
     output:
         touch(f"{RUN_ROOT}/{CAMPAIGN}/classical_smoke.done")
+
+
+rule render_gromacs_pilot_mdp:
+    input:
+        template=lambda wildcards: (
+            f"workflow/templates/gromacs/pilot_{wildcards.stage}.mdp.tpl"
+        ),
+        campaign="configs/campaign.yaml",
+        methods="configs/methods.yaml",
+        sources=SOLVELEC_SOURCES
+    output:
+        f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/{{stage}}/{{stage}}.mdp"
+    wildcard_constraints:
+        stage="nvt|npt|production"
+    shell:
+        "{PYTHON} -m solvelec.cli render-gromacs-mdp --protocol pilot "
+        "--stage {wildcards.stage} --system {wildcards.system:q} "
+        "--replica {wildcards.replica} --output {output:q}"
+
+
+rule gromacs_pilot_em:
+    input:
+        coordinates=rules.build_gromacs_system.output.coordinates,
+        topology=rules.build_gromacs_system.output.topology,
+        mdp="workflow/templates/gromacs/smoke_em.mdp",
+        script=RUN_GROMACS,
+        runtime=STAGE_RUNTIME_INPUTS
+    output:
+        tpr=f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/em/em.tpr",
+        coordinates=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/em/em.gro"
+        ),
+        energy=f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/em/em.edr",
+        engine_log=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/em/em.log"
+        ),
+        grompp_log=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/em/grompp.log"
+        ),
+        stdout_log=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/em/"
+            "mdrun.stdout.log"
+        ),
+        manifest=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/em/manifest.json"
+        )
+    params:
+        output_dir=lambda wildcards: (
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{wildcards.system}/r{wildcards.replica}/pilot/em"
+        )
+    threads: 4
+    resources:
+        mem_mb=8000,
+        runtime=120
+    shell:
+        "bash {STAGE_RUNNER:q} classical_md -- {PYTHON} {RUN_GROMACS:q} --phase em "
+        "--mdp {input.mdp:q} --coordinates {input.coordinates:q} "
+        "--topology {input.topology:q} --output-dir {params.output_dir:q}"
+
+
+rule gromacs_pilot_md:
+    input:
+        coordinates=pilot_previous_coordinates,
+        checkpoint=pilot_previous_checkpoint,
+        previous_validation=pilot_previous_validation,
+        topology=rules.build_gromacs_system.output.topology,
+        mdp=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
+            "{stage}/{stage}.mdp"
+        ),
+        script=RUN_GROMACS,
+        runtime=STAGE_RUNTIME_INPUTS
+    output:
+        tpr=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
+            "{stage}/{stage}.tpr"
+        ),
+        coordinates=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
+            "{stage}/{stage}.gro"
+        ),
+        energy=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
+            "{stage}/{stage}.edr"
+        ),
+        checkpoint=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
+            "{stage}/{stage}.cpt"
+        ),
+        trajectory=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
+            "{stage}/{stage}.xtc"
+        ),
+        engine_log=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
+            "{stage}/{stage}.log"
+        ),
+        grompp_log=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
+            "{stage}/grompp.log"
+        ),
+        stdout_log=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
+            "{stage}/mdrun.stdout.log"
+        ),
+        manifest=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
+            "{stage}/manifest.json"
+        )
+    params:
+        output_dir=lambda wildcards: (
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{wildcards.system}/r{wildcards.replica}/"
+            f"pilot/{wildcards.stage}"
+        ),
+        checkpoint_arg=pilot_checkpoint_argument,
+        checkpoint_minutes=lambda _wildcards: int(
+            json.loads(Path("configs/methods.yaml").read_text())["classical_md"][
+                "checkpoint_minutes"
+            ]
+        )
+    threads: 4
+    resources:
+        mem_mb=8000,
+        runtime=720
+    wildcard_constraints:
+        stage="nvt|npt|production"
+    shell:
+        "bash {STAGE_RUNNER:q} classical_md -- {PYTHON} {RUN_GROMACS:q} "
+        "--phase {wildcards.stage:q} --mdp {input.mdp:q} "
+        "--coordinates {input.coordinates:q} --topology {input.topology:q} "
+        "{params.checkpoint_arg} --checkpoint-minutes {params.checkpoint_minutes} "
+        "--restartable --expect-trajectory --output-dir {params.output_dir:q}"
+
+
+rule validate_gromacs_pilot_stage:
+    input:
+        engine_log=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
+            "{stage}/{stage}.log"
+        ),
+        coordinates=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
+            "{stage}/{stage}.gro"
+        )
+    output:
+        f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
+        "{stage}/engine.validation.json"
+    threads: 4
+    resources:
+        mem_mb=4000,
+        runtime=60
+    shell:
+        "{PYTHON} -m solvelec.cli parse-output --engine gromacs {input.engine_log:q} "
+        "> {output:q}"
+
+
+rule validate_classical_pilot_replica:
+    input:
+        spec=f"{RUN_ROOT}/{CAMPAIGN}/specs/{{system}}/r{{replica}}.json",
+        methods="configs/methods.yaml",
+        tpr=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
+            "production/production.tpr"
+        ),
+        trajectory=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
+            "production/production.xtc"
+        ),
+        engine_validation=(
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
+            "production/engine.validation.json"
+        ),
+        script=VALIDATE_CLASSICAL
+    output:
+        f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/validation.json"
+    threads: 4
+    resources:
+        mem_mb=8000,
+        runtime=60
+    shell:
+        "bash {STAGE_RUNNER:q} classical_md -- {PYTHON} {VALIDATE_CLASSICAL:q} replica "
+        "--spec {input.spec:q} --methods {input.methods:q} --tpr {input.tpr:q} "
+        "--trajectory {input.trajectory:q} --engine-validation {input.engine_validation:q} "
+        "--concentration-tolerance-m {config[concentration_tolerance_m]} "
+        "--output {output:q}"
+
+
+rule summarize_classical_pilot:
+    input:
+        CLASSICAL_PILOT_VALIDATIONS
+    output:
+        f"{RUN_ROOT}/{CAMPAIGN}/classical_pilot.validation.json"
+    params:
+        campaign=require_pilot_campaign,
+        inputs=lambda _wildcards: " ".join(
+            shlex.quote(path) for path in CLASSICAL_PILOT_VALIDATIONS
+        )
+    threads: 4
+    resources:
+        mem_mb=4000,
+        runtime=60
+    shell:
+        "{PYTHON} {VALIDATE_CLASSICAL:q} summary --campaign {params.campaign:q} "
+        "--methods configs/methods.yaml --output {output:q} {params.inputs}"
+
+
+rule classical_pilot:
+    input:
+        summary=rules.summarize_classical_pilot.output
+    output:
+        f"{RUN_ROOT}/{CAMPAIGN}/classical_pilot.done"
+    threads: 4
+    resources:
+        mem_mb=4000,
+        runtime=60
+    shell:
+        "{PYTHON} {VALIDATE_CLASSICAL:q} gate --summary {input.summary:q} --output {output:q}"

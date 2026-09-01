@@ -43,6 +43,26 @@ set-resources:
     cpus_per_task: 4
     mem_mb: 8000
     runtime: 60
+  gromacs_pilot_em:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 120
+  gromacs_pilot_md:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 720
+  validate_gromacs_pilot_stage:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
+  validate_classical_pilot_replica:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 60
   cp2k_cdft:
     slurm_partition: amd
     tasks: 32

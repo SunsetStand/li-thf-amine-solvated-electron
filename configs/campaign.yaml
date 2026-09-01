@@ -13,6 +13,11 @@
       "replicas": [1],
       "stages": ["spec", "inputs", "classical_smoke"]
     },
+    "mixed_smoke": {
+      "systems": ["eda_1p5m"],
+      "replicas": [1],
+      "stages": ["spec", "inputs", "classical_smoke"]
+    },
     "pilot": {
       "systems": ["pure_thf", "eda_1p5m"],
       "replicas": [1, 2, 3],

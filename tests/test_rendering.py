@@ -107,6 +107,57 @@ class RenderingTests(unittest.TestCase):
             self.assertIn("ref-p = 1.000000", text)
             self.assertIn("gen-seed = 2026001", text)
 
+    def test_pilot_mdp_uses_configured_duration_and_stable_system_seed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            directory = Path(directory)
+            production = directory / "eda-production.mdp"
+            first = directory / "eda-nvt.mdp"
+            second = directory / "thf-nvt.mdp"
+            with patch("solvelec.cli.repository_root", return_value=ROOT):
+                self.assertEqual(
+                    main(
+                        [
+                            "render-gromacs-mdp",
+                            "--protocol",
+                            "pilot",
+                            "--stage",
+                            "production",
+                            "--system",
+                            "eda_1p5m",
+                            "--replica",
+                            "1",
+                            "--output",
+                            str(production),
+                        ]
+                    ),
+                    0,
+                )
+                for system, output in (("eda_1p5m", first), ("pure_thf", second)):
+                    result = main(
+                        [
+                            "render-gromacs-mdp",
+                            "--protocol",
+                            "pilot",
+                            "--stage",
+                            "nvt",
+                            "--system",
+                            system,
+                            "--replica",
+                            "1",
+                            "--output",
+                            str(output),
+                        ]
+                    )
+                    self.assertEqual(result, 0)
+
+            production_text = production.read_text(encoding="utf-8")
+            eda_text = first.read_text(encoding="utf-8")
+            thf_text = second.read_text(encoding="utf-8")
+            self.assertIn("nsteps                      = 10000000", production_text)
+            self.assertIn("dt                          = 0.002000", production_text)
+            self.assertIn("nstxout-compressed          = 5000", production_text)
+            self.assertNotEqual(eda_text, thf_text)
+
     def test_written_spec_records_the_initial_box(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "spec.json"

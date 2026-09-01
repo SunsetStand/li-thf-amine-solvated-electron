@@ -10,7 +10,13 @@
     "npt_equilibration_ns": 5.0,
     "production_ns": 20.0,
     "checkpoint_minutes": 15,
+    "trajectory_stride_ps": 10.0,
     "note": "Solvent-only seed generation until a Li force-field gate is passed."
+  },
+  "classical_validation": {
+    "minimum_trajectory_fraction": 0.98,
+    "density_half_relative_tolerance": 0.02,
+    "replica_density_relative_tolerance": 0.03
   },
   "cp2k": {
     "functional": "PBE0-D3",

@@ -157,15 +157,25 @@ def render_gromacs_mdp(
     temperature_k: float,
     pressure_bar: float,
     seed: int,
+    *,
+    timestep_fs: float = 2.0,
+    nsteps: int | None = None,
+    trajectory_stride_steps: int = 5000,
 ) -> None:
-    if temperature_k <= 0 or pressure_bar <= 0:
-        raise ValueError("temperature and pressure must be positive")
-    if seed <= 0:
-        raise ValueError("GROMACS velocity seed must be positive")
-    rendered = _load_template(template_path).substitute(
+    if temperature_k <= 0 or pressure_bar <= 0 or timestep_fs <= 0:
+        raise ValueError("temperature, pressure, and timestep must be positive")
+    if seed <= 0 or trajectory_stride_steps <= 0:
+        raise ValueError("GROMACS seed and trajectory stride must be positive")
+    template = _load_template(template_path)
+    if "$nsteps" in template.template and (nsteps is None or nsteps <= 0):
+        raise ValueError("a positive nsteps value is required by this GROMACS template")
+    rendered = template.substitute(
         temperature_k=f"{temperature_k:.2f}",
         pressure_bar=f"{pressure_bar:.6f}",
         seed=seed,
+        timestep_ps=f"{timestep_fs / 1000.0:.6f}",
+        nsteps=nsteps,
+        trajectory_stride_steps=trajectory_stride_steps,
     )
     output = Path(output_path)
     output.parent.mkdir(parents=True, exist_ok=True)

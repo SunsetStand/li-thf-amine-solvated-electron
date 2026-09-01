@@ -20,6 +20,7 @@ SLURM_DRIVER = ROOT / "configs" / "slurm" / "tmc-amd-driver.sbatch"
 STAGE_MODULES = ROOT / "configs" / "slurm" / "tmc-amd-stage-modules.sh"
 STORAGE_HELPER = ROOT / "configs" / "slurm" / "tmc-amd-storage.sh"
 TMC_PROFILE = ROOT / "configs" / "profiles" / "tmc-amd" / "config.v9+.yaml"
+SNAKEFILE = ROOT / "workflow" / "Snakefile"
 ENGINE_RUNNER = ROOT / "workflow" / "scripts" / "run_checked_engine.py"
 STAGE_RUNNER = ROOT / "workflow" / "scripts" / "run_tmc_stage.sh"
 ENVIRONMENT_DIR = ROOT / "configs" / "environments"
@@ -40,6 +41,13 @@ class SlurmSafetyTests(unittest.TestCase):
         self.assertIn("cpus_per_task=4", profile)
         self.assertIn("slurm-no-account: true", profile)
         self.assertIn("slurm-status-command: squeue", profile)
+
+    def test_classical_pilot_is_an_explicit_restricted_target(self) -> None:
+        runner = RUN_SH.read_text(encoding="utf-8")
+        snakefile = SNAKEFILE.read_text(encoding="utf-8")
+        self.assertIn("input_bundle|classical_smoke|classical_pilot", runner)
+        self.assertIn('if CAMPAIGN != "pilot"', snakefile)
+        self.assertIn("gromacs_pilot_md:", TMC_PROFILE.read_text(encoding="utf-8"))
 
     def test_slurm_plugin_has_compute_node_hang_fix(self) -> None:
         project = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
