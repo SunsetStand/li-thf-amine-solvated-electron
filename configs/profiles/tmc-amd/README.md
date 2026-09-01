@@ -10,6 +10,12 @@ subprocess before the Slurm executor starts its status thread. The controller
 still uses this profile to submit every rule as a child Slurm job; the stage
 guard remains enabled and rejects chemistry outside a child allocation.
 
+The profile explicitly uses `squeue` for child-job status checks. TMC-AMD keeps
+completed jobs in the controller for 300 seconds, which the executor plugin
+reports as sufficient for reliable `squeue` monitoring. This avoids the site's
+incompatible `sacct` account/status query behavior, which can otherwise leave a
+controller waiting after successful child jobs have finished.
+
 Site modules are loaded by `configs/slurm/tmc-amd-driver.sbatch`. Validated
 engine-specific choices are pinned in `configs/slurm/tmc-amd-stage-modules.sh`:
 

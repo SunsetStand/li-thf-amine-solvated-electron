@@ -39,6 +39,7 @@ class SlurmSafetyTests(unittest.TestCase):
         self.assertIn("slurm_partition=amd", profile)
         self.assertIn("cpus_per_task=4", profile)
         self.assertIn("slurm-no-account: true", profile)
+        self.assertIn("slurm-status-command: squeue", profile)
 
     def test_slurm_plugin_has_compute_node_hang_fix(self) -> None:
         project = (ROOT / "pyproject.toml").read_text(encoding="utf-8")

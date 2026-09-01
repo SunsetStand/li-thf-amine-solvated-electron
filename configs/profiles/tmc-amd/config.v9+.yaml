@@ -5,6 +5,7 @@ printshellcmds: true
 rerun-incomplete: true
 keep-going: true
 slurm-no-account: true
+slurm-status-command: squeue
 default-resources:
   - slurm_partition=amd
   - cpus_per_task=4
