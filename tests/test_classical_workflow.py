@@ -58,9 +58,32 @@ class ClassicalWorkflowTests(unittest.TestCase):
         )
         self.assertIn("source leaprc.gaff2", text)
         self.assertIn('loadamberparams "thf.frcmod"', text)
-        self.assertIn('MOL0 = loadmol2 "thf.mol2"', text)
+        self.assertIn('THF = loadmol2 "thf.mol2"', text)
+        self.assertIn("check THF", text)
+        self.assertNotIn("MOL0", text)
         self.assertIn("set system box { 22.50000000 22.50000000 22.50000000 }", text)
         self.assertIn('saveamberparm system "system.prmtop" "system.inpcrd"', text)
+
+    def test_tleap_input_rejects_invalid_or_duplicate_template_names(self) -> None:
+        module = load_script("build_gromacs_system")
+        common = (Path("packed.pdb"), 22.5)
+        outputs = (Path("system.prmtop"), Path("system.inpcrd"))
+
+        with self.assertRaisesRegex(ValueError, "valid TLeap identifier"):
+            module.render_leap_input(
+                *common,
+                [("1BAD", Path("bad.mol2"), Path("bad.frcmod"), 1)],
+                *outputs,
+            )
+        with self.assertRaisesRegex(ValueError, "duplicate TLeap residue template"):
+            module.render_leap_input(
+                *common,
+                [
+                    ("THF", Path("thf.mol2"), Path("thf.frcmod"), 32),
+                    ("THF", Path("thf-2.mol2"), Path("thf-2.frcmod"), 32),
+                ],
+                *outputs,
+            )
 
     def test_npt_gromacs_command_uses_checkpoint_and_four_threads(self) -> None:
         module = load_script("run_gromacs_stage")

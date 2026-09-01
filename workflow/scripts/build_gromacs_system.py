@@ -5,10 +5,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shlex
 import subprocess
 import sys
 from pathlib import Path
+
+TLEAP_IDENTIFIER = re.compile(r"[A-Za-z][A-Za-z0-9_]*\Z")
 
 
 def render_leap_input(
@@ -19,11 +22,18 @@ def render_leap_input(
     inpcrd: Path,
 ) -> str:
     lines = ["source leaprc.gaff2"]
-    for index, (residue, mol2, frcmod, _count) in enumerate(molecules):
+    registered_residues: set[str] = set()
+    for residue, mol2, frcmod, _count in molecules:
+        if not TLEAP_IDENTIFIER.fullmatch(residue):
+            raise ValueError(f"residue is not a valid TLeap identifier: {residue!r}")
+        if residue in registered_residues:
+            raise ValueError(f"duplicate TLeap residue template: {residue}")
+        registered_residues.add(residue)
         lines.append(f'loadamberparams "{frcmod}"')
-        lines.append(f'MOL{index} = loadmol2 "{mol2}"')
-        lines.append(f"check MOL{index}")
-        lines.append(f"# residue {residue}")
+        # loadPdb resolves a PDB residue by looking for a same-named LEaP
+        # variable, so the template variable must be the configured residue.
+        lines.append(f'{residue} = loadmol2 "{mol2}"')
+        lines.append(f"check {residue}")
     lines.extend(
         [
             f'system = loadpdb "{packed_pdb}"',
@@ -69,13 +79,12 @@ def main() -> int:
     topology = output_dir / "topol.top"
     coordinates = output_dir / "conf.gro"
     manifest = output_dir / "manifest.json"
-    leap_input.write_text(
-        render_leap_input(packed_pdb, box_angstrom, molecules, prmtop, inpcrd),
-        encoding="utf-8",
-    )
-
     command = ["tleap", "-f", str(leap_input)]
     try:
+        leap_input.write_text(
+            render_leap_input(packed_pdb, box_angstrom, molecules, prmtop, inpcrd),
+            encoding="utf-8",
+        )
         with leap_log.open("w", encoding="utf-8") as handle:
             handle.write(f"$ {shlex.join(command)}\n")
             handle.flush()

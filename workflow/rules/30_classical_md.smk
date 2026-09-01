@@ -67,9 +67,9 @@ rule build_gromacs_system:
         coordinates=f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/build/conf.gro",
         prmtop=f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/build/system.prmtop",
         inpcrd=f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/build/system.inpcrd",
-        leap_input=f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/build/tleap.in",
-        leap_log=f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/build/tleap.log",
         manifest=f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/build/manifest.json"
+    log:
+        f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/build/tleap.log"
     params:
         output_dir=lambda wildcards: (
             f"{RUN_ROOT}/{CAMPAIGN}/classical/{wildcards.system}/r{wildcards.replica}/build"
