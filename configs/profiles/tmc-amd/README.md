@@ -23,6 +23,10 @@ engine-specific choices are pinned in `configs/slurm/tmc-amd-stage-modules.sh`:
 - cDFT: `cp2k/2023.2` with OpenMPI 4.1.5;
 - embedded VDE: `orca/6.1.1` with OpenMPI 4.1.8.
 
+The site CP2K module does not export its data directory. The cDFT stage pins
+`CP2K_DATA_DIR=/data/softwares/cp2k/2023.2/data` and verifies the required
+basis, potential, and D3 files before starting CP2K.
+
 Put only additional modules that are compatible with all three engines in the
 ignored file:
 

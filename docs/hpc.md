@@ -143,6 +143,11 @@ Packmol. `qe` contains Quantum ESPRESSO and its own OpenMPI. For a
 `classical_md` doctor job, the support-tool paths are added first and the site
 GROMACS module is loaded afterward, leaving the site's OpenMPI first on `PATH`.
 CP2K and ORCA continue to use only their validated site module families.
+The TMC CP2K module does not set `CP2K_DATA_DIR`; the stage wrapper therefore
+exports `/data/softwares/cp2k/2023.2/data` and checks the basis, potential, and
+D3 parameter files before starting MPI. A failed checked-engine run keeps its
+raw combined output beside the requested output as `*.out.failed`, so the
+original engine diagnostic survives Snakemake's cleanup of incomplete outputs.
 
 After installation, submit one capability stage per job:
 

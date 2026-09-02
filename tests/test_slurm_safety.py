@@ -88,6 +88,9 @@ class SlurmSafetyTests(unittest.TestCase):
     def test_tmc_engine_stages_pin_separate_mpi_module_families(self) -> None:
         modules = STAGE_MODULES.read_text(encoding="utf-8")
         self.assertIn("module load cp2k/2023.2", modules)
+        self.assertIn("CP2K_DATA_DIR:=/data/softwares/cp2k/2023.2/data", modules)
+        for data_file in ("BASIS_MOLOPT", "GTH_POTENTIALS", "dftd3.dat"):
+            self.assertIn(data_file, modules)
         self.assertIn("module load gromacs/2023", modules)
         self.assertIn("module load orca/6.1.1", modules)
         driver = SLURM_DRIVER.read_text(encoding="utf-8")
@@ -290,6 +293,38 @@ class SlurmSafetyTests(unittest.TestCase):
             self.assertEqual(completed.returncode, 2)
             self.assertIn("outside a Slurm allocation", completed.stderr)
             self.assertFalse(output.exists())
+
+    def test_engine_runner_retains_failed_engine_output(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output = Path(temporary_directory) / "cp2k.out"
+            environment = os.environ.copy()
+            environment["SLURM_JOB_ID"] = "test-allocation"
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    str(ENGINE_RUNNER),
+                    "--engine",
+                    "cp2k",
+                    "--output",
+                    str(output),
+                    "--",
+                    sys.executable,
+                    "-c",
+                    "import sys; print('synthetic CP2K failure'); sys.exit(7)",
+                ],
+                cwd=ROOT,
+                env=environment,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            failed_output = output.with_name("cp2k.out.failed")
+            self.assertEqual(completed.returncode, 7)
+            self.assertFalse(output.exists())
+            self.assertTrue(failed_output.exists())
+            self.assertIn("synthetic CP2K failure", failed_output.read_text(encoding="utf-8"))
+            self.assertIn(str(failed_output), completed.stderr)
 
     def test_stage_runner_refuses_outside_slurm(self) -> None:
         environment = os.environ.copy()

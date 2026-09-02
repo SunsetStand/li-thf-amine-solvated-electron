@@ -19,6 +19,17 @@ case "${1:-}" in
     ;;
   cdft)
     module load cp2k/2023.2
+    # The site module exposes cp2k.psmp but does not publish its data directory.
+    # CP2K otherwise looks for these relative names in the calculation directory.
+    : "${CP2K_DATA_DIR:=/data/softwares/cp2k/2023.2/data}"
+    export CP2K_DATA_DIR
+    for cp2k_data_file in BASIS_MOLOPT GTH_POTENTIALS dftd3.dat; do
+      if [[ ! -r "${CP2K_DATA_DIR}/${cp2k_data_file}" ]]; then
+        printf 'ERROR: required CP2K data file is not readable: %s\n' \
+          "${CP2K_DATA_DIR}/${cp2k_data_file}" >&2
+        return 2
+      fi
+    done
     ;;
   embedded_vde)
     module load orca/6.1.1

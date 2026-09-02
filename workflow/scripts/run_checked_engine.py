@@ -34,12 +34,15 @@ def main() -> int:
         parser.error("an engine command is required after --")
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
-    with output.open("w", encoding="utf-8") as handle:
+    failed_output = output.with_name(f"{output.name}.failed")
+    with failed_output.open("w", encoding="utf-8") as handle:
         completed = subprocess.run(command, cwd=args.cwd, stdout=handle, stderr=subprocess.STDOUT)
-    result = parse_output(args.engine, output)
+    result = parse_output(args.engine, failed_output)
     if completed.returncode != 0 or not result.converged:
         print(f"Engine validation failed: {result.as_dict()}", file=sys.stderr)
+        print(f"Raw engine output retained at: {failed_output}", file=sys.stderr)
         return completed.returncode or 4
+    failed_output.replace(output)
     print(f"Validated: {shlex.join(command)}")
     return 0
 
