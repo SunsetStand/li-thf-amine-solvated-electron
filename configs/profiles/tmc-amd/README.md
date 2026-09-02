@@ -26,9 +26,14 @@ engine-specific choices are pinned in `configs/slurm/tmc-amd-stage-modules.sh`:
 The site CP2K module does not export its data directory. The cDFT stage pins
 `CP2K_DATA_DIR=/data/softwares/cp2k/2023.2/data` and verifies the required
 basis, potential, and D3 files before starting CP2K.
-MPI rules set the standard Snakemake `mpi` resource to `srun`; this exposes the
-full Slurm allocation to CP2K instead of nesting `mpirun` inside the executor's
-single-task wrapper step.
+The site's OpenMPI 4.1.5 cannot direct-launch applications with `srun` because
+it lacks Slurm PMI support. MPI rules therefore set Snakemake's standard `mpi`
+resource to `configs/slurm/tmc-amd-mpirun.sh`. The launcher queries `scontrol`
+for the active job, accepts single-node allocations only, and refuses a rank
+count above the allocated CPU count. It then starts the ranks locally with
+`mpirun --nooversubscribe` inside the existing Slurm batch cgroup. This avoids
+both direct PMI launch and the executor's sanitized one-slot environment without
+moving any computation outside Slurm.
 
 Put only additional modules that are compatible with all three engines in the
 ignored file:

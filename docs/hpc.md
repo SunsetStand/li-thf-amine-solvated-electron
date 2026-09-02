@@ -214,10 +214,14 @@ wavefunction, cube, and output files remain under the configured storage run
 root. See `docs/stage-b.md`.
 
 MPI rules use Snakemake's standard `mpi` and `tasks` resources. The reusable
-rule defaults to `mpirun`, while Slurm profiles override the launcher with
-`srun -n {tasks}`. This is required inside the executor's Slurm job step:
-starting a second `mpirun` there can see only the single wrapper slot even
-though the enclosing allocation contains all requested ranks.
+rule defaults to `mpirun`, and the generic Slurm profile overrides the launcher
+with `srun -n {tasks}`. TMC-AMD is an explicit site exception: its OpenMPI 4.1.5
+module lacks the PMI support required by direct `srun` launch, while the
+Snakemake job-step executor removes the allocation-size variables that plain
+`mpirun` would normally inspect. The TMC profile therefore uses
+`configs/slurm/tmc-amd-mpirun.sh`. That launcher reads the allocation from
+`scontrol`, requires a running single-node job, rejects ranks above allocated
+CPUs, and uses `mpirun --nooversubscribe` inside the existing batch cgroup.
 
 ## Supported execution modes
 

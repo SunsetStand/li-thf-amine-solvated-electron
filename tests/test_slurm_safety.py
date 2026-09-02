@@ -19,7 +19,9 @@ RUN_SH = ROOT / "run.sh"
 SLURM_DRIVER = ROOT / "configs" / "slurm" / "tmc-amd-driver.sbatch"
 STAGE_MODULES = ROOT / "configs" / "slurm" / "tmc-amd-stage-modules.sh"
 STORAGE_HELPER = ROOT / "configs" / "slurm" / "tmc-amd-storage.sh"
+TMC_MPI_LAUNCHER = ROOT / "configs" / "slurm" / "tmc-amd-mpirun.sh"
 TMC_PROFILE = ROOT / "configs" / "profiles" / "tmc-amd" / "config.v9+.yaml"
+GENERIC_SLURM_PROFILE = ROOT / "configs" / "profiles" / "slurm" / "config.v9+.yaml"
 SNAKEFILE = ROOT / "workflow" / "Snakefile"
 ENGINE_RUNNER = ROOT / "workflow" / "scripts" / "run_checked_engine.py"
 STAGE_RUNNER = ROOT / "workflow" / "scripts" / "run_tmc_stage.sh"
@@ -28,7 +30,14 @@ ENVIRONMENT_DIR = ROOT / "configs" / "environments"
 
 class SlurmSafetyTests(unittest.TestCase):
     def test_shell_entry_points_have_valid_bash_syntax(self) -> None:
-        for script in (RUN_SH, SLURM_DRIVER, STAGE_MODULES, STORAGE_HELPER, STAGE_RUNNER):
+        for script in (
+            RUN_SH,
+            SLURM_DRIVER,
+            STAGE_MODULES,
+            STORAGE_HELPER,
+            TMC_MPI_LAUNCHER,
+            STAGE_RUNNER,
+        ):
             with self.subTest(script=script):
                 completed = subprocess.run(
                     ["bash", "-n", str(script)], capture_output=True, text=True, check=False
@@ -77,13 +86,41 @@ class SlurmSafetyTests(unittest.TestCase):
         profile = TMC_PROFILE.read_text(encoding="utf-8")
         self.assertIn("run_stage_b_cp2k_smoke:", profile)
         self.assertIn("tasks: 32", profile)
-        self.assertIn("mpi: srun", profile)
+        self.assertIn("mpi: bash configs/slurm/tmc-amd-mpirun.sh", profile)
         self.assertIn("cpus_per_task: 1", profile)
         self.assertIn(
             "{resources.mpi} -n {resources.tasks} cp2k.psmp",
             rules,
         )
         self.assertNotIn("mpirun -np", rules)
+
+    def test_tmc_mpi_launcher_enforces_the_slurm_allocation(self) -> None:
+        launcher = TMC_MPI_LAUNCHER.read_text(encoding="utf-8")
+        self.assertIn('[[ -n "${SLURM_JOB_ID:-}" ]]', launcher)
+        self.assertIn("scontrol show job --oneliner", launcher)
+        self.assertIn('[[ "$num_nodes" == "1" ]]', launcher)
+        self.assertIn("(( ranks <= num_cpus ))", launcher)
+        self.assertIn('--host "${local_host}:${ranks}"', launcher)
+        self.assertIn("--nooversubscribe", launcher)
+        self.assertNotIn("--oversubscribe", launcher)
+        generic_profile = GENERIC_SLURM_PROFILE.read_text(encoding="utf-8")
+        self.assertIn("mpi: srun", generic_profile)
+
+    def test_tmc_mpi_launcher_refuses_outside_slurm(self) -> None:
+        environment = os.environ.copy()
+        for variable in list(environment):
+            if variable.startswith("SLURM_"):
+                environment.pop(variable)
+        completed = subprocess.run(
+            ["bash", str(TMC_MPI_LAUNCHER), "-n", "4", "true"],
+            cwd=ROOT,
+            env=environment,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(completed.returncode, 2)
+        self.assertIn("outside a Slurm allocation", completed.stderr)
 
     def test_slurm_plugin_has_compute_node_hang_fix(self) -> None:
         project = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
