@@ -49,6 +49,22 @@ set-resources:
     cpus_per_task: 4
     mem_mb: 8000
     runtime: 60
+  analyze_classical_replica:
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 180
+  select_classical_snapshot:
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 60
+  summarize_classical_analysis:
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
+  summarize_snapshot_bank:
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
   cp2k_cdft:
     tasks: 32
     mem_mb: 128000

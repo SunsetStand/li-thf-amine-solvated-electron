@@ -28,6 +28,9 @@
   its bundled `libtinfo` is not selected while launching `run.sh`.
 - Use the backward-compatible `CONDA_ALWAYS_YES` setting because the TMC Conda
   environment subcommands do not recognize the newer `--yes` option.
+- Add Slurm-only Stage-A analysis for the six completed classical-pilot
+  trajectories, including periodic structural descriptors, autocorrelation
+  gates, and deterministic solvent-only snapshot export.
 
 ## 0.1.0 - 2026-08-21
 

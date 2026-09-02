@@ -162,6 +162,8 @@ Finally, preview the input bundle, smoke chains, or restricted classical pilot:
 ./run.sh dry-run --campaign smoke --target classical_smoke
 ./run.sh dry-run --campaign mixed_smoke --target classical_smoke
 ./run.sh dry-run --campaign pilot --target classical_pilot
+./run.sh dry-run --campaign pilot --target classical_analysis
+./run.sh dry-run --campaign pilot --target snapshot_bank
 ./run.sh submit --campaign smoke --target classical_smoke
 ```
 
@@ -172,6 +174,21 @@ and is an execution test, not an equilibrated production trajectory.
 The `classical_pilot` target is restricted to the six pure-THF/EDA pilot
 replicas and writes restartable long trajectories to project storage. Submit it
 only after both smoke campaigns pass; see `docs/classical-pilot.md`.
+
+After `classical_pilot` passes, Stage A is deliberately split into two targets:
+
+```bash
+./run.sh submit --campaign pilot --target classical_analysis
+# Inspect pilot/classical_analysis.summary.json and require ready=true.
+./run.sh submit --campaign pilot --target snapshot_bank
+```
+
+Both commands start a Slurm-hosted controller and every analysis/export rule is
+a Slurm child job. The first target reads the existing TPR/XTC files and writes
+small JSON/CSV products; the second is dependency-gated on the first and writes
+one solvent-only XYZ/cell pair per replica. Neither target loads GROMACS or an
+MPI family, and neither modifies the source trajectories. See
+`docs/classical-analysis.md`.
 
 ## Supported execution modes
 

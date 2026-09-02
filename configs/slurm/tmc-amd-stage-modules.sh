@@ -13,6 +13,10 @@ case "${1:-}" in
     solvelec_activate_support_tools
     module load gromacs/2023
     ;;
+  trajectory_analysis)
+    # The repository virtual environment contains MDAnalysis/NumPy/SciPy.
+    # Do not load an engine MPI family for read-only trajectory analysis.
+    ;;
   cdft)
     module load cp2k/2023.2
     ;;

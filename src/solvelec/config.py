@@ -190,6 +190,56 @@ def validate_repository_configs(root: Path | None = None) -> list[str]:
                 raise ValueError
         except (KeyError, TypeError, ValueError):
             errors.append(f"methods.classical_validation.{key} must be in (0, 1]")
+    trajectory_analysis = methods.get("trajectory_analysis", {})
+    for key in (
+        "analysis_stride_ps",
+        "minimum_effective_samples",
+        "rdf_bin_width_angstrom",
+        "rdf_max_angstrom",
+        "eda_thf_contact_cutoff_angstrom",
+        "hydrogen_bond_distance_angstrom",
+        "minimum_snapshot_separation_ps",
+        "decorrelation_multiplier",
+    ):
+        try:
+            if float(trajectory_analysis[key]) <= 0:
+                raise ValueError
+        except (KeyError, TypeError, ValueError):
+            errors.append(f"methods.trajectory_analysis.{key} must be positive")
+    for key in ("minimum_analysis_frames", "void_grid_points_per_axis"):
+        try:
+            value = int(trajectory_analysis[key])
+            if value < 2 or value != float(trajectory_analysis[key]):
+                raise ValueError
+        except (KeyError, TypeError, ValueError):
+            errors.append(f"methods.trajectory_analysis.{key} must be an integer >= 2")
+    try:
+        refinement_levels = int(trajectory_analysis["void_refinement_levels"])
+        if refinement_levels < 0 or refinement_levels != float(
+            trajectory_analysis["void_refinement_levels"]
+        ):
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append("methods.trajectory_analysis.void_refinement_levels must be an integer >= 0")
+    try:
+        if int(trajectory_analysis["snapshots_per_replica"]) != 1:
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append("methods.trajectory_analysis.snapshots_per_replica must be 1 for stage A")
+    try:
+        equilibrated_start = float(trajectory_analysis["equilibrated_start_ns"])
+        if not 0 <= equilibrated_start < float(classical["production_ns"]):
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append(
+            "methods.trajectory_analysis.equilibrated_start_ns must be in [0, production_ns)"
+        )
+    try:
+        angle = float(trajectory_analysis["hydrogen_bond_angle_degree"])
+        if not 0 < angle <= 180:
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append("methods.trajectory_analysis.hydrogen_bond_angle_degree must be in (0, 180]")
     thresholds = methods.get("localization_thresholds", {})
     if float(thresholds.get("electron_count_min", 2)) >= float(
         thresholds.get("electron_count_max", 0)

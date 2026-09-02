@@ -46,8 +46,10 @@ class SlurmSafetyTests(unittest.TestCase):
         runner = RUN_SH.read_text(encoding="utf-8")
         snakefile = SNAKEFILE.read_text(encoding="utf-8")
         self.assertIn("input_bundle|classical_smoke|classical_pilot", runner)
+        self.assertIn("classical_analysis|snapshot_bank", runner)
         self.assertIn('if CAMPAIGN != "pilot"', snakefile)
         self.assertIn("gromacs_pilot_md:", TMC_PROFILE.read_text(encoding="utf-8"))
+        self.assertIn("analyze_classical_replica:", TMC_PROFILE.read_text(encoding="utf-8"))
 
     def test_slurm_plugin_has_compute_node_hang_fix(self) -> None:
         project = (ROOT / "pyproject.toml").read_text(encoding="utf-8")

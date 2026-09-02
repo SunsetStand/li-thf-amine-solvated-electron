@@ -186,9 +186,9 @@ workflow_target_from_args() {
     previous="${item}"
   done
   case "${target}" in
-    input_bundle|classical_smoke|classical_pilot) ;;
+    input_bundle|classical_smoke|classical_pilot|classical_analysis|snapshot_bank) ;;
     *)
-      printf 'ERROR: unknown workflow target %s; choose input_bundle, classical_smoke, or classical_pilot.\n' \
+      printf 'ERROR: unknown workflow target %s; choose input_bundle, classical_smoke, classical_pilot, classical_analysis, or snapshot_bank.\n' \
         "${target}" >&2
       return 2
       ;;
@@ -488,7 +488,7 @@ Commands:
   probe       Inspect modules, executables, allocation, and filesystems on a compute node
   doctor      Check engines; add --require STAGE to enforce a capability gate
   test        Validate configs and run dependency-light regression tests
-  dry-run     Build the Snakemake DAG; select input_bundle, classical_smoke, or classical_pilot
+  dry-run     Build the Snakemake DAG for an explicitly selected workflow target
   submit      Run the controller; --target defaults to the input_bundle
   resume      Resume through the same Slurm-controller mechanism
   unlock      Safely clear a stale Snakemake lock after checking no controller is active
@@ -509,6 +509,9 @@ The repository remains the command working directory. The first executable
 chemistry target is: ./run.sh submit --campaign smoke --target classical_smoke
 The restricted long solvent target is:
 ./run.sh submit --campaign pilot --target classical_pilot
+The stage-A read-only trajectory targets are:
+./run.sh submit --campaign pilot --target classical_analysis
+./run.sh submit --campaign pilot --target snapshot_bank
 EOF
     ;;
   *)

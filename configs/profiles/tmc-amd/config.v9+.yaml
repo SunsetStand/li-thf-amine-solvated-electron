@@ -63,6 +63,26 @@ set-resources:
     cpus_per_task: 4
     mem_mb: 8000
     runtime: 60
+  analyze_classical_replica:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 180
+  select_classical_snapshot:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 60
+  summarize_classical_analysis:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
+  summarize_snapshot_bank:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
   cp2k_cdft:
     slurm_partition: amd
     tasks: 32

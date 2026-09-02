@@ -120,6 +120,22 @@ The pilot has hash-guarded checkpoint continuation and density, concentration,
 trajectory-length, and replica-consistency gates. It remains a solvent-only
 ensemble for later electronic-structure seeds. See `docs/classical-pilot.md`.
 
+Stage A analyzes those six completed trajectories without modifying them. It
+computes periodic RDF/contact/hydrogen-bond descriptors, estimates descriptor
+autocorrelation and effective sample sizes, and measures a heavy-atom
+van-der-Waals clearance proxy for interstitial free volume. Run the analysis
+gate first, then export one deterministic representative solvent snapshot per
+replica only if every analysis record passed:
+
+```bash
+./run.sh submit --campaign pilot --target classical_analysis
+./run.sh submit --campaign pilot --target snapshot_bank
+```
+
+The snapshots contain solvent only: no Li atom and no explicit electron are
+added at this stage. See `docs/classical-analysis.md` for output paths,
+acceptance checks, and interpretation limits.
+
 ## What is implemented in v0.1
 
 - Config-driven 11-system matrix (pure THF plus five amines at 1.5/3.0 M).
@@ -131,6 +147,8 @@ ensemble for later electronic-structure seeds. See `docs/classical-pilot.md`.
 - Packmol execution and checked AmberTools/ParmEd-to-GROMACS topology conversion.
 - Neutral-solvent GROMACS smoke and six-replica classical pilot execution with
   checkpoint-safe continuation and quantitative acceptance gates.
+- Periodic pilot-trajectory analysis, autocorrelation-aware readiness checks,
+  and deterministic solvent-only electronic-structure seed selection.
 - Provenance manifests with Git SHA, software versions, inputs, and checksums.
 - Dependency-light unit and integration tests using only core package dependencies.
 
