@@ -77,7 +77,13 @@ class SlurmSafetyTests(unittest.TestCase):
         profile = TMC_PROFILE.read_text(encoding="utf-8")
         self.assertIn("run_stage_b_cp2k_smoke:", profile)
         self.assertIn("tasks: 32", profile)
+        self.assertIn("mpi: srun", profile)
         self.assertIn("cpus_per_task: 1", profile)
+        self.assertIn(
+            "{resources.mpi} -n {resources.tasks} cp2k.psmp",
+            rules,
+        )
+        self.assertNotIn("mpirun -np", rules)
 
     def test_slurm_plugin_has_compute_node_hang_fix(self) -> None:
         project = (ROOT / "pyproject.toml").read_text(encoding="utf-8")

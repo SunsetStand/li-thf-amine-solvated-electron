@@ -26,6 +26,9 @@ engine-specific choices are pinned in `configs/slurm/tmc-amd-stage-modules.sh`:
 The site CP2K module does not export its data directory. The cDFT stage pins
 `CP2K_DATA_DIR=/data/softwares/cp2k/2023.2/data` and verifies the required
 basis, potential, and D3 files before starting CP2K.
+MPI rules set the standard Snakemake `mpi` resource to `srun`; this exposes the
+full Slurm allocation to CP2K instead of nesting `mpirun` inside the executor's
+single-task wrapper step.
 
 Put only additional modules that are compatible with all three engines in the
 ignored file:

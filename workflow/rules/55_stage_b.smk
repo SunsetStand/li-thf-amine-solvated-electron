@@ -131,12 +131,13 @@ rule run_stage_b_cp2k_smoke:
     threads: 1
     resources:
         tasks=32,
+        mpi="mpirun",
         mem_mb=128000,
         runtime=720,
     shell:
         "bash {STAGE_RUNNER:q} cdft -- {PYTHON} {input.engine_runner:q} "
         "--engine cp2k --output {output:q} --cwd {params.workdir:q} -- "
-        "mpirun -np {resources.tasks} cp2k.psmp -i {input.cp2k:q}"
+        "{resources.mpi} -n {resources.tasks} cp2k.psmp -i {input.cp2k:q}"
 
 
 rule summarize_stage_b_cp2k_smoke:

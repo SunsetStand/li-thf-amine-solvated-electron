@@ -75,6 +75,7 @@ set-resources:
     runtime: 60
   run_stage_b_cp2k_smoke:
     tasks: 32
+    mpi: srun
     cpus_per_task: 1
     mem_mb: 128000
     runtime: 720
@@ -88,9 +89,11 @@ set-resources:
     runtime: 60
   cp2k_cdft:
     tasks: 32
+    mpi: srun
     mem_mb: 128000
     runtime: 1440
   cp2k_vde:
     tasks: 32
+    mpi: srun
     mem_mb: 128000
     runtime: 720

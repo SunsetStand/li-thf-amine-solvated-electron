@@ -213,6 +213,12 @@ current pilot, and must contain no GROMACS or Stage-A rule. Each CP2K job uses
 wavefunction, cube, and output files remain under the configured storage run
 root. See `docs/stage-b.md`.
 
+MPI rules use Snakemake's standard `mpi` and `tasks` resources. The reusable
+rule defaults to `mpirun`, while Slurm profiles override the launcher with
+`srun -n {tasks}`. This is required inside the executor's Slurm job step:
+starting a second `mpirun` there can see only the single wrapper slot even
+though the enclosing allocation contains all requested ranks.
+
 ## Supported execution modes
 
 All modes below are launched inside Slurm allocations:

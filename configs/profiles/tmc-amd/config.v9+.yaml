@@ -96,6 +96,7 @@ set-resources:
   run_stage_b_cp2k_smoke:
     slurm_partition: amd
     tasks: 32
+    mpi: srun
     cpus_per_task: 1
     mem_mb: 128000
     runtime: 720
@@ -112,12 +113,14 @@ set-resources:
   cp2k_cdft:
     slurm_partition: amd
     tasks: 32
+    mpi: srun
     cpus_per_task: 1
     mem_mb: 128000
     runtime: 720
   cp2k_vde:
     slurm_partition: amd
     tasks: 32
+    mpi: srun
     cpus_per_task: 1
     mem_mb: 128000
     runtime: 720
