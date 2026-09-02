@@ -65,13 +65,17 @@ allocated_host="${batch_host:-$node_list}"
 [[ "$local_host" == "$allocated_host" ]] \
     || die "current host ${local_host} is not allocated host ${allocated_host}"
 
-echo "TMC MPI launcher: job=${SLURM_JOB_ID} host=${local_host} ranks=${ranks}/${num_cpus}" >&2
+allowed_cpus="$(awk '/^Cpus_allowed_list:/ {print $2}' /proc/self/status 2>/dev/null || true)"
+echo "TMC MPI launcher: job=${SLURM_JOB_ID} host=${local_host} ranks=${ranks}/${num_cpus} cpuset=${allowed_cpus:-unknown}" >&2
 
 # The site's OpenMPI 4.1.5 lacks the PMI interface required for direct `srun`
 # launch.  The allocation is single-node, so let mpirun fork locally inside the
 # existing batch cgroup.  Removing Slurm discovery variables prevents OpenMPI
 # from mistaking Snakemake's one-process wrapper context for the full allocation.
 # The explicit host slot count and --nooversubscribe retain the Slurm CPU cap.
+# OpenMPI must not bind by its own logical core numbers here: they can differ
+# from the non-zero-based CPU IDs exposed by the Slurm cgroup. The inherited
+# cpuset remains enforced by the kernel and contains only allocated CPUs.
 while IFS='=' read -r variable _value; do
     if [[ "$variable" == SLURM_* ]]; then
         unset "$variable"
@@ -81,7 +85,7 @@ done < <(env)
 exec mpirun \
     --host "${local_host}:${ranks}" \
     --map-by slot \
-    --bind-to core \
+    --bind-to none \
     --nooversubscribe \
     -n "$ranks" \
     "$@"

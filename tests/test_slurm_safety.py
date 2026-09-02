@@ -101,6 +101,8 @@ class SlurmSafetyTests(unittest.TestCase):
         self.assertIn('[[ "$num_nodes" == "1" ]]', launcher)
         self.assertIn("(( ranks <= num_cpus ))", launcher)
         self.assertIn('--host "${local_host}:${ranks}"', launcher)
+        self.assertIn("--bind-to none", launcher)
+        self.assertIn("Cpus_allowed_list", launcher)
         self.assertIn("--nooversubscribe", launcher)
         self.assertNotIn("--oversubscribe", launcher)
         stage_runner = STAGE_RUNNER.read_text(encoding="utf-8")

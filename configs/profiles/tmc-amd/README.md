@@ -33,9 +33,12 @@ wrapper on `PATH` even after an engine moves into its storage work directory.
 The launcher queries `scontrol`
 for the active job, accepts single-node allocations only, and refuses a rank
 count above the allocated CPU count. It then starts the ranks locally with
-`mpirun --nooversubscribe` inside the existing Slurm batch cgroup. This avoids
-both direct PMI launch and the executor's sanitized one-slot environment without
-moving any computation outside Slurm.
+`mpirun --nooversubscribe --bind-to none` inside the existing Slurm batch
+cgroup. Slurm's kernel-enforced cpuset remains the binding boundary; disabling
+OpenMPI's second binding layer avoids invalid zero-based hwloc IDs when the
+allocation contains a different CPU subset. This avoids both direct PMI launch
+and the executor's sanitized one-slot environment without moving any
+computation outside Slurm.
 
 Put only additional modules that are compatible with all three engines in the
 ignored file:

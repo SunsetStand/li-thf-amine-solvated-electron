@@ -222,7 +222,10 @@ Snakemake job-step executor removes the allocation-size variables that plain
 `tmc-amd-mpirun.sh`, which the stage runner places on `PATH` before the engine
 changes to its storage work directory. That launcher reads the allocation from
 `scontrol`, requires a running single-node job, rejects ranks above allocated
-CPUs, and uses `mpirun --nooversubscribe` inside the existing batch cgroup.
+CPUs, and uses `mpirun --nooversubscribe --bind-to none` inside the existing
+batch cgroup. The kernel-enforced Slurm cpuset remains active; OpenMPI binding
+is disabled because its zero-based hwloc IDs can differ from the CPU subset
+assigned to this site's batch cgroup.
 
 ## Supported execution modes
 
