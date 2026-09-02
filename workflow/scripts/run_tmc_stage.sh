@@ -27,6 +27,10 @@ fi
 # shellcheck source=configs/slurm/tmc-amd-stage-modules.sh
 source "${ROOT}/configs/slurm/tmc-amd-stage-modules.sh" "${STAGE}"
 
+# Engine commands can change to a storage work directory before launch. Keep
+# repository-provided site wrappers discoverable independently of that cwd.
+export PATH="${ROOT}/configs/slurm:${PATH}"
+
 printf 'Stage %s:' "${STAGE}"
 printf ' %q' "$@"
 printf '\n'

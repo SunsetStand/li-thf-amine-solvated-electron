@@ -28,7 +28,9 @@ The site CP2K module does not export its data directory. The cDFT stage pins
 basis, potential, and D3 files before starting CP2K.
 The site's OpenMPI 4.1.5 cannot direct-launch applications with `srun` because
 it lacks Slurm PMI support. MPI rules therefore set Snakemake's standard `mpi`
-resource to `configs/slurm/tmc-amd-mpirun.sh`. The launcher queries `scontrol`
+resource to `tmc-amd-mpirun.sh`; the stage runner exposes that repository
+wrapper on `PATH` even after an engine moves into its storage work directory.
+The launcher queries `scontrol`
 for the active job, accepts single-node allocations only, and refuses a rank
 count above the allocated CPU count. It then starts the ranks locally with
 `mpirun --nooversubscribe` inside the existing Slurm batch cgroup. This avoids

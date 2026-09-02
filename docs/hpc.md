@@ -219,7 +219,8 @@ with `srun -n {tasks}`. TMC-AMD is an explicit site exception: its OpenMPI 4.1.5
 module lacks the PMI support required by direct `srun` launch, while the
 Snakemake job-step executor removes the allocation-size variables that plain
 `mpirun` would normally inspect. The TMC profile therefore uses
-`configs/slurm/tmc-amd-mpirun.sh`. That launcher reads the allocation from
+`tmc-amd-mpirun.sh`, which the stage runner places on `PATH` before the engine
+changes to its storage work directory. That launcher reads the allocation from
 `scontrol`, requires a running single-node job, rejects ranks above allocated
 CPUs, and uses `mpirun --nooversubscribe` inside the existing batch cgroup.
 

@@ -86,7 +86,7 @@ class SlurmSafetyTests(unittest.TestCase):
         profile = TMC_PROFILE.read_text(encoding="utf-8")
         self.assertIn("run_stage_b_cp2k_smoke:", profile)
         self.assertIn("tasks: 32", profile)
-        self.assertIn("mpi: bash configs/slurm/tmc-amd-mpirun.sh", profile)
+        self.assertIn("mpi: tmc-amd-mpirun.sh", profile)
         self.assertIn("cpus_per_task: 1", profile)
         self.assertIn(
             "{resources.mpi} -n {resources.tasks} cp2k.psmp",
@@ -103,6 +103,8 @@ class SlurmSafetyTests(unittest.TestCase):
         self.assertIn('--host "${local_host}:${ranks}"', launcher)
         self.assertIn("--nooversubscribe", launcher)
         self.assertNotIn("--oversubscribe", launcher)
+        stage_runner = STAGE_RUNNER.read_text(encoding="utf-8")
+        self.assertIn('export PATH="${ROOT}/configs/slurm:${PATH}"', stage_runner)
         generic_profile = GENERIC_SLURM_PROFILE.read_text(encoding="utf-8")
         self.assertIn("mpi: srun", generic_profile)
 
