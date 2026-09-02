@@ -36,6 +36,8 @@ class RenderingTests(unittest.TestCase):
             self.assertIn("MULTIPLICITY 2", text)
             self.assertIn("&CDFT", text)
             self.assertIn("ATOMS 1", text)
+            self.assertIn("TARGET 2.0", text)
+            self.assertIn("POTENTIAL GTH-PBE-q3", text)
             self.assertIn("&BECKE_CONSTRAINT", text)
             self.assertIn("ADMM_TYPE ADMMS", text)
 

@@ -240,6 +240,79 @@ def validate_repository_configs(root: Path | None = None) -> list[str]:
             raise ValueError
     except (KeyError, TypeError, ValueError):
         errors.append("methods.trajectory_analysis.hydrogen_bond_angle_degree must be in (0, 180]")
+    stage_b = methods.get("stage_b", {})
+    for key in (
+        "candidate_site_count",
+        "void_grid_points_per_axis",
+        "smoke_replicas_per_system",
+    ):
+        try:
+            value = int(stage_b[key])
+            if value < 1 or value != float(stage_b[key]):
+                raise ValueError
+        except (KeyError, TypeError, ValueError):
+            errors.append(f"methods.stage_b.{key} must be a positive integer")
+    try:
+        refinement = int(stage_b["void_refinement_levels"])
+        if refinement < 0 or refinement != float(stage_b["void_refinement_levels"]):
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append("methods.stage_b.void_refinement_levels must be an integer >= 0")
+    for key in ("minimum_site_separation_angstrom", "minimum_surface_clearance_angstrom"):
+        try:
+            value = float(stage_b[key])
+            if value <= 0:
+                raise ValueError
+        except (KeyError, TypeError, ValueError):
+            errors.append(f"methods.stage_b.{key} must be positive")
+    candidate_ids: list[str] = []
+    try:
+        definitions = stage_b["candidate_pairs"]
+        if not isinstance(definitions, list) or not definitions:
+            raise ValueError
+        for definition in definitions:
+            candidate_id = str(definition["id"])
+            if not re.fullmatch(r"[a-z][a-z0-9_-]*", candidate_id):
+                raise ValueError
+            if float(definition["target_li_cavity_distance_angstrom"]) <= 0:
+                raise ValueError
+            if float(definition["tolerance_angstrom"]) <= 0:
+                raise ValueError
+            candidate_ids.append(candidate_id)
+        if len(candidate_ids) != len(set(candidate_ids)):
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append("methods.stage_b.candidate_pairs must define unique positive candidates")
+    if str(stage_b.get("smoke_candidate_id", "")) not in candidate_ids:
+        errors.append("methods.stage_b.smoke_candidate_id must name a configured candidate")
+    stage_b_smoke = methods.get("stage_b_smoke", {})
+    if stage_b_smoke.get("scientific_status") != "NUMERICAL_SMOKE_ONLY":
+        errors.append("Stage-B CP2K smoke status must remain explicitly non-production")
+    try:
+        smoke_li_valence = int(stage_b_smoke["li_pseudopotential_valence_electrons"])
+        smoke_li_target = float(stage_b_smoke["li_target_valence_electrons"])
+        if smoke_li_valence != 3 or smoke_li_target != 2.0:
+            raise ValueError
+        if stage_b_smoke["li_potential"] != "GTH-PBE-q3":
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append("Stage-B Li+ must pair GTH-PBE-q3 with a 2.0-electron cDFT target")
+    for key in ("cutoff_ry", "rel_cutoff_ry", "max_scf", "cube_stride"):
+        try:
+            if float(stage_b_smoke[key]) <= 0:
+                raise ValueError
+        except (KeyError, TypeError, ValueError):
+            errors.append(f"methods.stage_b_smoke.{key} must be positive")
+    cp2k = methods.get("cp2k", {})
+    try:
+        if cp2k["li_potential"] != "GTH-PBE-q3":
+            raise ValueError
+        if int(cp2k["li_pseudopotential_valence_electrons"]) != 3:
+            raise ValueError
+        if float(cp2k["li_target_valence_electrons"]) != 2.0:
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append("production CP2K Li+ must pair GTH-PBE-q3 with target 2.0")
     thresholds = methods.get("localization_thresholds", {})
     if float(thresholds.get("electron_count_min", 2)) >= float(
         thresholds.get("electron_count_max", 0)

@@ -35,12 +35,56 @@
     "decorrelation_multiplier": 5.0,
     "note": "Heavy-atom van-der-Waals clearance is a cavity-seed proxy, not an electron density observable."
   },
+  "stage_b": {
+    "candidate_site_count": 24,
+    "void_grid_points_per_axis": 12,
+    "void_refinement_levels": 2,
+    "minimum_site_separation_angstrom": 1.5,
+    "minimum_surface_clearance_angstrom": 0.25,
+    "candidate_pairs": [
+      {
+        "id": "compact",
+        "target_li_cavity_distance_angstrom": 3.5,
+        "tolerance_angstrom": 1.5
+      },
+      {
+        "id": "separated",
+        "target_li_cavity_distance_angstrom": 6.0,
+        "tolerance_angstrom": 2.0
+      },
+      {
+        "id": "distant",
+        "target_li_cavity_distance_angstrom": 9.0,
+        "tolerance_angstrom": 2.5
+      }
+    ],
+    "smoke_candidate_id": "separated",
+    "smoke_replicas_per_system": 1,
+    "note": "Li and ghost centers are deterministic geometric seeds, not observed electron positions."
+  },
+  "stage_b_smoke": {
+    "functional": "PBE-D3(BJ)",
+    "basis_set": "DZVP-MOLOPT-SR-GTH",
+    "ghost_basis_set": "TZV2P-MOLOPT-GTH-q1",
+    "potential": "GTH-PBE",
+    "li_potential": "GTH-PBE-q3",
+    "cutoff_ry": 400,
+    "rel_cutoff_ry": 50,
+    "eps_scf": "1.0E-5",
+    "max_scf": 120,
+    "cube_stride": 2,
+    "li_pseudopotential_valence_electrons": 3,
+    "li_target_valence_electrons": 2.0,
+    "scientific_status": "NUMERICAL_SMOKE_ONLY",
+    "note": "This semilocal single point tests the periodic cDFT pipeline only; it cannot pass the electron-localization gate."
+  },
   "cp2k": {
     "functional": "PBE0-D3",
     "exact_exchange_fraction": 0.25,
     "basis_set": "TZV2P-MOLOPT-GTH",
     "aux_basis_set": "cFIT3",
     "potential": "GTH-PBE",
+    "li_potential": "GTH-PBE-q3",
     "cutoff_ry": 600,
     "rel_cutoff_ry": 60,
     "hfx_cutoff_angstrom": 5.0,
@@ -48,6 +92,8 @@
     "admm": true,
     "timestep_fs": 0.5,
     "cdft_constraint": "keep Li valence population near Li+ target",
+    "li_pseudopotential_valence_electrons": 3,
+    "li_target_valence_electrons": 2.0,
     "production_status": "PROVISIONAL_UNTIL_BASIS_FUNCTIONAL_GATE"
   },
   "orca": {

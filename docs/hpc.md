@@ -164,6 +164,8 @@ Finally, preview the input bundle, smoke chains, or restricted classical pilot:
 ./run.sh dry-run --campaign pilot --target classical_pilot
 ./run.sh dry-run --campaign pilot --target classical_analysis
 ./run.sh dry-run --campaign pilot --target snapshot_bank
+./run.sh dry-run --campaign pilot --target stage_b_candidates
+./run.sh dry-run --campaign pilot --target stage_b
 ./run.sh submit --campaign smoke --target classical_smoke
 ```
 
@@ -189,6 +191,22 @@ small JSON/CSV products; the second is dependency-gated on the first and writes
 one solvent-only XYZ/cell pair per replica. Neither target loads GROMACS or an
 MPI family, and neither modifies the source trajectories. See
 `docs/classical-analysis.md`.
+
+After the snapshot bank passes, Stage B has a cheap inspection point and a
+single-command numerical smoke chain:
+
+```bash
+./run.sh submit --campaign pilot --target stage_b_candidates
+# Inspect pilot/stage_b_candidates.summary.json and require ready=true.
+./run.sh submit --campaign pilot --target stage_b
+```
+
+For a fresh run, the second command alone schedules both layers. Its DAG must
+contain exactly six candidate jobs and two `run_stage_b_cp2k_smoke` jobs for the
+current pilot, and must contain no GROMACS or Stage-A rule. Each CP2K job uses
+32 MPI ranks, one CPU per rank, 128 GB, and at most 12 hours on `amd`. All input,
+wavefunction, cube, and output files remain under the configured storage run
+root. See `docs/stage-b.md`.
 
 ## Supported execution modes
 

@@ -16,6 +16,7 @@ runs/
 results/
 scratch/
 work/
+.stage-*-review/
 *.sif
 *.wfn
 *.wfn.bak-*

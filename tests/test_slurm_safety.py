@@ -64,6 +64,21 @@ class SlurmSafetyTests(unittest.TestCase):
         self.assertIn("tpr=lambda wildcards", snapshot_rule)
         self.assertIn("trajectory=lambda wildcards", snapshot_rule)
 
+    def test_stage_b_treats_stage_a_as_an_immutable_handoff(self) -> None:
+        rules = (ROOT / "workflow" / "rules" / "55_stage_b.smk").read_text(
+            encoding="utf-8"
+        )
+        prepare_rule = rules.split("rule summarize_stage_b_candidates:", 1)[0]
+        for name in ("spec", "snapshot_metadata", "xyz", "cell"):
+            self.assertIn(f"{name}=lambda wildcards", prepare_rule)
+        self.assertNotIn("snapshot_bank.done", rules)
+        runner = RUN_SH.read_text(encoding="utf-8")
+        self.assertIn("stage_b_candidates|stage_b", runner)
+        profile = TMC_PROFILE.read_text(encoding="utf-8")
+        self.assertIn("run_stage_b_cp2k_smoke:", profile)
+        self.assertIn("tasks: 32", profile)
+        self.assertIn("cpus_per_task: 1", profile)
+
     def test_slurm_plugin_has_compute_node_hang_fix(self) -> None:
         project = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
         pixi = (ROOT / "pixi.toml").read_text(encoding="utf-8")

@@ -29,11 +29,15 @@ def render_cp2k(
     if constrained:
         if state_name != "solvated_electron":
             raise ValueError("Li+ cDFT constraint is only valid for the solvated-electron state")
+        li_valence = int(method["li_pseudopotential_valence_electrons"])
+        li_target = float(method["li_target_valence_electrons"])
+        if li_valence - li_target != 1.0:
+            raise ValueError("Li+ cDFT requires target = pseudopotential valence - 1")
         cdft = f"""      &CDFT
         TYPE_OF_CONSTRAINT BECKE
         ATOMIC_CHARGES TRUE
         STRENGTH 0.0
-        TARGET 0.0
+        TARGET {li_target:.1f}
         &ATOM_GROUP
           ATOMS {li_atom_index}
           COEFF 1.0
@@ -74,11 +78,54 @@ def render_cp2k(
         "basis_set": method["basis_set"],
         "aux_basis_set": method["aux_basis_set"],
         "potential": method["potential"],
+        "li_potential": method["li_potential"],
         "exact_exchange_fraction": method["exact_exchange_fraction"],
         "hfx_cutoff_angstrom": method["hfx_cutoff_angstrom"],
         "coordinates_include": coordinates_include,
         "cell_include": cell_include,
         "cdft_block": cdft,
+    }
+    rendered = _load_template(template_path).substitute(substitutions)
+    output = Path(output_path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(rendered.rstrip() + "\n", encoding="utf-8")
+
+
+def render_stage_b_cp2k(
+    template_path: str | Path,
+    output_path: str | Path,
+    *,
+    project: str,
+    coordinates_path: str | Path,
+    cell_path: str | Path,
+    method: Mapping[str, Any],
+    li_atom_index: int,
+) -> None:
+    """Render the deliberately low-cost Stage-B numerical cDFT smoke input."""
+
+    if li_atom_index <= 0:
+        raise ValueError("CP2K atom indices are one-based")
+    if method.get("scientific_status") != "NUMERICAL_SMOKE_ONLY":
+        raise ValueError("Stage-B smoke method must remain explicitly non-production")
+    li_valence = int(method["li_pseudopotential_valence_electrons"])
+    target = float(method["li_target_valence_electrons"])
+    if li_valence - target != 1.0:
+        raise ValueError("Li+ cDFT requires target = pseudopotential valence - 1")
+    substitutions = {
+        "project": project,
+        "coordinates_path": Path(coordinates_path).resolve().as_posix(),
+        "cell_path": Path(cell_path).resolve().as_posix(),
+        "basis_set": method["basis_set"],
+        "ghost_basis_set": method["ghost_basis_set"],
+        "potential": method["potential"],
+        "li_potential": method["li_potential"],
+        "cutoff_ry": method["cutoff_ry"],
+        "rel_cutoff_ry": method["rel_cutoff_ry"],
+        "eps_scf": method["eps_scf"],
+        "max_scf": method["max_scf"],
+        "li_atom_index": li_atom_index,
+        "li_target_valence_electrons": f"{target:.1f}",
+        "cube_stride": int(method["cube_stride"]),
     }
     rendered = _load_template(template_path).substitute(substitutions)
     output = Path(output_path)

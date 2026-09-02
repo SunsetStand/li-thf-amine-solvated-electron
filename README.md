@@ -136,6 +136,21 @@ The snapshots contain solvent only: no Li atom and no explicit electron are
 added at this stage. See `docs/classical-analysis.md` for output paths,
 acceptance checks, and interpretation limits.
 
+Stage B converts the immutable snapshot bank into three configured Li/cavity
+seeds per replica and then runs only two periodic PBE-cDFT numerical smoke jobs
+(the first replica of each pilot system). The full candidate-only gate and the
+one-step Stage-B target are:
+
+```bash
+./run.sh submit --campaign pilot --target stage_b_candidates
+./run.sh submit --campaign pilot --target stage_b
+```
+
+The second command includes the first, so a fresh run needs only `stage_b`.
+Passing it proves the CP2K/cDFT execution chain, not the existence or stability
+of a solvated electron. Hybrid-DFT, constraint-release, VDE, and finite-size
+gates remain later stages. See `docs/stage-b.md`.
+
 ## What is implemented in v0.1
 
 - Config-driven 11-system matrix (pure THF plus five amines at 1.5/3.0 M).
@@ -149,6 +164,8 @@ acceptance checks, and interpretation limits.
   checkpoint-safe continuation and quantitative acceptance gates.
 - Periodic pilot-trajectory analysis, autocorrelation-aware readiness checks,
   and deterministic solvent-only electronic-structure seed selection.
+- Config-driven Li/cavity candidate generation and a two-system periodic
+  CP2K cDFT numerical smoke gate that cannot be mistaken for production data.
 - Provenance manifests with Git SHA, software versions, inputs, and checksums.
 - Dependency-light unit and integration tests using only core package dependencies.
 

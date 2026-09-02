@@ -24,6 +24,7 @@ if not STORAGE_ROOT_PATH.is_absolute():
 STORAGE_ROOT = STORAGE_ROOT_PATH.resolve().as_posix()
 SHARED_ROOT = f"{RUN_ROOT}/_shared"
 SYSTEM_CATALOG = json.loads((ROOT / "configs" / "systems.yaml").read_text(encoding="utf-8"))
+METHOD_CATALOG = json.loads((ROOT / "configs" / "methods.yaml").read_text(encoding="utf-8"))
 SOLVELEC_SOURCES = sorted(str(path) for path in Path("src/solvelec").glob("*.py"))
 PYTHON = shlex.quote(sys.executable)
 STAGE_RUNNER = (ROOT / "workflow" / "scripts" / "run_tmc_stage.sh").as_posix()
@@ -36,6 +37,8 @@ VALIDATE_CLASSICAL = (
 ANALYZE_CLASSICAL = (
     ROOT / "workflow" / "scripts" / "analyze_classical_ensemble.py"
 ).as_posix()
+PREPARE_STAGE_B = (ROOT / "workflow" / "scripts" / "prepare_stage_b.py").as_posix()
+ENGINE_RUNNER = (ROOT / "workflow" / "scripts" / "run_checked_engine.py").as_posix()
 AMBER_PYTHON = f"{STORAGE_ROOT}/software/conda/envs/ambertools/bin/python"
 STAGE_RUNTIME_INPUTS = [
     STAGE_RUNNER,
@@ -70,6 +73,31 @@ CLASSICAL_ANALYSIS_RECORDS = pair_outputs(
 SNAPSHOT_RECORDS = pair_outputs(
     f"{RUN_ROOT}/{{campaign}}/analysis/{{system}}/r{{replica}}/snapshot/metadata.json"
 )
+STAGE_B_MANIFESTS = pair_outputs(
+    f"{RUN_ROOT}/{{campaign}}/stage_b/{{system}}/r{{replica}}/candidates/manifest.json"
+)
+STAGE_B_CANDIDATE_IDS = [
+    str(record["id"]) for record in METHOD_CATALOG["stage_b"]["candidate_pairs"]
+]
+STAGE_B_SMOKE_CANDIDATE = str(METHOD_CATALOG["stage_b"]["smoke_candidate_id"])
+STAGE_B_SMOKE_REPLICAS = int(METHOD_CATALOG["stage_b"]["smoke_replicas_per_system"])
+STAGE_B_SMOKE_PAIRS = [
+    (system, replica)
+    for system in SYSTEMS
+    for replica in sorted(int(value) for value in REPLICAS)[:STAGE_B_SMOKE_REPLICAS]
+]
+STAGE_B_SMOKE_OUTPUTS = [
+    (
+        f"{RUN_ROOT}/{CAMPAIGN}/stage_b/{system}/r{replica}/smoke/"
+        f"{STAGE_B_SMOKE_CANDIDATE}/cp2k.out"
+    )
+    for system, replica in STAGE_B_SMOKE_PAIRS
+]
+STAGE_B_SMOKE_INPUTS = [path.replace("cp2k.out", "cp2k.inp") for path in STAGE_B_SMOKE_OUTPUTS]
+STAGE_B_SMOKE_MANIFESTS = [
+    f"{RUN_ROOT}/{CAMPAIGN}/stage_b/{system}/r{replica}/candidates/manifest.json"
+    for system, replica in STAGE_B_SMOKE_PAIRS
+]
 
 
 def amine_for_system(system):
@@ -186,4 +214,5 @@ include: "rules/20_inputs.smk"
 include: "rules/30_classical_md.smk"
 include: "rules/40_classical_analysis.smk"
 include: "rules/50_cp2k_cdft.smk"
+include: "rules/55_stage_b.smk"
 include: "rules/70_report.smk"
