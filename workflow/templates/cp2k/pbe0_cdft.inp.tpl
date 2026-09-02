@@ -73,9 +73,6 @@ $cdft_block
       &E_DENSITY_CUBE
         STRIDE 1 1 1
       &END E_DENSITY_CUBE
-      &SPIN_DENSITY_CUBE
-        STRIDE 1 1 1
-      &END SPIN_DENSITY_CUBE
       &HIRSHFELD ON
       &END HIRSHFELD
     &END PRINT

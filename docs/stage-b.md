@@ -70,6 +70,10 @@ inconsistent pair. See the
 and [KIND/GHOST reference](https://manual.cp2k.org/cp2k-2023_2-branch/CP2K_INPUT/FORCE_EVAL/SUBSYS/KIND.html).
 
 The smoke gate requires SCF convergence, a CP2K energy, and normal termination.
+For unrestricted calculations, CP2K 2023.2's `E_DENSITY_CUBE` print key writes
+both electronic and spin-density cubes; the later localization analysis uses
+the spin-density member of that output rather than the unsupported
+`SPIN_DENSITY_CUBE` subsection.
 Its summary is explicitly labelled
 `NUMERICAL_SMOKE_ONLY_NOT_A_LOCALIZATION_RESULT`. PBE self-interaction can
 qualitatively change an excess-electron state, and the ghost basis is not yet

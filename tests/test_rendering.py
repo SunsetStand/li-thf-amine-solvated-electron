@@ -40,6 +40,8 @@ class RenderingTests(unittest.TestCase):
             self.assertIn("POTENTIAL GTH-PBE-q3", text)
             self.assertIn("&BECKE_CONSTRAINT", text)
             self.assertIn("ADMM_TYPE ADMMS", text)
+            self.assertIn("&E_DENSITY_CUBE", text)
+            self.assertNotIn("&SPIN_DENSITY_CUBE", text)
 
     def test_detached_cannot_use_li_constraint(self) -> None:
         _, _, methods = load_repository_configs(ROOT)

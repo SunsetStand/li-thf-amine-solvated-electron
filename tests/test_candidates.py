@@ -96,6 +96,8 @@ class CandidateTests(unittest.TestCase):
             self.assertIn("POTENTIAL GTH-PBE-q3", text)
             self.assertIn("&KIND Gh", text)
             self.assertIn("GHOST TRUE", text)
+            self.assertIn("&E_DENSITY_CUBE", text)
+            self.assertNotIn("&SPIN_DENSITY_CUBE", text)
             self.assertNotIn("&HF", text)
 
             inconsistent = deepcopy(methods["stage_b_smoke"])

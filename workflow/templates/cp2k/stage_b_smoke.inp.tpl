@@ -86,9 +86,9 @@
       &END VDW_POTENTIAL
     &END XC
     &PRINT
-      &SPIN_DENSITY_CUBE
+      &E_DENSITY_CUBE
         STRIDE $cube_stride $cube_stride $cube_stride
-      &END SPIN_DENSITY_CUBE
+      &END E_DENSITY_CUBE
       &HIRSHFELD ON
       &END HIRSHFELD
       &MULLIKEN ON
