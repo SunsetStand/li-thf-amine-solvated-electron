@@ -1,22 +1,28 @@
 rule analyze_classical_replica:
     input:
-        spec=f"{RUN_ROOT}/{CAMPAIGN}/specs/{{system}}/r{{replica}}.json",
         methods="configs/methods.yaml",
-        classical_validation=(
-            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/validation.json"
-        ),
-        tpr=(
-            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
-            "production/production.tpr"
-        ),
-        trajectory=(
-            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
-            "production/production.xtc"
-        ),
         script=ANALYZE_CLASSICAL,
         runtime=STAGE_RUNTIME_INPUTS,
     params:
         campaign=require_pilot_campaign,
+        # Stage A consumes a completed, validated pilot as an immutable data
+        # product. Keeping these paths in params deliberately prevents a newer
+        # analysis config/source file from scheduling the 20 ns MD producers.
+        spec=lambda wildcards: (
+            f"{RUN_ROOT}/{CAMPAIGN}/specs/{wildcards.system}/r{wildcards.replica}.json"
+        ),
+        classical_validation=lambda wildcards: (
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{wildcards.system}/r{wildcards.replica}/"
+            "pilot/validation.json"
+        ),
+        tpr=lambda wildcards: (
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{wildcards.system}/r{wildcards.replica}/"
+            "pilot/production/production.tpr"
+        ),
+        trajectory=lambda wildcards: (
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{wildcards.system}/r{wildcards.replica}/"
+            "pilot/production/production.xtc"
+        ),
     output:
         analysis=f"{RUN_ROOT}/{CAMPAIGN}/analysis/{{system}}/r{{replica}}/analysis.json",
         timeseries=f"{RUN_ROOT}/{CAMPAIGN}/analysis/{{system}}/r{{replica}}/timeseries.csv",
@@ -30,9 +36,9 @@ rule analyze_classical_replica:
         runtime=180,
     shell:
         "bash {STAGE_RUNNER:q} trajectory_analysis -- {PYTHON} {input.script:q} analyze "
-        "--spec {input.spec:q} --methods {input.methods:q} "
-        "--classical-validation {input.classical_validation:q} --tpr {input.tpr:q} "
-        "--trajectory {input.trajectory:q} --timeseries {output.timeseries:q} "
+        "--spec {params.spec:q} --methods {input.methods:q} "
+        "--classical-validation {params.classical_validation:q} --tpr {params.tpr:q} "
+        "--trajectory {params.trajectory:q} --timeseries {output.timeseries:q} "
         "--rdf {output.rdf:q} --output {output.analysis:q}"
 
 
@@ -77,16 +83,17 @@ rule select_classical_snapshot:
         analysis=f"{RUN_ROOT}/{CAMPAIGN}/analysis/{{system}}/r{{replica}}/analysis.json",
         timeseries=f"{RUN_ROOT}/{CAMPAIGN}/analysis/{{system}}/r{{replica}}/timeseries.csv",
         methods="configs/methods.yaml",
-        tpr=(
-            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
-            "production/production.tpr"
-        ),
-        trajectory=(
-            f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
-            "production/production.xtc"
-        ),
         script=ANALYZE_CLASSICAL,
         runtime=STAGE_RUNTIME_INPUTS,
+    params:
+        tpr=lambda wildcards: (
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{wildcards.system}/r{wildcards.replica}/"
+            "pilot/production/production.tpr"
+        ),
+        trajectory=lambda wildcards: (
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{wildcards.system}/r{wildcards.replica}/"
+            "pilot/production/production.xtc"
+        ),
     output:
         xyz=(
             f"{RUN_ROOT}/{CAMPAIGN}/analysis/{{system}}/r{{replica}}/snapshot/"
@@ -109,7 +116,7 @@ rule select_classical_snapshot:
     shell:
         "bash {STAGE_RUNNER:q} trajectory_analysis -- {PYTHON} {input.script:q} select "
         "--analysis {input.analysis:q} --timeseries {input.timeseries:q} "
-        "--methods {input.methods:q} --tpr {input.tpr:q} --trajectory {input.trajectory:q} "
+        "--methods {input.methods:q} --tpr {params.tpr:q} --trajectory {params.trajectory:q} "
         "--xyz {output.xyz:q} --cell {output.cell:q} --output {output.metadata:q}"
 
 

@@ -51,6 +51,19 @@ class SlurmSafetyTests(unittest.TestCase):
         self.assertIn("gromacs_pilot_md:", TMC_PROFILE.read_text(encoding="utf-8"))
         self.assertIn("analyze_classical_replica:", TMC_PROFILE.read_text(encoding="utf-8"))
 
+    def test_stage_a_cannot_reschedule_completed_classical_md(self) -> None:
+        rules = (ROOT / "workflow" / "rules" / "40_classical_analysis.smk").read_text(
+            encoding="utf-8"
+        )
+        analyze_rule, snapshot_rules = rules.split("rule summarize_classical_analysis:", 1)
+        self.assertIn("tpr=lambda wildcards", analyze_rule)
+        self.assertIn("trajectory=lambda wildcards", analyze_rule)
+        self.assertNotIn("tpr=(", analyze_rule)
+        self.assertNotIn("trajectory=(", analyze_rule)
+        snapshot_rule = snapshot_rules.split("rule select_classical_snapshot:", 1)[1]
+        self.assertIn("tpr=lambda wildcards", snapshot_rule)
+        self.assertIn("trajectory=lambda wildcards", snapshot_rule)
+
     def test_slurm_plugin_has_compute_node_hang_fix(self) -> None:
         project = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
         pixi = (ROOT / "pixi.toml").read_text(encoding="utf-8")

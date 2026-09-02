@@ -29,6 +29,13 @@ bank be submitted:
 The dependency graph also enforces this order. A failed analysis gate prevents
 all snapshot-export rules from starting.
 
+The completed pilot is treated as an immutable upstream data product. Its
+TPR/XTC/validation paths are checked and checksummed at analysis runtime but are
+not producer dependencies of the Stage-A DAG. This boundary prevents a newer
+analysis setting or source file from rescheduling the already validated 20 ns
+MD. If a pilot trajectory is intentionally replaced, start a new campaign or
+explicitly invalidate its Stage-A outputs before analysis.
+
 ## Analysis performed
 
 Every replica is sampled at 100 ps spacing over the full 20 ns production
