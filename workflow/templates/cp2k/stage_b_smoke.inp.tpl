@@ -36,7 +36,7 @@
           TYPE CDFT_CONSTRAINT
           EXTRAPOLATION_ORDER 2
           MAX_SCF 20
-          EPS_SCF 1.0E-3
+          EPS_SCF $cdft_eps_scf
           OPTIMIZER NEWTON_LS
           STEP_SIZE -1.0
           &CDFT_OPT ON

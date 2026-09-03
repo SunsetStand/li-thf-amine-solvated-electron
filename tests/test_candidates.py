@@ -94,6 +94,8 @@ class CandidateTests(unittest.TestCase):
             self.assertIn("TARGET 2.0", text)
             self.assertIn("ATOMS 1", text)
             self.assertIn("POTENTIAL GTH-PBE-q3", text)
+            self.assertIn("EPS_SCF 2.0E-2", text)
+            self.assertIn("EPS_SCF 1.0E-5", text)
             self.assertIn("&KIND Gh", text)
             self.assertIn("GHOST TRUE", text)
             self.assertIn("&E_DENSITY_CUBE", text)

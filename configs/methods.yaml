@@ -71,12 +71,13 @@
     "cutoff_ry": 400,
     "rel_cutoff_ry": 50,
     "eps_scf": "1.0E-5",
+    "cdft_eps_scf": "2.0E-2",
     "max_scf": 120,
     "cube_stride": 2,
     "li_pseudopotential_valence_electrons": 3,
     "li_target_valence_electrons": 2.0,
     "scientific_status": "NUMERICAL_SMOKE_ONLY",
-    "note": "This semilocal single point tests the periodic cDFT pipeline only; it cannot pass the electron-localization gate."
+    "note": "This semilocal single point uses a 0.02-electron cDFT execution tolerance and tests the periodic pipeline only; it cannot pass the electron-localization gate."
   },
   "cp2k": {
     "functional": "PBE0-D3",

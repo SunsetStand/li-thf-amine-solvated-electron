@@ -61,6 +61,14 @@ run in the current pilot. Each job reserves 32 MPI ranks, 128 GB, and 12 hours.
 The method is unrestricted periodic PBE-D3(BJ), a modest MOLOPT basis, a ghost
 basis center, and a Becke cDFT constraint with `TARGET 2.0` on Li atom 1.
 
+The numerical smoke uses an explicit cDFT population tolerance of 0.02
+electrons, separate from the tighter electronic SCF tolerance. This accepts an
+execution-path result only when the Li population is within one percent of the
+two-electron target, while avoiding a near-degenerate electronic-state branch
+switch observed when this semilocal smoke calculation was forced below 0.02
+electrons. The production PBE0 method has a separate configuration and is not
+relaxed by this smoke-only setting.
+
 In CP2K 2023.2, the cDFT charge target is the desired valence-electron
 population and core charge is not subtracted. The TMC installation's standard
 Li potential is explicitly `GTH-PBE-q3`, so Li+ requires two remaining valence

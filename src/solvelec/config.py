@@ -303,6 +303,12 @@ def validate_repository_configs(root: Path | None = None) -> list[str]:
                 raise ValueError
         except (KeyError, TypeError, ValueError):
             errors.append(f"methods.stage_b_smoke.{key} must be positive")
+    try:
+        cdft_eps_scf = float(stage_b_smoke["cdft_eps_scf"])
+        if not 0 < cdft_eps_scf <= 2.0e-2:
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append("methods.stage_b_smoke.cdft_eps_scf must be in (0, 0.02]")
     cp2k = methods.get("cp2k", {})
     try:
         if cp2k["li_potential"] != "GTH-PBE-q3":

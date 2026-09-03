@@ -122,6 +122,7 @@ def render_stage_b_cp2k(
         "cutoff_ry": method["cutoff_ry"],
         "rel_cutoff_ry": method["rel_cutoff_ry"],
         "eps_scf": method["eps_scf"],
+        "cdft_eps_scf": method["cdft_eps_scf"],
         "max_scf": method["max_scf"],
         "li_atom_index": li_atom_index,
         "li_target_valence_electrons": f"{target:.1f}",
