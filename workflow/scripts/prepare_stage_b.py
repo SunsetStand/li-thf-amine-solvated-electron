@@ -20,7 +20,7 @@ from solvelec.candidates import (
     select_candidate_pairs,
     write_xyz,
 )
-from solvelec.parsers import parse_cp2k_text
+from solvelec.parsers import evaluate_cp2k_cdft_constraint, parse_cp2k_text
 from solvelec.provenance import sha256_file
 from solvelec.rendering import render_stage_b_cp2k
 
@@ -264,13 +264,23 @@ def run_summary(args: argparse.Namespace) -> int:
 def run_smoke_summary(args: argparse.Namespace) -> int:
     if not (len(args.outputs) == len(args.manifests) == len(args.cp2k_inputs)):
         raise ValueError("smoke outputs, inputs, and manifests must have the same cardinality")
+    methods = _read_json(args.methods)
+    smoke_method = methods["stage_b_smoke"]
+    cdft_tolerance = float(smoke_method["cdft_eps_scf"])
+    cdft_target = float(smoke_method["li_target_valence_electrons"])
     records: list[dict[str, Any]] = []
     for output_path, input_path, manifest_path in zip(
         args.outputs, args.cp2k_inputs, args.manifests, strict=True
     ):
         output = Path(output_path)
         cp2k_input = Path(input_path)
-        result = parse_cp2k_text(output.read_text(encoding="utf-8", errors="replace"))
+        output_text = output.read_text(encoding="utf-8", errors="replace")
+        result = parse_cp2k_text(output_text)
+        cdft = evaluate_cp2k_cdft_constraint(
+            output_text,
+            expected_target_electrons=cdft_target,
+            tolerance_electrons=cdft_tolerance,
+        )
         manifest = _read_json(manifest_path)
         matches = [
             record
@@ -287,10 +297,11 @@ def run_smoke_summary(args: argparse.Namespace) -> int:
                 "amine": manifest.get("amine"),
                 "replica": int(manifest["replica"]),
                 "candidate_id": args.candidate,
-                "converged": result.converged,
+                "converged": result.converged and cdft.converged,
                 "normal_termination": result.normal_termination,
                 "energy_hartree": result.energy_hartree,
-                "problems": list(result.problems),
+                "problems": [*result.problems, *cdft.problems],
+                "cdft_constraint_gate": cdft.as_dict(),
                 "input": {
                     "path": str(cp2k_input.resolve()),
                     "sha256": sha256_file(cp2k_input),
@@ -352,6 +363,7 @@ def build_parser() -> argparse.ArgumentParser:
     smoke = subparsers.add_parser("smoke-summary")
     smoke.add_argument("--campaign", required=True)
     smoke.add_argument("--candidate", required=True)
+    smoke.add_argument("--methods", required=True)
     smoke.add_argument("--output", required=True)
     smoke.add_argument("--outputs", nargs="+", required=True)
     smoke.add_argument("--cp2k-inputs", nargs="+", required=True)

@@ -145,6 +145,7 @@ rule summarize_stage_b_cp2k_smoke:
         outputs=STAGE_B_SMOKE_OUTPUTS,
         cp2k_inputs=STAGE_B_SMOKE_INPUTS,
         manifests=STAGE_B_SMOKE_MANIFESTS,
+        methods="configs/methods.yaml",
         script=PREPARE_STAGE_B,
         runtime=STAGE_RUNTIME_INPUTS,
     output:
@@ -159,7 +160,7 @@ rule summarize_stage_b_cp2k_smoke:
     shell:
         "bash {STAGE_RUNNER:q} trajectory_analysis -- {PYTHON} {input.script:q} "
         "smoke-summary --campaign {params.campaign:q} --candidate {params.candidate:q} "
-        "--output {output:q} --outputs {input.outputs:q} "
+        "--methods {input.methods:q} --output {output:q} --outputs {input.outputs:q} "
         "--cp2k-inputs {input.cp2k_inputs:q} --manifests {input.manifests:q}"
 
 
