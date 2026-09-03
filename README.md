@@ -136,6 +136,11 @@ The snapshots contain solvent only: no Li atom and no explicit electron are
 added at this stage. See `docs/classical-analysis.md` for output paths,
 acceptance checks, and interpretation limits.
 
+The completed pilot also has a shareable, Chinese-language report with all six
+representative XYZ files, rendered structures, density/concentration traces,
+RDFs, contact/hydrogen-bond statistics, and the periodic/non-periodic modeling
+boundary. See [`reports/stage_a/`](reports/stage_a/README.md).
+
 Stage B converts the immutable snapshot bank into three configured Li/cavity
 seeds per replica and then runs only two periodic PBE-cDFT numerical smoke jobs
 (the first replica of each pilot system). The full candidate-only gate and the

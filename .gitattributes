@@ -7,3 +7,7 @@
 Snakefile text eol=lf
 *.tpl text eol=lf
 *.mdp text eol=lf
+reports/stage_a/data/** -text
+reports/stage_a/data/**/*.csv text eol=lf
+reports/stage_a/figures/*.png binary
+reports/stage_a/*.pdf binary

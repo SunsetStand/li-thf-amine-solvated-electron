@@ -1,0 +1,82 @@
+{
+  "inputs": {
+    "classical_validation": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/classical/eda_1p5m/r1/pilot/validation.json",
+      "sha256": "2756abf4cc390be9a5e863c67da724b35e2f5d042f51eb626780ed89e7c3b54d"
+    },
+    "spec": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/specs/eda_1p5m/r1.json",
+      "sha256": "b9de1783065a6cc85b54351c1874e1fe2bd8fd6ca853e44140fbf6a1946bd4ba"
+    },
+    "tpr": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/classical/eda_1p5m/r1/pilot/production/production.tpr",
+      "sha256": "d783431f49707ee582a7b54a4a864cecec1d5686f5b250008dff5ccd16e6da61"
+    },
+    "trajectory": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/classical/eda_1p5m/r1/pilot/production/production.xtc",
+      "sha256": "9dfe34448e7d99fe0c020586510afe26fcccaffa67e21dc0412fd34c2181f1a2"
+    }
+  },
+  "metrics": {
+    "analysis_stride_ps": 100.0,
+    "atom_count": 940,
+    "atom_groups": {
+      "eda_n": 18,
+      "heavy": 356,
+      "thf_o": 64
+    },
+    "autocorrelation": {
+      "density_g_ml": {
+        "effective_sample_size": 173.60899714153055,
+        "integrated_autocorrelation_time_ps": 57.88870487977636,
+        "statistical_inefficiency": 1.1577740975955273
+      },
+      "eda_thf_contacts": {
+        "effective_sample_size": 149.6123372794604,
+        "integrated_autocorrelation_time_ps": 67.17360468226386,
+        "statistical_inefficiency": 1.343472093645277
+      },
+      "eda_thf_hydrogen_bonds": {
+        "effective_sample_size": 201.0,
+        "integrated_autocorrelation_time_ps": 50.0,
+        "statistical_inefficiency": 1.0
+      },
+      "void_radius_angstrom": {
+        "effective_sample_size": 142.6500362766627,
+        "integrated_autocorrelation_time_ps": 70.45213770929944,
+        "statistical_inefficiency": 1.4090427541859887
+      },
+      "volume_nm3": {
+        "effective_sample_size": 175.09270093776038,
+        "integrated_autocorrelation_time_ps": 57.398166492231105,
+        "statistical_inefficiency": 1.1479633298446221
+      }
+    },
+    "checks": {
+      "classical_pilot_ready": true,
+      "effective_samples": true,
+      "minimum_analysis_frames": true,
+      "positive_void_proxy": true
+    },
+    "frame_count": 201,
+    "hydrogen_bond_donor_count": 18,
+    "mean_descriptors": {
+      "density_g_ml": 0.8649281715951483,
+      "eda_thf_contacts": 9.940298507462687,
+      "eda_thf_hydrogen_bonds": 5.467661691542289,
+      "void_radius_angstrom": 1.994727911464196,
+      "volume_nm3": 9.90408103486176
+    },
+    "ready": true,
+    "sampled_duration_ns": 20.0,
+    "trajectory_frame_count": 2001
+  },
+  "outputs": {
+    "rdf": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/analysis/eda_1p5m/r1/rdf.csv",
+    "timeseries": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/analysis/eda_1p5m/r1/timeseries.csv"
+  },
+  "ready": true,
+  "replica": 1,
+  "schema_version": 1,
+  "system_id": "eda_1p5m"
+}

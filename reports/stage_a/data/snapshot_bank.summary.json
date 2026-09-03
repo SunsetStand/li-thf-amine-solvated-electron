@@ -1,0 +1,33 @@
+{
+  "campaign": "pilot",
+  "kind": "snapshot",
+  "ready": true,
+  "record_count": 6,
+  "schema_version": 1,
+  "systems": {
+    "eda_1p5m": {
+      "checks": {
+        "all_records_ready": true,
+        "unique_replicas": true
+      },
+      "ready": true,
+      "replicas": [
+        1,
+        2,
+        3
+      ]
+    },
+    "pure_thf": {
+      "checks": {
+        "all_records_ready": true,
+        "unique_replicas": true
+      },
+      "ready": true,
+      "replicas": [
+        1,
+        2,
+        3
+      ]
+    }
+  }
+}

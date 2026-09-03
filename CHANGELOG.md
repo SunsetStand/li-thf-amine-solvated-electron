@@ -31,6 +31,8 @@
 - Add Slurm-only Stage-A analysis for the six completed classical-pilot
   trajectories, including periodic structural descriptors, autocorrelation
   gates, and deterministic solvent-only snapshot export.
+- Add a shareable Chinese Stage A PDF report, high-resolution molecular and
+  statistical figures, committed audit data, and a reproducible local builder.
 
 ## 0.1.0 - 2026-08-21
 

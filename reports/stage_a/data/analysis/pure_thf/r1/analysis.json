@@ -1,0 +1,70 @@
+{
+  "inputs": {
+    "classical_validation": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/classical/pure_thf/r1/pilot/validation.json",
+      "sha256": "098bc8e2f0dccc257d6d061ba226808adffd18facae2c9bef353b2e494eb46a1"
+    },
+    "spec": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/specs/pure_thf/r1.json",
+      "sha256": "4002add53fa1bc7c600798c90934ea8e8586c5a7e5585929ab3e75e1879bb6de"
+    },
+    "tpr": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/classical/pure_thf/r1/pilot/production/production.tpr",
+      "sha256": "0671ee04b32023871655e73fc419d6753707cba9105c7b42162a14adce1d7567"
+    },
+    "trajectory": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/classical/pure_thf/r1/pilot/production/production.xtc",
+      "sha256": "541a4354aa843ddeb83d6fd70c9f06ccf6e11da2ef58c9fe8c535b6064dae66f"
+    }
+  },
+  "metrics": {
+    "analysis_stride_ps": 100.0,
+    "atom_count": 832,
+    "atom_groups": {
+      "eda_n": 0,
+      "heavy": 320,
+      "thf_o": 64
+    },
+    "autocorrelation": {
+      "density_g_ml": {
+        "effective_sample_size": 172.577683336041,
+        "integrated_autocorrelation_time_ps": 58.23464428150176,
+        "statistical_inefficiency": 1.1646928856300351
+      },
+      "void_radius_angstrom": {
+        "effective_sample_size": 153.89623550899884,
+        "integrated_autocorrelation_time_ps": 65.3037416201928,
+        "statistical_inefficiency": 1.3060748324038558
+      },
+      "volume_nm3": {
+        "effective_sample_size": 171.55151643508145,
+        "integrated_autocorrelation_time_ps": 58.58298550105281,
+        "statistical_inefficiency": 1.1716597100210562
+      }
+    },
+    "checks": {
+      "classical_pilot_ready": true,
+      "effective_samples": true,
+      "minimum_analysis_frames": true,
+      "positive_void_proxy": true
+    },
+    "frame_count": 201,
+    "hydrogen_bond_donor_count": 0,
+    "mean_descriptors": {
+      "density_g_ml": 0.8774621811277515,
+      "void_radius_angstrom": 1.8740103232067968,
+      "volume_nm3": 8.738148357341936
+    },
+    "ready": true,
+    "sampled_duration_ns": 20.0,
+    "trajectory_frame_count": 2001
+  },
+  "outputs": {
+    "rdf": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/analysis/pure_thf/r1/rdf.csv",
+    "timeseries": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/analysis/pure_thf/r1/timeseries.csv"
+  },
+  "ready": true,
+  "replica": 1,
+  "schema_version": 1,
+  "system_id": "pure_thf"
+}

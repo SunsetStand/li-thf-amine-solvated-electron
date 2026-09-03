@@ -1,0 +1,64 @@
+{
+  "li_atom_present": false,
+  "ready": true,
+  "replica": 2,
+  "schema_version": 1,
+  "selection": {
+    "candidate_start_ns": 10.0,
+    "descriptors": {
+      "density_g_ml": 0.8632865239866835,
+      "eda_thf_contacts": 11.0,
+      "eda_thf_hydrogen_bonds": 5.0,
+      "void_radius_angstrom": 1.9255143442158003
+    },
+    "elapsed_ps": 19800.0,
+    "features": [
+      "density_g_ml",
+      "void_radius_angstrom",
+      "eda_thf_contacts",
+      "eda_thf_hydrogen_bonds"
+    ],
+    "frame_index": 1980,
+    "method": "equilibrated robust-medoid",
+    "required_separation_ps": 1000.0,
+    "source_time_ps": 19800.0
+  },
+  "snapshot_id": "eda_1p5m_r2_t19800ps",
+  "source": {
+    "analysis": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/analysis/eda_1p5m/r2/analysis.json",
+      "sha256": "a5d47fdd831f91b406f1f20ede4b2ffd62ed65306109e691fbcfed37aac903cc"
+    },
+    "tpr_sha256": "9c7ad434f5fac2897c36f0456c54fbf49cd927e50f99046086ace599e6249125",
+    "trajectory_sha256": "c6b4289da32a5de4f9bec9519c19f136e07df92b7b784f073c93325e67fd5ae5"
+  },
+  "structure": {
+    "atom_count": 940,
+    "cell": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/analysis/eda_1p5m/r2/snapshot/representative.cell.inc",
+      "sha256": "192d872d305447caa014073341c8d7149f88080472ebbb600792ba6f0a54557c"
+    },
+    "cell_vectors_angstrom": [
+      [
+        21.48444938659668,
+        0.0,
+        0.0
+      ],
+      [
+        1.315543108636947e-15,
+        21.48444938659668,
+        0.0
+      ],
+      [
+        1.315543108636947e-15,
+        1.315543108636947e-15,
+        21.48444938659668
+      ]
+    ],
+    "xyz": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/analysis/eda_1p5m/r2/snapshot/representative.xyz",
+      "sha256": "37dab7d4273277611f9a85bf17df27a69c3ed6aaebc472afdb2899265eb47bc7"
+    }
+  },
+  "system_id": "eda_1p5m"
+}

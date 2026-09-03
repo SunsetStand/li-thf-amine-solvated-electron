@@ -1,0 +1,64 @@
+{
+  "li_atom_present": false,
+  "ready": true,
+  "replica": 3,
+  "schema_version": 1,
+  "selection": {
+    "candidate_start_ns": 10.0,
+    "descriptors": {
+      "density_g_ml": 0.8596037822681204,
+      "eda_thf_contacts": 10.0,
+      "eda_thf_hydrogen_bonds": 6.0,
+      "void_radius_angstrom": 1.8671687538441246
+    },
+    "elapsed_ps": 10300.0,
+    "features": [
+      "density_g_ml",
+      "void_radius_angstrom",
+      "eda_thf_contacts",
+      "eda_thf_hydrogen_bonds"
+    ],
+    "frame_index": 1030,
+    "method": "equilibrated robust-medoid",
+    "required_separation_ps": 1000.0,
+    "source_time_ps": 10300.0
+  },
+  "snapshot_id": "eda_1p5m_r3_t10300ps",
+  "source": {
+    "analysis": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/analysis/eda_1p5m/r3/analysis.json",
+      "sha256": "8c268bdec068c720c4e3c5b5188c86c32026526544830d4115b5acfa58a3b006"
+    },
+    "tpr_sha256": "704c1480fb2a1222d34edac711dc54898f05c5bbbe571fab66a2585f89cd6260",
+    "trajectory_sha256": "b59523da15404f70a07f0dd684e52e676bdfee2fbd74b158a17667e9ee46f1df"
+  },
+  "structure": {
+    "atom_count": 940,
+    "cell": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/analysis/eda_1p5m/r3/snapshot/representative.cell.inc",
+      "sha256": "a0eedeeb6966057dce5b507fc50b9eff4010d60490f5a0678edae851e7d067d2"
+    },
+    "cell_vectors_angstrom": [
+      [
+        21.515087127685547,
+        0.0,
+        0.0
+      ],
+      [
+        1.3174191292148264e-15,
+        21.515087127685547,
+        0.0
+      ],
+      [
+        1.3174191292148264e-15,
+        1.3174191292148264e-15,
+        21.515087127685547
+      ]
+    ],
+    "xyz": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/analysis/eda_1p5m/r3/snapshot/representative.xyz",
+      "sha256": "1cf06b272d22865961e94ad06115edca3fce0591c41953c1df32eb3ad7151c68"
+    }
+  },
+  "system_id": "eda_1p5m"
+}

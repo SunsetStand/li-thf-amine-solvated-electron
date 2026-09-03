@@ -1,0 +1,60 @@
+{
+  "li_atom_present": false,
+  "ready": true,
+  "replica": 1,
+  "schema_version": 1,
+  "selection": {
+    "candidate_start_ns": 10.0,
+    "descriptors": {
+      "density_g_ml": 0.8765651847099972,
+      "void_radius_angstrom": 1.8933068333335579
+    },
+    "elapsed_ps": 14600.0,
+    "features": [
+      "density_g_ml",
+      "void_radius_angstrom"
+    ],
+    "frame_index": 1460,
+    "method": "equilibrated robust-medoid",
+    "required_separation_ps": 1000.0,
+    "source_time_ps": 14600.0
+  },
+  "snapshot_id": "pure_thf_r1_t14600ps",
+  "source": {
+    "analysis": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/analysis/pure_thf/r1/analysis.json",
+      "sha256": "2cb1c0079a23cd84c61ed53b48cd172acf366d704d1d6b5938486e400b82f7b1"
+    },
+    "tpr_sha256": "0671ee04b32023871655e73fc419d6753707cba9105c7b42162a14adce1d7567",
+    "trajectory_sha256": "541a4354aa843ddeb83d6fd70c9f06ccf6e11da2ef58c9fe8c535b6064dae66f"
+  },
+  "structure": {
+    "atom_count": 832,
+    "cell": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/analysis/pure_thf/r1/snapshot/representative.cell.inc",
+      "sha256": "e8415048e807d19c497763aaa48a2143794586208e4466d40bdedf4c26dc0610"
+    },
+    "cell_vectors_angstrom": [
+      [
+        20.600040435791016,
+        0.0,
+        0.0
+      ],
+      [
+        1.2613886790998758e-15,
+        20.600040435791016,
+        0.0
+      ],
+      [
+        1.2613886790998758e-15,
+        1.2613886790998758e-15,
+        20.600040435791016
+      ]
+    ],
+    "xyz": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/analysis/pure_thf/r1/snapshot/representative.xyz",
+      "sha256": "ad71b5802204043a9e3782ccbbb5fae5753a7bf08489b923dc019360568d8e35"
+    }
+  },
+  "system_id": "pure_thf"
+}

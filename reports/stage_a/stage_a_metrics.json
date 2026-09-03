@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "status": "READY",
+  "source": "Stage A pilot snapshot bank",
+  "systems": {
+    "pure_thf": {
+      "replicas": 3,
+      "production_ns_per_replica": 20.0,
+      "analysis_frames_per_replica": 201,
+      "density_g_ml": {
+        "mean": 0.8769792425860956,
+        "replica_sd": 0.000916063711064846
+      },
+      "volume_nm3": {
+        "mean": 8.743807520642406,
+        "replica_sd": 0.009755028439493102
+      },
+      "void_radius_angstrom": {
+        "mean": 1.8938521955456673,
+        "replica_sd": 0.0182455950937775
+      },
+      "maximum_density_half_difference_percent": 0.5687677080725718,
+      "minimum_effective_sample_size": 153.89623550899884,
+      "snapshots": [
+        {
+          "replica": 1,
+          "snapshot_id": "pure_thf_r1_t14600ps",
+          "time_ns": 14.6,
+          "density_g_ml": 0.8765651847099972,
+          "void_radius_angstrom": 1.8933068333335579
+        },
+        {
+          "replica": 2,
+          "snapshot_id": "pure_thf_r2_t12400ps",
+          "time_ns": 12.4,
+          "density_g_ml": 0.8763750524945068,
+          "void_radius_angstrom": 1.8953831023381997
+        },
+        {
+          "replica": 3,
+          "snapshot_id": "pure_thf_r3_t11000ps",
+          "time_ns": 11.0,
+          "density_g_ml": 0.8744063692831358,
+          "void_radius_angstrom": 1.887795780366827
+        }
+      ],
+      "thf_count": 64,
+      "eda_count": 0,
+      "rdf_peaks": {
+        "thf_o-thf_o": {
+          "r_angstrom": 4.75,
+          "g_r": 1.5339271105358232
+        }
+      }
+    },
+    "eda_1p5m": {
+      "replicas": 3,
+      "production_ns_per_replica": 20.0,
+      "analysis_frames_per_replica": 201,
+      "density_g_ml": {
+        "mean": 0.8656930085544248,
+        "replica_sd": 0.0007699148554558607
+      },
+      "volume_nm3": {
+        "mean": 9.895959011764878,
+        "replica_sd": 0.007975439403713253
+      },
+      "void_radius_angstrom": {
+        "mean": 1.9704749078660326,
+        "replica_sd": 0.021089649148723782
+      },
+      "maximum_density_half_difference_percent": 0.422131518661543,
+      "minimum_effective_sample_size": 142.6500362766627,
+      "snapshots": [
+        {
+          "replica": 1,
+          "snapshot_id": "eda_1p5m_r1_t17400ps",
+          "time_ns": 17.4,
+          "density_g_ml": 0.8673777734939059,
+          "void_radius_angstrom": 1.9339630363591807
+        },
+        {
+          "replica": 2,
+          "snapshot_id": "eda_1p5m_r2_t19800ps",
+          "time_ns": 19.8,
+          "density_g_ml": 0.8632865239866835,
+          "void_radius_angstrom": 1.9255143442158003
+        },
+        {
+          "replica": 3,
+          "snapshot_id": "eda_1p5m_r3_t10300ps",
+          "time_ns": 10.3,
+          "density_g_ml": 0.8596037822681204,
+          "void_radius_angstrom": 1.8671687538441246
+        }
+      ],
+      "thf_count": 64,
+      "eda_count": 9,
+      "thf_to_eda_ratio": 7.111111111111111,
+      "eda_mole_fraction": 0.1232876712328767,
+      "achieved_eda_concentration_m": 1.510197403485335,
+      "eda_n_thf_o_contacts": {
+        "mean": 10.069651741293532,
+        "replica_sd": 0.12064035475604064
+      },
+      "eda_nh_thf_o_hydrogen_bonds": {
+        "mean": 5.5306799336650085,
+        "replica_sd": 0.09245346510624428
+      },
+      "rdf_peaks": {
+        "thf_o-thf_o": {
+          "r_angstrom": 4.65,
+          "g_r": 1.4520043329579286
+        },
+        "eda_n-thf_o": {
+          "r_angstrom": 3.05,
+          "g_r": 1.2262545154644326
+        },
+        "eda_n-eda_n": {
+          "r_angstrom": 3.1500000000000004,
+          "g_r": 6.228906389476347
+        }
+      }
+    }
+  },
+  "comparisons": {
+    "mixture_vs_pure_density_percent": -1.2869442608914206,
+    "mixture_vs_pure_void_radius_percent": 4.04586548520427
+  },
+  "scientific_scope": {
+    "periodic_bulk_solvent": true,
+    "contains_li": false,
+    "contains_excess_electron": false,
+    "void_is_geometric_proxy_not_electron_density": true
+  }
+}
