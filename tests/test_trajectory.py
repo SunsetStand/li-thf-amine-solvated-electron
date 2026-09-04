@@ -112,6 +112,33 @@ class TrajectoryAnalysisTests(unittest.TestCase):
         self.assertFalse(summary["ready"])
         self.assertIsNone(summary["systems"]["pure_thf"]["minimum_effective_samples"])
 
+    def test_analysis_summary_aggregates_hydrogen_bond_replica_means(self) -> None:
+        module = load_analysis_script()
+        records = [
+            {
+                "system_id": "eda_1to1",
+                "replica": replica,
+                "ready": True,
+                "metrics": {
+                    "autocorrelation": {
+                        "cavity_bridging_hydrogen_bonds": {"effective_sample_size": 8.0}
+                    },
+                    "mean_descriptors": {
+                        "void_radius_angstrom": 2.0 + replica * 0.1,
+                        "cavity_bridging_hydrogen_bonds": float(replica),
+                    },
+                },
+            }
+            for replica in (1, 2, 3)
+        ]
+        summary = module.summarize_records(records, "analysis")
+        descriptor = summary["systems"]["eda_1to1"]["ensemble_mean_descriptors"][
+            "cavity_bridging_hydrogen_bonds"
+        ]
+        self.assertEqual(descriptor["mean"], 2.0)
+        self.assertEqual(descriptor["replica_standard_deviation"], 1.0)
+        self.assertEqual(descriptor["replica_means"], [1.0, 2.0, 3.0])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -101,9 +101,9 @@ STAGE_B_SMOKE_MANIFESTS = [
 
 
 def amine_for_system(system):
-    if system == "pure_thf":
-        return None
-    return system.rsplit("_", 1)[0]
+    from solvelec.config import make_system_spec
+
+    return make_system_spec(system, config, SYSTEM_CATALOG).amine
 
 
 def molecule_record(molecule):
@@ -117,11 +117,10 @@ def molecule_path(molecule, suffix):
 
 
 def molecules_for_system(system):
-    molecules = ["thf"]
-    amine = amine_for_system(system)
-    if amine:
-        molecules.append(amine)
-    return molecules
+    from solvelec.config import make_system_spec
+
+    spec = make_system_spec(system, config, SYSTEM_CATALOG)
+    return list(spec.component_counts)
 
 
 def molecule_pdb_inputs(wildcards):
@@ -143,17 +142,13 @@ def packmol_amine_argument(wildcards):
 
 
 def tleap_molecule_arguments(wildcards):
+    from solvelec.config import make_system_spec
+
+    spec = make_system_spec(wildcards.system, config, SYSTEM_CATALOG)
     arguments = []
     for name in molecules_for_system(wildcards.system):
         record = molecule_record(name)
-        count = config["thf_count"] if name == "thf" else None
-        if count is None:
-            # The build script verifies this count against the generated topology;
-            # the value is calculated by the same config model used for the spec.
-            from solvelec.config import make_system_spec
-
-            spec = make_system_spec(wildcards.system, config, SYSTEM_CATALOG)
-            count = spec.amine_count_initial
+        count = spec.component_counts[name]
         values = [
             record["residue"],
             molecule_path(name, "mol2"),
@@ -196,10 +191,23 @@ def pilot_checkpoint_argument(wildcards):
 
 
 def require_pilot_campaign(_wildcards):
-    if CAMPAIGN != "pilot":
+    if CAMPAIGN not in {"pilot", "hbond_pilot"}:
         raise ValueError(
-            f"classical_pilot is restricted to campaign 'pilot', not {CAMPAIGN!r}"
+            "classical pilot/analysis targets require campaign 'pilot' or "
+            f"'hbond_pilot', not {CAMPAIGN!r}"
         )
+    return CAMPAIGN
+
+
+def hbond_analysis_handoff(_wildcards):
+    if CAMPAIGN != "hbond_pilot":
+        return []
+    return [f"{RUN_ROOT}/{CAMPAIGN}/classical_pilot.done"]
+
+
+def require_hbond_pilot_campaign(_wildcards):
+    if CAMPAIGN != "hbond_pilot":
+        raise ValueError(f"hbond_stage_a requires campaign 'hbond_pilot', not {CAMPAIGN!r}")
     return CAMPAIGN
 
 

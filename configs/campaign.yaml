@@ -18,10 +18,20 @@
       "replicas": [1],
       "stages": ["spec", "inputs", "classical_smoke"]
     },
+    "hbond_smoke": {
+      "systems": ["pure_eda", "eda_1to1"],
+      "replicas": [1],
+      "stages": ["spec", "inputs", "classical_smoke"]
+    },
     "pilot": {
       "systems": ["pure_thf", "eda_1p5m"],
       "replicas": [1, 2, 3],
       "stages": ["spec", "inputs", "classical_md", "cdft", "vde", "analysis"]
+    },
+    "hbond_pilot": {
+      "systems": ["pure_eda", "eda_1to1"],
+      "replicas": [1, 2, 3],
+      "stages": ["spec", "inputs", "classical_md", "analysis"]
     },
     "production": {
       "systems": [

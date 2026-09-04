@@ -80,11 +80,15 @@ def cmd_write_spec(args: argparse.Namespace) -> int:
 
 
 def _initial_box_angstrom(spec: dict[str, Any], systems: dict[str, Any]) -> float:
-    volume_l_mol_scaled = spec["thf_count"] * float(systems["thf"]["molar_volume_l_mol"])
-    if spec["amine"]:
-        volume_l_mol_scaled += spec["amine_count_initial"] * float(
-            systems["amines"][spec["amine"]]["molar_volume_l_mol"]
-        )
+    component_counts = spec.get("component_counts") or {"thf": int(spec["thf_count"])}
+    if spec.get("amine") and "component_counts" not in spec:
+        component_counts[str(spec["amine"])] = int(spec["amine_count_initial"])
+    volume_l_mol_scaled = 0.0
+    for component, count in component_counts.items():
+        record = systems["thf"] if component == "thf" else systems["amines"][component]
+        volume_l_mol_scaled += int(count) * float(record["molar_volume_l_mol"])
+    if volume_l_mol_scaled <= 0:
+        raise ValueError("at least one solvent molecule is required")
     volume_l = volume_l_mol_scaled / AVOGADRO_MOL_INV
     volume_nm3 = volume_l / NM3_TO_L
     return volume_nm3 ** (1.0 / 3.0) * 10.0

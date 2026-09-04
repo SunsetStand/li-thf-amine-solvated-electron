@@ -55,8 +55,11 @@ class SlurmSafetyTests(unittest.TestCase):
         runner = RUN_SH.read_text(encoding="utf-8")
         snakefile = SNAKEFILE.read_text(encoding="utf-8")
         self.assertIn("input_bundle|classical_smoke|classical_pilot", runner)
-        self.assertIn("classical_analysis|snapshot_bank", runner)
-        self.assertIn('if CAMPAIGN != "pilot"', snakefile)
+        self.assertIn("classical_analysis|snapshot_bank|hbond_stage_a", runner)
+        self.assertIn('if CAMPAIGN not in {"pilot", "hbond_pilot"}', snakefile)
+        self.assertIn('if CAMPAIGN != "hbond_pilot"', snakefile)
+        self.assertIn("hbond_analysis_handoff", snakefile)
+        self.assertIn("classical_pilot.done", snakefile)
         self.assertIn("gromacs_pilot_md:", TMC_PROFILE.read_text(encoding="utf-8"))
         self.assertIn("analyze_classical_replica:", TMC_PROFILE.read_text(encoding="utf-8"))
 

@@ -141,6 +141,23 @@ representative XYZ files, rendered structures, density/concentration traces,
 RDFs, contact/hydrogen-bond statistics, and the periodic/non-periodic modeling
 boundary. See [`reports/stage_a/`](reports/stage_a/README.md).
 
+The hydrogen-bond extension adds two count-defined systems while keeping the
+total solvent molecule count fixed at 64: neat en (`64 EDA`) and a 1:1 molar
+THF:en mixture (`32 THF + 32 EDA`). A smoke check is available separately;
+after it passes, one target runs all six 20 ns replicas, validates them,
+analyzes EDA--EDA and EDA--THF hydrogen bonds, and exports cavity-centered
+structures:
+
+```bash
+./run.sh submit --campaign hbond_smoke --target classical_smoke
+./run.sh submit --campaign hbond_pilot --target hbond_stage_a
+```
+
+Every representative structure includes an SVG overview, a local PDB, a PyMOL
+script, and JSON/CSV audit data. Hydrogen bonds are labeled as cavity-associated
+or geometrically bridging the void; no bond to the cavity center and no electron
+localization are implied. See [`docs/hbond-cavity.md`](docs/hbond-cavity.md).
+
 Stage B converts the immutable snapshot bank into three configured Li/cavity
 seeds per replica and then runs only two periodic PBE-cDFT numerical smoke jobs
 (the first replica of each pilot system). The full candidate-only gate and the
@@ -169,6 +186,8 @@ gates remain later stages. See `docs/stage-b.md`.
   checkpoint-safe continuation and quantitative acceptance gates.
 - Periodic pilot-trajectory analysis, autocorrelation-aware readiness checks,
   and deterministic solvent-only electronic-structure seed selection.
+- Count-defined neat-solvent/equimolar campaigns and cavity-centered
+  EDA--EDA/EDA--THF hydrogen-bond network visualization.
 - Config-driven Li/cavity candidate generation and a two-system periodic
   CP2K cDFT numerical smoke gate that cannot be mistaken for production data.
 - Provenance manifests with Git SHA, software versions, inputs, and checksums.

@@ -186,9 +186,9 @@ workflow_target_from_args() {
     previous="${item}"
   done
   case "${target}" in
-    input_bundle|classical_smoke|classical_pilot|classical_analysis|snapshot_bank|stage_b_candidates|stage_b) ;;
+    input_bundle|classical_smoke|classical_pilot|classical_analysis|snapshot_bank|hbond_stage_a|stage_b_candidates|stage_b) ;;
     *)
-      printf 'ERROR: unknown workflow target %s; choose input_bundle, classical_smoke, classical_pilot, classical_analysis, snapshot_bank, stage_b_candidates, or stage_b.\n' \
+      printf 'ERROR: unknown workflow target %s; choose input_bundle, classical_smoke, classical_pilot, classical_analysis, snapshot_bank, hbond_stage_a, stage_b_candidates, or stage_b.\n' \
         "${target}" >&2
       return 2
       ;;
@@ -512,6 +512,8 @@ The restricted long solvent target is:
 The stage-A read-only trajectory targets are:
 ./run.sh submit --campaign pilot --target classical_analysis
 ./run.sh submit --campaign pilot --target snapshot_bank
+The one-step neat-en/equimolar-THF-en structure workflow is:
+./run.sh submit --campaign hbond_pilot --target hbond_stage_a
 The Stage-B candidate-only gate and one-step CP2K smoke target are:
 ./run.sh submit --campaign pilot --target stage_b_candidates
 ./run.sh submit --campaign pilot --target stage_b

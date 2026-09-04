@@ -68,6 +68,15 @@ class RenderingTests(unittest.TestCase):
             self.assertIn("number 9", text)
             self.assertIn("seed 2", text)
 
+    def test_packmol_supports_neat_amine_without_thf(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "packmol.inp"
+            render_packmol(output, "box.pdb", 20.0, "unused-thf.pdb", 0, "eda.pdb", 64)
+            text = output.read_text(encoding="utf-8")
+            self.assertNotIn("unused-thf.pdb", text)
+            self.assertIn("structure eda.pdb", text)
+            self.assertIn("number 64", text)
+
     def test_packmol_cli_accepts_explicit_production_paths(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "packmol.inp"

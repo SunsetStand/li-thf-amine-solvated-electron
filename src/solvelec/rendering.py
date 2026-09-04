@@ -167,20 +167,28 @@ def render_packmol(
     amine_count: int = 0,
     seed: int = 1,
 ) -> None:
-    if box_angstrom <= 0 or thf_count <= 0 or amine_count < 0:
-        raise ValueError("box/thf counts must be positive and amine count non-negative")
+    if box_angstrom <= 0 or thf_count < 0 or amine_count < 0:
+        raise ValueError("box must be positive and molecule counts non-negative")
+    if thf_count + amine_count <= 0:
+        raise ValueError("at least one molecule is required")
     lines = [
         "tolerance 2.0",
         "filetype pdb",
         f"output {output_pdb}",
         f"seed {seed}",
         "add_box_sides 1.0",
-        "",
-        f"structure {thf_structure}",
-        f"  number {thf_count}",
-        f"  inside box 0.0 0.0 0.0 {box_angstrom:.6f} {box_angstrom:.6f} {box_angstrom:.6f}",
-        "end structure",
     ]
+    if thf_count:
+        lines.extend(
+            [
+                "",
+                f"structure {thf_structure}",
+                f"  number {thf_count}",
+                "  inside box 0.0 0.0 0.0 "
+                f"{box_angstrom:.6f} {box_angstrom:.6f} {box_angstrom:.6f}",
+                "end structure",
+            ]
+        )
     if amine_count:
         if not amine_structure:
             raise ValueError("amine_structure is required when amine_count is non-zero")

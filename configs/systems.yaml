@@ -48,5 +48,26 @@
       "molar_volume_l_mol": 0.1500,
       "charge": 0
     }
+  },
+  "compositions": {
+    "pure_eda": {
+      "display_name": "neat ethylenediamine",
+      "composition_basis": "explicit_molecule_counts",
+      "components": {
+        "eda": 64
+      },
+      "target_amine_mole_fraction": 1.0,
+      "note": "64-molecule neat-en reference; no THF is present."
+    },
+    "eda_1to1": {
+      "display_name": "THF:ethylenediamine 1:1 molar",
+      "composition_basis": "explicit_molecule_counts",
+      "components": {
+        "thf": 32,
+        "eda": 32
+      },
+      "target_amine_mole_fraction": 0.5,
+      "note": "The 1:1 value is a molecular/molar ratio, not a volume ratio."
+    }
   }
 }

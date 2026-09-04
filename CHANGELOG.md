@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add count-defined `pure_eda` and 1:1 molar `eda_1to1` Stage-A campaigns.
+- Analyze EDA--EDA and EDA--THF hydrogen bonds relative to the periodic cavity
+  proxy, with CSV/JSON audit records, SVG projections, local PDB, and PyMOL view.
+- Add the one-step `hbond_stage_a` target with a completed-pilot handoff gate.
+
 - Made `doctor` capability checks stage-aware with repeatable `--require` gates.
 - Detect Snakemake installed beside the repository virtual-environment Python.
 - Reject the Linux desktop screen reader when checking for ORCA quantum chemistry.

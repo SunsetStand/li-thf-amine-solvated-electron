@@ -29,12 +29,15 @@ def replica_metrics(
     volumes_nm3: list[float],
     times_ps: list[float],
     amine_count: int,
-    target_concentration_m: float,
+    target_concentration_m: float | None,
     expected_duration_ns: float,
     concentration_tolerance_m: float,
     minimum_trajectory_fraction: float,
     density_half_relative_tolerance: float,
     engine_converged: bool,
+    thf_count: int = 0,
+    target_amine_mole_fraction: float | None = None,
+    composition_basis: str = "target_molarity",
 ) -> dict[str, Any]:
     volumes = np.asarray(volumes_nm3, dtype=float)
     times = np.asarray(times_ps, dtype=float)
@@ -44,7 +47,12 @@ def replica_metrics(
         raise ValueError("trajectory must contain at least four finite positive volumes")
     if not np.all(np.isfinite(times)) or np.any(np.diff(times) <= 0):
         raise ValueError("trajectory times must be finite and strictly increasing")
-    if amine_count < 0 or target_concentration_m < 0 or expected_duration_ns <= 0:
+    if (
+        amine_count < 0
+        or thf_count < 0
+        or (target_concentration_m is not None and target_concentration_m < 0)
+        or expected_duration_ns <= 0
+    ):
         raise ValueError("counts and target values are invalid")
 
     mean_volume = float(np.mean(volumes))
@@ -58,14 +66,27 @@ def replica_metrics(
     )
     sampled_duration_ns = float((times[-1] - times[0]) / 1000.0)
     achieved_concentration = concentration_molar(amine_count, mean_volume)
-    concentration_error = abs(achieved_concentration - target_concentration_m)
+    concentration_error = (
+        None
+        if target_concentration_m is None
+        else abs(achieved_concentration - target_concentration_m)
+    )
+    molecule_count = thf_count + amine_count
+    achieved_mole_fraction = amine_count / molecule_count if molecule_count else 0.0
+    mole_fraction_error = (
+        None
+        if target_amine_mole_fraction is None
+        else abs(achieved_mole_fraction - target_amine_mole_fraction)
+    )
 
     checks = {
         "engine_converged": bool(engine_converged),
         "trajectory_complete": sampled_duration_ns
         >= expected_duration_ns * minimum_trajectory_fraction,
         "density_half_stable": density_half_relative_difference <= density_half_relative_tolerance,
-        "concentration_within_tolerance": concentration_error <= concentration_tolerance_m,
+        "concentration_within_tolerance": concentration_error is None
+        or concentration_error <= concentration_tolerance_m,
+        "composition_ratio_exact": mole_fraction_error is None or mole_fraction_error <= 1.0e-12,
     }
     return {
         "ready": all(checks.values()),
@@ -83,8 +104,14 @@ def replica_metrics(
         "achieved_concentration_m": achieved_concentration,
         "target_concentration_m": target_concentration_m,
         "concentration_error_m": concentration_error,
-        "suggested_amine_count": suggest_count_after_npt(
-            target_concentration_m, mean_volume, amine_count
+        "achieved_amine_mole_fraction": achieved_mole_fraction,
+        "target_amine_mole_fraction": target_amine_mole_fraction,
+        "amine_mole_fraction_error": mole_fraction_error,
+        "composition_basis": composition_basis,
+        "suggested_amine_count": (
+            None
+            if target_concentration_m is None
+            else suggest_count_after_npt(target_concentration_m, mean_volume, amine_count)
         ),
     }
 
@@ -166,7 +193,11 @@ def run_replica(args: argparse.Namespace) -> int:
             volumes_nm3=volumes,
             times_ps=times,
             amine_count=int(spec["amine_count_initial"]),
-            target_concentration_m=float(spec["target_concentration_m"]),
+            target_concentration_m=(
+                None
+                if spec.get("target_concentration_m") is None
+                else float(spec["target_concentration_m"])
+            ),
             expected_duration_ns=float(methods["classical_md"]["production_ns"]),
             concentration_tolerance_m=float(args.concentration_tolerance_m),
             minimum_trajectory_fraction=float(
@@ -176,6 +207,9 @@ def run_replica(args: argparse.Namespace) -> int:
                 methods["classical_validation"]["density_half_relative_tolerance"]
             ),
             engine_converged=bool(engine.get("converged")),
+            thf_count=int(spec["thf_count"]),
+            target_amine_mole_fraction=float(spec["target_amine_mole_fraction"]),
+            composition_basis=str(spec["composition_basis"]),
         )
         result = {
             "schema_version": 1,

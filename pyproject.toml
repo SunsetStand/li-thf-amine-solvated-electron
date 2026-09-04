@@ -45,6 +45,7 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.ruff.lint.per-file-ignores]
 "reports/stage_a/build_report.py" = ["E501"]
+"src/solvelec/cavity_visualization.py" = ["E501", "B023"]
 
 [tool.mypy]
 python_version = "3.10"

@@ -208,6 +208,30 @@ class ClassicalWorkflowTests(unittest.TestCase):
             failed_summary["systems"]["pure_thf"]["checks"]["replica_density_consistent"]
         )
 
+    def test_explicit_molar_ratio_skips_molarity_gate_but_checks_counts(self) -> None:
+        module = load_script("validate_classical_pilot")
+        metrics = module.replica_metrics(
+            total_mass_g_mol=32 * 72.107 + 32 * 60.100,
+            volumes_nm3=[7.7, 7.72, 7.71, 7.69, 7.70],
+            times_ps=[0.0, 5000.0, 10000.0, 15000.0, 20000.0],
+            amine_count=32,
+            thf_count=32,
+            target_concentration_m=None,
+            target_amine_mole_fraction=0.5,
+            composition_basis="explicit_molecule_counts",
+            expected_duration_ns=20.0,
+            concentration_tolerance_m=0.05,
+            minimum_trajectory_fraction=0.98,
+            density_half_relative_tolerance=0.02,
+            engine_converged=True,
+        )
+        self.assertTrue(metrics["ready"])
+        self.assertTrue(metrics["checks"]["concentration_within_tolerance"])
+        self.assertTrue(metrics["checks"]["composition_ratio_exact"])
+        self.assertIsNone(metrics["target_concentration_m"])
+        self.assertIsNone(metrics["suggested_amine_count"])
+        self.assertEqual(metrics["achieved_amine_mole_fraction"], 0.5)
+
 
 if __name__ == "__main__":
     unittest.main()

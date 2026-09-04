@@ -3,6 +3,7 @@ rule analyze_classical_replica:
         methods="configs/methods.yaml",
         script=ANALYZE_CLASSICAL,
         runtime=STAGE_RUNTIME_INPUTS,
+        campaign_handoff=hbond_analysis_handoff,
     params:
         campaign=require_pilot_campaign,
         # Stage A consumes a completed, validated pilot as an immutable data
@@ -27,6 +28,9 @@ rule analyze_classical_replica:
         analysis=f"{RUN_ROOT}/{CAMPAIGN}/analysis/{{system}}/r{{replica}}/analysis.json",
         timeseries=f"{RUN_ROOT}/{CAMPAIGN}/analysis/{{system}}/r{{replica}}/timeseries.csv",
         rdf=f"{RUN_ROOT}/{CAMPAIGN}/analysis/{{system}}/r{{replica}}/rdf.csv",
+        hydrogen_bonds=(
+            f"{RUN_ROOT}/{CAMPAIGN}/analysis/{{system}}/r{{replica}}/hydrogen_bonds.csv"
+        ),
     wildcard_constraints:
         system="[a-z0-9_]+",
         replica="[1-9][0-9]*",
@@ -39,7 +43,8 @@ rule analyze_classical_replica:
         "--spec {params.spec:q} --methods {input.methods:q} "
         "--classical-validation {params.classical_validation:q} --tpr {params.tpr:q} "
         "--trajectory {params.trajectory:q} --timeseries {output.timeseries:q} "
-        "--rdf {output.rdf:q} --output {output.analysis:q}"
+        "--rdf {output.rdf:q} --hydrogen-bonds {output.hydrogen_bonds:q} "
+        "--output {output.analysis:q}"
 
 
 rule summarize_classical_analysis:
@@ -51,6 +56,9 @@ rule summarize_classical_analysis:
         f"{RUN_ROOT}/{CAMPAIGN}/classical_analysis.summary.json"
     params:
         campaign=require_pilot_campaign,
+        records=lambda _wildcards: " ".join(
+            shlex.quote(path) for path in CLASSICAL_ANALYSIS_RECORDS
+        ),
     threads: 4
     resources:
         mem_mb=4000,
@@ -58,7 +66,7 @@ rule summarize_classical_analysis:
     shell:
         "bash {STAGE_RUNNER:q} trajectory_analysis -- {PYTHON} {input.script:q} summary "
         "--campaign {params.campaign:q} --kind analysis --output {output:q} "
-        "{input[0]:q} {input[1]:q} {input[2]:q} {input[3]:q} {input[4]:q} {input[5]:q}"
+        "{params.records}"
 
 
 rule classical_analysis:
@@ -106,6 +114,22 @@ rule select_classical_snapshot:
         metadata=(
             f"{RUN_ROOT}/{CAMPAIGN}/analysis/{{system}}/r{{replica}}/snapshot/metadata.json"
         ),
+        cavity_hbonds=(
+            f"{RUN_ROOT}/{CAMPAIGN}/analysis/{{system}}/r{{replica}}/snapshot/"
+            "cavity_hbonds.json"
+        ),
+        local_pdb=(
+            f"{RUN_ROOT}/{CAMPAIGN}/analysis/{{system}}/r{{replica}}/snapshot/"
+            "cavity_local.pdb"
+        ),
+        pymol=(
+            f"{RUN_ROOT}/{CAMPAIGN}/analysis/{{system}}/r{{replica}}/snapshot/"
+            "cavity_hbonds.pml"
+        ),
+        svg=(
+            f"{RUN_ROOT}/{CAMPAIGN}/analysis/{{system}}/r{{replica}}/snapshot/"
+            "cavity_hbonds.svg"
+        ),
     wildcard_constraints:
         system="[a-z0-9_]+",
         replica="[1-9][0-9]*",
@@ -117,7 +141,9 @@ rule select_classical_snapshot:
         "bash {STAGE_RUNNER:q} trajectory_analysis -- {PYTHON} {input.script:q} select "
         "--analysis {input.analysis:q} --timeseries {input.timeseries:q} "
         "--methods {input.methods:q} --tpr {params.tpr:q} --trajectory {params.trajectory:q} "
-        "--xyz {output.xyz:q} --cell {output.cell:q} --output {output.metadata:q}"
+        "--xyz {output.xyz:q} --cell {output.cell:q} "
+        "--cavity-hbonds {output.cavity_hbonds:q} --local-pdb {output.local_pdb:q} "
+        "--pymol {output.pymol:q} --svg {output.svg:q} --output {output.metadata:q}"
 
 
 rule summarize_snapshot_bank:
@@ -129,6 +155,7 @@ rule summarize_snapshot_bank:
         f"{RUN_ROOT}/{CAMPAIGN}/snapshot_bank.summary.json"
     params:
         campaign=require_pilot_campaign,
+        records=lambda _wildcards: " ".join(shlex.quote(path) for path in SNAPSHOT_RECORDS),
     threads: 4
     resources:
         mem_mb=4000,
@@ -136,7 +163,7 @@ rule summarize_snapshot_bank:
     shell:
         "bash {STAGE_RUNNER:q} trajectory_analysis -- {PYTHON} {input.script:q} summary "
         "--campaign {params.campaign:q} --kind snapshot --output {output:q} "
-        "{input[0]:q} {input[1]:q} {input[2]:q} {input[3]:q} {input[4]:q} {input[5]:q}"
+        "{params.records}"
 
 
 rule snapshot_bank:
@@ -153,3 +180,20 @@ rule snapshot_bank:
     shell:
         "bash {STAGE_RUNNER:q} trajectory_analysis -- {PYTHON} {input.script:q} gate "
         "--summary {input.summary:q} --output {output:q}"
+
+
+rule hbond_stage_a:
+    input:
+        classical=rules.classical_pilot.output,
+        analysis=rules.classical_analysis.output,
+        snapshots=rules.snapshot_bank.output,
+    output:
+        f"{RUN_ROOT}/{CAMPAIGN}/hbond_stage_a.done"
+    params:
+        campaign=require_hbond_pilot_campaign,
+    threads: 4
+    resources:
+        mem_mb=4000,
+        runtime=60,
+    shell:
+        "touch {output:q}"

@@ -14,7 +14,15 @@ from typing import Any
 
 import numpy as np
 
+from solvelec.cavity_visualization import (
+    cavity_centered_positions,
+    local_residue_mask,
+    render_cavity_hbond_svg,
+    write_local_pdb,
+    write_pymol_script,
+)
 from solvelec.composition import AVOGADRO_MOL_INV
+from solvelec.hydrogen_bonds import find_hydrogen_bonds, hydrogen_bond_counts
 from solvelec.provenance import sha256_file
 from solvelec.trajectory import (
     VDW_RADII_ANGSTROM,
@@ -22,7 +30,6 @@ from solvelec.trajectory import (
     cell_matrix,
     infer_element,
     largest_void_proxy,
-    minimum_image_vectors,
     pair_distances,
     select_representative_indices,
 )
@@ -39,6 +46,28 @@ TIMESERIES_FIELDS = (
     "void_z_angstrom",
     "eda_thf_contacts",
     "eda_thf_hydrogen_bonds",
+    "eda_eda_hydrogen_bonds",
+    "cavity_associated_hydrogen_bonds",
+    "cavity_bridging_hydrogen_bonds",
+)
+
+HYDROGEN_BOND_FIELDS = (
+    "frame_index",
+    "time_ps",
+    "elapsed_ps",
+    "cavity_x_angstrom",
+    "cavity_y_angstrom",
+    "cavity_z_angstrom",
+    "cavity_radius_angstrom",
+    "donor_index",
+    "hydrogen_index",
+    "acceptor_index",
+    "bond_type",
+    "donor_acceptor_distance_angstrom",
+    "donor_hydrogen_acceptor_angle_degree",
+    "cavity_segment_distance_angstrom",
+    "cavity_associated",
+    "cavity_bridging",
 )
 
 
@@ -102,51 +131,16 @@ def _bonded_hydrogens(
     return mapping
 
 
-def _count_hydrogen_bonds(
-    positions: np.ndarray,
-    nitrogen_to_hydrogen: dict[int, list[int]],
-    oxygen_indices: np.ndarray,
-    cell: np.ndarray,
-    distance_cutoff_angstrom: float,
-    angle_cutoff_degree: float,
-) -> int:
-    count = 0
-    oxygen_positions = positions[oxygen_indices]
-    for nitrogen_index, hydrogen_indices in nitrogen_to_hydrogen.items():
-        if not hydrogen_indices:
-            continue
-        donor_position = positions[[nitrogen_index]]
-        donor_acceptor = minimum_image_vectors(donor_position, oxygen_positions, cell)[0]
-        donor_acceptor_distance = np.linalg.norm(donor_acceptor, axis=1)
-        nearby = np.flatnonzero(donor_acceptor_distance <= distance_cutoff_angstrom)
-        for hydrogen_index in hydrogen_indices:
-            hydrogen_position = positions[[hydrogen_index]]
-            hydrogen_to_donor = minimum_image_vectors(hydrogen_position, donor_position, cell)[0, 0]
-            hydrogen_to_acceptor = minimum_image_vectors(
-                hydrogen_position, oxygen_positions[nearby], cell
-            )[0]
-            denominator = np.linalg.norm(hydrogen_to_donor) * np.linalg.norm(
-                hydrogen_to_acceptor, axis=1
-            )
-            valid = denominator > 0
-            cosines = np.ones(len(nearby), dtype=float)
-            cosines[valid] = hydrogen_to_acceptor[valid] @ hydrogen_to_donor / denominator[valid]
-            angles = np.rad2deg(np.arccos(np.clip(cosines, -1.0, 1.0)))
-            count += int(np.count_nonzero(angles >= angle_cutoff_degree))
-    return count
-
-
 def _rdf_pairs(
     groups: dict[str, np.ndarray],
 ) -> list[tuple[str, np.ndarray, np.ndarray, bool, bool]]:
-    pairs = [("thf_o-thf_o", groups["thf_o"], groups["thf_o"], True, False)]
+    pairs: list[tuple[str, np.ndarray, np.ndarray, bool, bool]] = []
+    if len(groups["thf_o"]):
+        pairs.append(("thf_o-thf_o", groups["thf_o"], groups["thf_o"], True, False))
     if len(groups["eda_n"]):
-        pairs.extend(
-            [
-                ("eda_n-thf_o", groups["eda_n"], groups["thf_o"], False, False),
-                ("eda_n-eda_n", groups["eda_n"], groups["eda_n"], True, True),
-            ]
-        )
+        if len(groups["thf_o"]):
+            pairs.append(("eda_n-thf_o", groups["eda_n"], groups["thf_o"], False, False))
+        pairs.append(("eda_n-eda_n", groups["eda_n"], groups["eda_n"], True, True))
     return pairs
 
 
@@ -167,16 +161,22 @@ def _analyze_trajectory(
     tpr: Path,
     trajectory_path: Path,
     settings: dict[str, Any],
-) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]]]:
+) -> tuple[
+    dict[str, Any],
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+]:
     import MDAnalysis as mda
 
     universe = mda.Universe(str(tpr), str(trajectory_path))
     elements, groups = _atom_groups(universe)
-    if len(groups["thf_o"]) == 0:
-        raise ValueError("topology contains no THF oxygen atoms (resname THF, element O)")
+    if len(groups["thf_o"]) == 0 and len(groups["eda_n"]) == 0:
+        raise ValueError("topology contains neither THF oxygen nor EDA nitrogen atoms")
     heavy_indices = groups["heavy"]
     heavy_radii = np.asarray([VDW_RADII_ANGSTROM[elements[index]] for index in heavy_indices])
     nitrogen_to_hydrogen = _bonded_hydrogens(universe, groups["eda_n"], elements)
+    residue_ids = np.asarray(universe.atoms.resindices, dtype=int)
     frame_indices = _trajectory_frame_indices(
         universe.trajectory, float(settings["analysis_stride_ps"])
     )
@@ -197,6 +197,7 @@ def _analyze_trajectory(
     total_mass_g_mol = float(universe.atoms.total_mass())
     first_time_ps = float(universe.trajectory[frame_indices[0]].time)
     rows: list[dict[str, Any]] = []
+    hydrogen_bond_rows: list[dict[str, Any]] = []
     for frame_index in frame_indices:
         frame = universe.trajectory[frame_index]
         matrix = cell_matrix(frame.dimensions)
@@ -215,24 +216,48 @@ def _analyze_trajectory(
             refinement_levels=int(settings["void_refinement_levels"]),
         )
         contacts = 0
-        hydrogen_bonds = 0
+        bond_counts = hydrogen_bond_counts([])
         if len(groups["eda_n"]):
-            contact_distances = pair_distances(
-                positions[groups["eda_n"]], positions[groups["thf_o"]], matrix
-            )
-            contacts = int(
-                np.count_nonzero(
-                    contact_distances <= float(settings["eda_thf_contact_cutoff_angstrom"])
+            if len(groups["thf_o"]):
+                contact_distances = pair_distances(
+                    positions[groups["eda_n"]], positions[groups["thf_o"]], matrix
                 )
-            )
-            hydrogen_bonds = _count_hydrogen_bonds(
+                contacts = int(
+                    np.count_nonzero(
+                        contact_distances <= float(settings["eda_thf_contact_cutoff_angstrom"])
+                    )
+                )
+            bonds = find_hydrogen_bonds(
                 positions,
                 nitrogen_to_hydrogen,
-                groups["thf_o"],
+                {"thf_o": groups["thf_o"], "eda_n": groups["eda_n"]},
+                residue_ids,
                 matrix,
-                float(settings["hydrogen_bond_distance_angstrom"]),
-                float(settings["hydrogen_bond_angle_degree"]),
+                np.asarray(void["cartesian_angstrom"], dtype=float),
+                float(void["radius_angstrom"]),
+                distance_cutoff_angstrom=float(settings["hydrogen_bond_distance_angstrom"]),
+                angle_cutoff_degree=float(settings["hydrogen_bond_angle_degree"]),
+                cavity_shell_thickness_angstrom=float(
+                    settings["cavity_hbond_shell_thickness_angstrom"]
+                ),
+                cavity_bridge_margin_angstrom=float(
+                    settings["cavity_hbond_bridge_margin_angstrom"]
+                ),
             )
+            bond_counts = hydrogen_bond_counts(bonds)
+            for bond in bonds:
+                hydrogen_bond_rows.append(
+                    {
+                        "frame_index": int(frame_index),
+                        "time_ps": float(frame.time),
+                        "elapsed_ps": float(frame.time) - first_time_ps,
+                        "cavity_x_angstrom": float(void["cartesian_angstrom"][0]),
+                        "cavity_y_angstrom": float(void["cartesian_angstrom"][1]),
+                        "cavity_z_angstrom": float(void["cartesian_angstrom"][2]),
+                        "cavity_radius_angstrom": float(void["radius_angstrom"]),
+                        **bond.as_dict(),
+                    }
+                )
         center = void["cartesian_angstrom"]
         rows.append(
             {
@@ -246,7 +271,7 @@ def _analyze_trajectory(
                 "void_y_angstrom": float(center[1]),
                 "void_z_angstrom": float(center[2]),
                 "eda_thf_contacts": contacts,
-                "eda_thf_hydrogen_bonds": hydrogen_bonds,
+                **bond_counts,
             }
         )
         for name, first_indices, second_indices, same, exclude in _rdf_pairs(groups):
@@ -287,7 +312,15 @@ def _analyze_trajectory(
     times = [float(row["elapsed_ps"]) for row in rows]
     descriptors = ["volume_nm3", "density_g_ml", "void_radius_angstrom"]
     if len(groups["eda_n"]):
-        descriptors.extend(["eda_thf_contacts", "eda_thf_hydrogen_bonds"])
+        descriptors.extend(
+            [
+                "eda_eda_hydrogen_bonds",
+                "cavity_associated_hydrogen_bonds",
+                "cavity_bridging_hydrogen_bonds",
+            ]
+        )
+        if len(groups["thf_o"]):
+            descriptors.extend(["eda_thf_contacts", "eda_thf_hydrogen_bonds"])
     for descriptor in descriptors:
         autocorrelation[descriptor] = autocorrelation_summary(
             times, [float(row[descriptor]) for row in rows]
@@ -312,13 +345,22 @@ def _analyze_trajectory(
         "atom_count": len(universe.atoms),
         "atom_groups": {name: int(len(indices)) for name, indices in groups.items()},
         "hydrogen_bond_donor_count": sum(bool(value) for value in nitrogen_to_hydrogen.values()),
+        "hydrogen_bond_definition": {
+            "distance_cutoff_angstrom": float(settings["hydrogen_bond_distance_angstrom"]),
+            "angle_cutoff_degree": float(settings["hydrogen_bond_angle_degree"]),
+            "cavity_shell_thickness_angstrom": float(
+                settings["cavity_hbond_shell_thickness_angstrom"]
+            ),
+            "cavity_bridge_margin_angstrom": float(settings["cavity_hbond_bridge_margin_angstrom"]),
+            "interpretation": "geometric cavity relation; no bond to the cavity center is implied",
+        },
         "autocorrelation": autocorrelation,
         "mean_descriptors": {
             descriptor: float(np.mean([float(row[descriptor]) for row in rows]))
             for descriptor in descriptors
         },
     }
-    return metadata, rows, rdf_rows
+    return metadata, rows, rdf_rows, hydrogen_bond_rows
 
 
 def run_analyze(args: argparse.Namespace) -> int:
@@ -332,8 +374,9 @@ def run_analyze(args: argparse.Namespace) -> int:
     classical_validation = json.loads(validation_path.read_text(encoding="utf-8"))
     rows: list[dict[str, Any]] = []
     rdf_rows: list[dict[str, Any]] = []
+    hydrogen_bond_rows: list[dict[str, Any]] = []
     try:
-        metrics, rows, rdf_rows = _analyze_trajectory(
+        metrics, rows, rdf_rows, hydrogen_bond_rows = _analyze_trajectory(
             tpr_path, trajectory_path, methods["trajectory_analysis"]
         )
         metrics["checks"]["classical_pilot_ready"] = bool(
@@ -381,9 +424,11 @@ def run_analyze(args: argparse.Namespace) -> int:
         ),
         rdf_rows,
     )
+    _write_csv(Path(args.hydrogen_bonds), HYDROGEN_BOND_FIELDS, hydrogen_bond_rows)
     result["outputs"] = {
         "timeseries": str(Path(args.timeseries).resolve()),
         "rdf": str(Path(args.rdf).resolve()),
+        "hydrogen_bonds": str(Path(args.hydrogen_bonds).resolve()),
     }
     _write_json(Path(args.output), result)
     return 0
@@ -449,8 +494,15 @@ def run_select(args: argparse.Namespace) -> int:
         raise ValueError("stage-A snapshot export currently requires snapshots_per_replica = 1")
     rows = _read_timeseries(Path(args.timeseries))
     feature_names = ["density_g_ml", "void_radius_angstrom"]
-    if str(analysis["system_id"]) != "pure_thf":
-        feature_names.extend(["eda_thf_contacts", "eda_thf_hydrogen_bonds"])
+    for candidate in (
+        "eda_thf_contacts",
+        "eda_thf_hydrogen_bonds",
+        "eda_eda_hydrogen_bonds",
+        "cavity_associated_hydrogen_bonds",
+        "cavity_bridging_hydrogen_bonds",
+    ):
+        if rows and candidate in rows[0] and candidate in analysis["metrics"]["autocorrelation"]:
+            feature_names.append(candidate)
     max_tau_ps = max(
         float(record["integrated_autocorrelation_time_ps"])
         for record in analysis["metrics"]["autocorrelation"].values()
@@ -473,13 +525,121 @@ def run_select(args: argparse.Namespace) -> int:
         f"{analysis['system_id']}_r{int(analysis['replica'])}_"
         f"t{float(selected['elapsed_ps']):.0f}ps"
     )
-    elements, _positions, matrix = _write_snapshot(
+    elements, positions, matrix = _write_snapshot(
         universe,
         int(selected["frame_index"]),
         Path(args.xyz),
         Path(args.cell),
         f"snapshot_id={snapshot_id} source_time_ps={float(selected['time_ps']):.6f}",
     )
+    _, groups = _atom_groups(universe)
+    residue_ids = np.asarray(universe.atoms.resindices, dtype=int)
+    cavity_center = np.asarray(
+        [
+            selected["void_x_angstrom"],
+            selected["void_y_angstrom"],
+            selected["void_z_angstrom"],
+        ],
+        dtype=float,
+    )
+    cavity_radius = float(selected["void_radius_angstrom"])
+    donor_to_hydrogens = _bonded_hydrogens(universe, groups["eda_n"], elements)
+    snapshot_bonds = find_hydrogen_bonds(
+        positions,
+        donor_to_hydrogens,
+        {"thf_o": groups["thf_o"], "eda_n": groups["eda_n"]},
+        residue_ids,
+        matrix,
+        cavity_center,
+        cavity_radius,
+        distance_cutoff_angstrom=float(settings["hydrogen_bond_distance_angstrom"]),
+        angle_cutoff_degree=float(settings["hydrogen_bond_angle_degree"]),
+        cavity_shell_thickness_angstrom=float(settings["cavity_hbond_shell_thickness_angstrom"]),
+        cavity_bridge_margin_angstrom=float(settings["cavity_hbond_bridge_margin_angstrom"]),
+    )
+    centered_positions = cavity_centered_positions(
+        positions, residue_ids, groups["heavy"], cavity_center, matrix
+    )
+    visualization_radius = float(settings["cavity_visualization_radius_angstrom"])
+    local_mask = local_residue_mask(
+        centered_positions, residue_ids, groups["heavy"], visualization_radius
+    )
+    local_indices = set(int(value) for value in np.flatnonzero(local_mask))
+    local_atoms = [
+        {
+            "index": int(atom.index),
+            "name": str(atom.name),
+            "resname": str(atom.resname),
+            "resid": int(atom.resid),
+            "element": elements[int(atom.index)],
+            "position_angstrom": centered_positions[int(atom.index)].tolist(),
+        }
+        for atom in universe.atoms
+        if int(atom.index) in local_indices
+    ]
+    try:
+        covalent_bonds = [
+            (int(bond.atoms[0].index), int(bond.atoms[1].index))
+            for bond in universe.bonds
+            if int(bond.atoms[0].index) in local_indices
+            and int(bond.atoms[1].index) in local_indices
+        ]
+    except (AttributeError, ValueError):
+        covalent_bonds = []
+    local_bonds = [
+        bond
+        for bond in snapshot_bonds
+        if bond.donor_index in local_indices
+        and bond.hydrogen_index in local_indices
+        and bond.acceptor_index in local_indices
+    ]
+    local_hydrogen_bonds = [bond.as_dict() for bond in local_bonds]
+    local_pdb_path = Path(args.local_pdb)
+    serials = write_local_pdb(local_pdb_path, local_atoms)
+    write_pymol_script(
+        Path(args.pymol),
+        local_pdb_path,
+        cavity_radius,
+        local_hydrogen_bonds,
+        serials,
+    )
+    render_cavity_hbond_svg(
+        Path(args.svg),
+        title=f"{snapshot_id}: cavity-centered hydrogen-bond shell",
+        atoms=local_atoms,
+        covalent_bonds=covalent_bonds,
+        hydrogen_bonds=local_hydrogen_bonds,
+        cavity_radius_angstrom=cavity_radius,
+        view_radius_angstrom=visualization_radius,
+    )
+    cavity_hbond_record = {
+        "schema_version": 1,
+        "system_id": analysis["system_id"],
+        "replica": int(analysis["replica"]),
+        "snapshot_id": snapshot_id,
+        "scientific_status": "GEOMETRIC_CAVITY_HBOND_VISUALIZATION",
+        "interpretation": (
+            "Hydrogen bonds are classified relative to a geometric void proxy; "
+            "no bond to the cavity center or electron localization is implied."
+        ),
+        "cavity": {
+            "center_in_periodic_cell_angstrom": cavity_center.tolist(),
+            "center_in_local_view_angstrom": [0.0, 0.0, 0.0],
+            "radius_angstrom": cavity_radius,
+            "visualization_radius_angstrom": visualization_radius,
+        },
+        "hydrogen_bond_definition": analysis["metrics"]["hydrogen_bond_definition"],
+        "hydrogen_bond_counts_whole_snapshot": hydrogen_bond_counts(snapshot_bonds),
+        "hydrogen_bond_counts_local_view": hydrogen_bond_counts(local_bonds),
+        "local_atom_count": len(local_atoms),
+        "local_hydrogen_bonds": local_hydrogen_bonds,
+        "outputs": {
+            "local_pdb": str(local_pdb_path.resolve()),
+            "pymol": str(Path(args.pymol).resolve()),
+            "svg": str(Path(args.svg).resolve()),
+        },
+    }
+    _write_json(Path(args.cavity_hbonds), cavity_hbond_record)
     metadata = {
         "schema_version": 1,
         "ready": True,
@@ -502,6 +662,22 @@ def run_select(args: argparse.Namespace) -> int:
             "cell_vectors_angstrom": matrix.tolist(),
             "xyz": {"path": str(Path(args.xyz).resolve()), "sha256": sha256_file(args.xyz)},
             "cell": {"path": str(Path(args.cell).resolve()), "sha256": sha256_file(args.cell)},
+            "cavity_hbonds": {
+                "path": str(Path(args.cavity_hbonds).resolve()),
+                "sha256": sha256_file(args.cavity_hbonds),
+            },
+            "cavity_svg": {
+                "path": str(Path(args.svg).resolve()),
+                "sha256": sha256_file(args.svg),
+            },
+            "cavity_local_pdb": {
+                "path": str(local_pdb_path.resolve()),
+                "sha256": sha256_file(local_pdb_path),
+            },
+            "cavity_pymol": {
+                "path": str(Path(args.pymol).resolve()),
+                "sha256": sha256_file(args.pymol),
+            },
         },
         "source": {
             "analysis": {
@@ -535,6 +711,24 @@ def summarize_records(records: list[dict[str, Any]], kind: str) -> dict[str, Any
             "replicas": sorted(replicas),
         }
         if kind == "analysis":
+            descriptor_maps = [
+                record.get("metrics", {}).get("mean_descriptors", {}) for record in group
+            ]
+            common_descriptors = (
+                set.intersection(*(set(values) for values in descriptor_maps))
+                if descriptor_maps
+                else set()
+            )
+            ensemble_descriptors: dict[str, Any] = {}
+            for descriptor in sorted(common_descriptors):
+                replica_means = [float(values[descriptor]) for values in descriptor_maps]
+                ensemble_descriptors[descriptor] = {
+                    "mean": float(np.mean(replica_means)),
+                    "replica_standard_deviation": (
+                        float(np.std(replica_means, ddof=1)) if len(replica_means) > 1 else 0.0
+                    ),
+                    "replica_means": replica_means,
+                }
             effective_samples = [
                 float(value["effective_sample_size"])
                 for record in group
@@ -553,6 +747,7 @@ def summarize_records(records: list[dict[str, Any]], kind: str) -> dict[str, Any
             system_result["mean_void_radius_angstrom"] = (
                 float(np.mean(void_radii)) if len(void_radii) == len(group) else None
             )
+            system_result["ensemble_mean_descriptors"] = ensemble_descriptors
         systems[system_id] = system_result
     return {
         "schema_version": 1,
@@ -597,6 +792,7 @@ def build_parser() -> argparse.ArgumentParser:
     analyze.add_argument("--trajectory", required=True)
     analyze.add_argument("--timeseries", required=True)
     analyze.add_argument("--rdf", required=True)
+    analyze.add_argument("--hydrogen-bonds", required=True)
     analyze.add_argument("--output", required=True)
     analyze.set_defaults(func=run_analyze)
 
@@ -608,6 +804,10 @@ def build_parser() -> argparse.ArgumentParser:
     select.add_argument("--trajectory", required=True)
     select.add_argument("--xyz", required=True)
     select.add_argument("--cell", required=True)
+    select.add_argument("--cavity-hbonds", required=True)
+    select.add_argument("--local-pdb", required=True)
+    select.add_argument("--pymol", required=True)
+    select.add_argument("--svg", required=True)
     select.add_argument("--output", required=True)
     select.set_defaults(func=run_select)
 

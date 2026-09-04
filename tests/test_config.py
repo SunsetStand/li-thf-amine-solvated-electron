@@ -24,7 +24,9 @@ class ConfigTests(unittest.TestCase):
     def test_campaign_cardinality(self) -> None:
         campaign, systems, _ = load_repository_configs(ROOT)
         self.assertEqual(len(campaign_matrix("mixed_smoke", campaign, systems)), 1)
+        self.assertEqual(len(campaign_matrix("hbond_smoke", campaign, systems)), 2)
         self.assertEqual(len(campaign_matrix("pilot", campaign, systems)), 6)
+        self.assertEqual(len(campaign_matrix("hbond_pilot", campaign, systems)), 6)
         self.assertEqual(len(campaign_matrix("production", campaign, systems)), 33)
 
     def test_system_spec(self) -> None:
@@ -33,6 +35,19 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(spec.thf_count, 64)
         self.assertEqual(spec.amine_count_initial, 28)
         self.assertEqual(spec.li_electron_pairs, 1)
+
+    def test_explicit_molar_ratio_and_neat_eda_specs(self) -> None:
+        campaign, systems, _ = load_repository_configs(ROOT)
+        neat = make_system_spec("pure_eda", campaign, systems)
+        self.assertEqual(neat.component_counts, {"eda": 64})
+        self.assertEqual(neat.thf_count, 0)
+        self.assertEqual(neat.amine_count_initial, 64)
+        self.assertIsNone(neat.target_concentration_m)
+        self.assertEqual(neat.target_amine_mole_fraction, 1.0)
+
+        equimolar = make_system_spec("eda_1to1", campaign, systems)
+        self.assertEqual(equimolar.component_counts, {"thf": 32, "eda": 32})
+        self.assertEqual(equimolar.target_amine_mole_fraction, 0.5)
 
     def test_repository_config_is_valid(self) -> None:
         self.assertEqual(validate_repository_configs(ROOT), [])

@@ -75,9 +75,12 @@ def format_system_id(amine: str | None, concentration_m: float) -> str:
 class SystemSpec:
     system_id: str
     amine: str | None
-    target_concentration_m: float
+    target_concentration_m: float | None
     thf_count: int
     amine_count_initial: int
+    component_counts: dict[str, int]
+    composition_basis: str
+    target_amine_mole_fraction: float
     li_electron_pairs: int
     temperature_k: float
     pressure_bar: float
@@ -89,6 +92,9 @@ class SystemSpec:
             "target_concentration_m": self.target_concentration_m,
             "thf_count": self.thf_count,
             "amine_count_initial": self.amine_count_initial,
+            "component_counts": dict(self.component_counts),
+            "composition_basis": self.composition_basis,
+            "target_amine_mole_fraction": self.target_amine_mole_fraction,
             "li_electron_pairs": self.li_electron_pairs,
             "temperature_k": self.temperature_k,
             "pressure_bar": self.pressure_bar,
@@ -98,28 +104,72 @@ class SystemSpec:
 def make_system_spec(
     system_id: str, campaign: dict[str, Any], systems: dict[str, Any]
 ) -> SystemSpec:
-    amine, target = parse_system_id(system_id)
-    thf_count = int(campaign["thf_count"])
-    if thf_count <= 0:
-        raise ConfigurationError("thf_count must be positive")
-    if amine is None:
-        amine_count = 0
-    else:
-        amines = systems.get("amines", {})
-        if amine not in amines:
-            raise ConfigurationError(f"Unknown amine {amine!r} in system {system_id!r}")
-        amine_count = initial_amine_count(
-            target_concentration_m=target,
-            thf_count=thf_count,
-            thf_molar_volume_l_mol=float(systems["thf"]["molar_volume_l_mol"]),
-            amine_molar_volume_l_mol=float(amines[amine]["molar_volume_l_mol"]),
+    explicit = systems.get("compositions", {}).get(system_id)
+    if explicit is not None:
+        components = explicit.get("components", {})
+        if not isinstance(components, dict) or not components:
+            raise ConfigurationError(
+                f"Explicit composition {system_id!r} must define component counts"
+            )
+        component_counts = {str(name): int(count) for name, count in components.items()}
+        known = {"thf", *systems.get("amines", {})}
+        unknown = sorted(set(component_counts) - known)
+        if unknown:
+            raise ConfigurationError(
+                f"Explicit composition {system_id!r} has unknown components: {unknown}"
+            )
+        if any(count <= 0 for count in component_counts.values()):
+            raise ConfigurationError(f"Explicit composition {system_id!r} counts must be positive")
+        amines = sorted(set(component_counts) - {"thf"})
+        if len(amines) > 1:
+            raise ConfigurationError(
+                f"Explicit composition {system_id!r} currently supports one amine"
+            )
+        amine = amines[0] if amines else None
+        thf_count = component_counts.get("thf", 0)
+        amine_count = component_counts.get(amine, 0) if amine else 0
+        target: float | None = None
+        composition_basis = str(explicit.get("composition_basis", "explicit_molecule_counts"))
+        total_count = sum(component_counts.values())
+        target_mole_fraction = float(
+            explicit.get("target_amine_mole_fraction", amine_count / total_count)
         )
+        if abs(target_mole_fraction - amine_count / total_count) > 1.0e-12:
+            raise ConfigurationError(
+                f"Explicit composition {system_id!r} target mole fraction disagrees with counts"
+            )
+    else:
+        amine, parsed_target = parse_system_id(system_id)
+        target = parsed_target
+        thf_count = int(campaign["thf_count"])
+        if thf_count <= 0:
+            raise ConfigurationError("thf_count must be positive")
+        if amine is None:
+            amine_count = 0
+        else:
+            amines = systems.get("amines", {})
+            if amine not in amines:
+                raise ConfigurationError(f"Unknown amine {amine!r} in system {system_id!r}")
+            amine_count = initial_amine_count(
+                target_concentration_m=parsed_target,
+                thf_count=thf_count,
+                thf_molar_volume_l_mol=float(systems["thf"]["molar_volume_l_mol"]),
+                amine_molar_volume_l_mol=float(amines[amine]["molar_volume_l_mol"]),
+            )
+        component_counts = {"thf": thf_count}
+        if amine:
+            component_counts[amine] = amine_count
+        composition_basis = "target_molarity"
+        target_mole_fraction = amine_count / sum(component_counts.values())
     return SystemSpec(
         system_id=system_id,
         amine=amine,
         target_concentration_m=target,
         thf_count=thf_count,
         amine_count_initial=amine_count,
+        component_counts=component_counts,
+        composition_basis=composition_basis,
+        target_amine_mole_fraction=target_mole_fraction,
         li_electron_pairs=int(campaign["li_electron_pairs"]),
         temperature_k=float(campaign["temperature_k"]),
         pressure_bar=float(campaign["pressure_bar"]),
@@ -198,6 +248,8 @@ def validate_repository_configs(root: Path | None = None) -> list[str]:
         "rdf_max_angstrom",
         "eda_thf_contact_cutoff_angstrom",
         "hydrogen_bond_distance_angstrom",
+        "cavity_hbond_shell_thickness_angstrom",
+        "cavity_visualization_radius_angstrom",
         "minimum_snapshot_separation_ps",
         "decorrelation_multiplier",
     ):
@@ -240,6 +292,13 @@ def validate_repository_configs(root: Path | None = None) -> list[str]:
             raise ValueError
     except (KeyError, TypeError, ValueError):
         errors.append("methods.trajectory_analysis.hydrogen_bond_angle_degree must be in (0, 180]")
+    try:
+        if float(trajectory_analysis["cavity_hbond_bridge_margin_angstrom"]) < 0:
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append(
+            "methods.trajectory_analysis.cavity_hbond_bridge_margin_angstrom must be non-negative"
+        )
     stage_b = methods.get("stage_b", {})
     for key in (
         "candidate_site_count",
