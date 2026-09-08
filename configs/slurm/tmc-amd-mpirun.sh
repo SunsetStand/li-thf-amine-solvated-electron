@@ -66,7 +66,7 @@ allocated_host="${batch_host:-$node_list}"
     || die "current host ${local_host} is not allocated host ${allocated_host}"
 
 allowed_cpus="$(awk '/^Cpus_allowed_list:/ {print $2}' /proc/self/status 2>/dev/null || true)"
-echo "TMC MPI launcher: job=${SLURM_JOB_ID} host=${local_host} ranks=${ranks}/${num_cpus} cpuset=${allowed_cpus:-unknown}" >&2
+echo "TMC MPI launcher: job=${SLURM_JOB_ID} host=${local_host} ranks=${ranks}/${num_cpus} cpuset=${allowed_cpus:-unknown}"
 
 # The site's OpenMPI 4.1.5 lacks the PMI interface required for direct `srun`
 # launch.  The allocation is single-node, so let mpirun fork locally inside the

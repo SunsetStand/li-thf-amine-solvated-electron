@@ -43,7 +43,17 @@ query and creates no output file. Locate persistent logs with:
 ./run.sh logs
 ./run.sh logs bootstrap
 ./run.sh logs probe
+./run.sh inspect
+./run.sh inspect JOBID
 ```
+
+`inspect` is a login-node-safe, read-only summary intended for copying into an
+issue or chat. It reports at most a few completion/error markers and final log
+lines from both streams. It suppresses the site's `Invalid job id` diagnostic
+after completed jobs disappear from `squeue`. The `.out` and `.err` suffixes
+mean stdout and stderr, not success and failure: Snakemake can write normal
+progress to stderr, while chemistry wrappers deliberately retain combined
+engine output in calculation logs such as `cp2k.out`.
 
 Inspect the actual compute-node environment:
 

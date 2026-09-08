@@ -108,6 +108,10 @@ class SlurmSafetyTests(unittest.TestCase):
         self.assertIn("Cpus_allowed_list", launcher)
         self.assertIn("--nooversubscribe", launcher)
         self.assertNotIn("--oversubscribe", launcher)
+        status_line = next(
+            line for line in launcher.splitlines() if line.startswith('echo "TMC MPI launcher:')
+        )
+        self.assertNotIn(">&2", status_line)
         stage_runner = STAGE_RUNNER.read_text(encoding="utf-8")
         self.assertIn('export PATH="${ROOT}/configs/slurm:${PATH}"', stage_runner)
         generic_profile = GENERIC_SLURM_PROFILE.read_text(encoding="utf-8")
@@ -315,6 +319,54 @@ class SlurmSafetyTests(unittest.TestCase):
             runner.index(queue_check), runner.index('storage_root="${storage_root}" --unlock')
         )
         self.assertIn("refusing to unlock while workflow controllers are active", runner)
+
+    def test_inspect_job_log_is_login_safe_and_concise(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            temporary = Path(temporary_directory)
+            temporary_run = temporary / "run.sh"
+            shutil.copy2(RUN_SH, temporary_run)
+            logs = temporary / "runs" / "slurm"
+            logs.mkdir(parents=True)
+            (logs / "solvelec-dry-run-17028.out").write_text(
+                "\n".join(
+                    [
+                        *(f"detail {index}" for index in range(200)),
+                        "This was a dry-run (flag -n).",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            (logs / "solvelec-dry-run-17028.err").write_text("", encoding="utf-8")
+
+            completed = subprocess.run(
+                ["bash", str(temporary_run), "inspect", "17028"],
+                cwd=temporary,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            self.assertEqual(completed.stderr, "")
+            self.assertIn("RESULT: DRY_RUN_COMPLETE", completed.stdout)
+            self.assertIn("This was a dry-run", completed.stdout)
+            self.assertIn("[stdout] This was a dry-run", completed.stdout)
+            self.assertIn("STDOUT: solvelec-dry-run-17028.out (201 lines)", completed.stdout)
+            self.assertIn("STDERR: solvelec-dry-run-17028.err (0 lines)", completed.stdout)
+            self.assertNotIn("detail 0\n", completed.stdout)
+            self.assertLessEqual(len(completed.stdout.splitlines()), 15)
+
+    def test_inspect_rejects_non_numeric_job_id(self) -> None:
+        completed = subprocess.run(
+            ["bash", str(RUN_SH), "inspect", "17028*"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(completed.returncode, 2)
+        self.assertIn("JOBID must contain digits only", completed.stderr)
 
     def test_engine_runner_refuses_outside_required_slurm_allocation(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

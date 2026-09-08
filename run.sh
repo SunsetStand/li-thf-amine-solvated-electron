@@ -126,16 +126,166 @@ submit_via_slurm() {
     "${ROOT}" "${action}" "${submission%%;*}"
 }
 
+inspect_slurm_job() {
+  if [[ $# -gt 1 ]]; then
+    printf 'ERROR: usage: ./run.sh inspect [JOBID]\n' >&2
+    return 2
+  fi
+
+  local requested_job_id="${1:-}"
+  if [[ -n "${requested_job_id}" && ! "${requested_job_id}" =~ ^[0-9]+$ ]]; then
+    printf 'ERROR: JOBID must contain digits only: %s\n' "${requested_job_id}" >&2
+    return 2
+  fi
+
+  local log_directory="${ROOT}/runs/slurm"
+  local out_log=""
+  local err_log=""
+  local job_id="${requested_job_id}"
+  local -a out_logs=()
+  shopt -s nullglob
+  if [[ -n "${requested_job_id}" ]]; then
+    out_logs=("${log_directory}"/solvelec-*-"${requested_job_id}".out)
+  else
+    out_logs=("${log_directory}"/solvelec-*.out)
+    if [[ ${#out_logs[@]} -gt 0 ]]; then
+      out_log="$(ls -1t -- "${out_logs[@]}" | head -n 1)"
+      out_logs=("${out_log}")
+    fi
+  fi
+  shopt -u nullglob
+
+  if [[ ${#out_logs[@]} -eq 0 ]]; then
+    if [[ -n "${requested_job_id}" ]]; then
+      printf 'ERROR: no Slurm stdout log found for job %s under %s\n' \
+        "${requested_job_id}" "${log_directory}" >&2
+    else
+      printf 'ERROR: no Slurm stdout logs found under %s\n' "${log_directory}" >&2
+    fi
+    return 2
+  fi
+
+  out_log="${out_logs[0]}"
+  err_log="${out_log%.out}.err"
+  local -a stream_logs=("${out_log}")
+  if [[ -f "${err_log}" ]]; then
+    stream_logs+=("${err_log}")
+  fi
+  if [[ -z "${job_id}" ]]; then
+    job_id="${out_log%.out}"
+    job_id="${job_id##*-}"
+  fi
+
+  local queue_status=""
+  local queue_active=0
+  if command -v squeue >/dev/null 2>&1; then
+    # Old jobs can make this site's squeue print "Invalid job id". An absent
+    # row already means the job is no longer active, so keep that noise out of
+    # the compact report.
+    queue_status="$(squeue -h -j "${job_id}" -o '%i %T %M %R' 2>/dev/null | head -n 1 || true)"
+    if [[ -n "${queue_status}" ]]; then
+      queue_active=1
+    fi
+  fi
+
+  local success_pattern
+  local failure_pattern
+  success_pattern='This was a dry-run|[0-9]+ of [0-9]+ steps \([0-9]+%\) done|Complete log\(s\):'
+  failure_pattern='^WorkflowError|^LockException|^MissingInput(Exception)?:|^Traceback \(most recent call last\):|Error in rule|(^|[[:space:]])ERROR:|slurmstepd: error:|CANCELLED|TIMEOUT|OUT_OF_MEMORY'
+
+  local success_stdout=""
+  local success_stderr=""
+  local failure_stdout=""
+  local failure_stderr=""
+  success_stdout="$(grep -Ei "${success_pattern}" "${out_log}" 2>/dev/null | tail -n 4 || true)"
+  failure_stdout="$(grep -Ei "${failure_pattern}" "${out_log}" 2>/dev/null | tail -n 4 || true)"
+  if [[ -f "${err_log}" ]]; then
+    success_stderr="$(grep -Ei "${success_pattern}" "${err_log}" 2>/dev/null | tail -n 4 || true)"
+    failure_stderr="$(grep -Ei "${failure_pattern}" "${err_log}" 2>/dev/null | tail -n 4 || true)"
+  fi
+
+  local result="INCOMPLETE_OR_EXPIRED"
+  if [[ -n "${failure_stdout}${failure_stderr}" ]]; then
+    result="ATTENTION_FAILURE_MARKER"
+  elif grep -qF 'This was a dry-run' "${stream_logs[@]}" 2>/dev/null; then
+    result="DRY_RUN_COMPLETE"
+  elif grep -Eq '[0-9]+ of [0-9]+ steps \(100%\) done' "${stream_logs[@]}" 2>/dev/null; then
+    result="WORKFLOW_COMPLETE"
+  elif [[ ${queue_active} -eq 1 ]]; then
+    result="RUNNING_OR_PENDING"
+  fi
+
+  local out_lines=0
+  local err_lines=0
+  out_lines="$(wc -l < "${out_log}")"
+  if [[ -f "${err_log}" ]]; then
+    err_lines="$(wc -l < "${err_log}")"
+  fi
+
+  printf 'JOB: %s\n' "${job_id}"
+  if [[ ${queue_active} -eq 1 ]]; then
+    printf 'QUEUE: %s\n' "${queue_status}"
+  elif command -v squeue >/dev/null 2>&1; then
+    printf 'QUEUE: not active\n'
+  else
+    printf 'QUEUE: unavailable (squeue not found)\n'
+  fi
+  printf 'RESULT: %s\n' "${result}"
+  printf 'STDOUT: %s (%s lines)\n' "$(basename "${out_log}")" "${out_lines//[[:space:]]/}"
+  if [[ -f "${err_log}" ]]; then
+    printf 'STDERR: %s (%s lines)\n' "$(basename "${err_log}")" "${err_lines//[[:space:]]/}"
+  else
+    printf 'STDERR: %s (missing)\n' "$(basename "${err_log}")"
+  fi
+
+  printf 'MARKERS:\n'
+  local marker_count=0
+  local marker_line=""
+  local marker_stdout="${failure_stdout}"
+  local marker_stderr="${failure_stderr}"
+  if [[ -n "${marker_stdout}" && -n "${success_stdout}" ]]; then
+    marker_stdout+=$'\n'
+  fi
+  marker_stdout+="${success_stdout}"
+  if [[ -n "${marker_stderr}" && -n "${success_stderr}" ]]; then
+    marker_stderr+=$'\n'
+  fi
+  marker_stderr+="${success_stderr}"
+  if [[ -n "${marker_stdout}" ]]; then
+    while IFS= read -r marker_line; do
+      printf '[stdout] %.300s\n' "${marker_line}"
+      marker_count=$((marker_count + 1))
+    done <<< "${marker_stdout}"
+  fi
+  if [[ -n "${marker_stderr}" ]]; then
+    while IFS= read -r marker_line; do
+      printf '[stderr] %.300s\n' "${marker_line}"
+      marker_count=$((marker_count + 1))
+    done <<< "${marker_stderr}"
+  fi
+  if [[ ${marker_count} -eq 0 ]]; then
+    printf '(none)\n'
+  fi
+
+  printf 'TAIL:\n'
+  grep -v '^[[:space:]]*$' "${out_log}" 2>/dev/null \
+    | tail -n 3 | cut -c 1-300 | sed 's/^/[stdout] /' || true
+  if [[ -s "${err_log}" ]]; then
+    grep -v '^[[:space:]]*$' "${err_log}" 2>/dev/null \
+      | tail -n 3 | cut -c 1-300 | sed 's/^/[stderr] /' || true
+  fi
+}
+
 is_login_safe_command() {
   case "$1" in
-    help|-h|--help|queue|logs|update) return 0 ;;
+    help|-h|--help|queue|logs|inspect|update) return 0 ;;
     *) return 1 ;;
   esac
 }
 
 is_known_command() {
   case "$1" in
-    bootstrap|storage-init|tools-install|doctor|probe|test|dry-run|submit|resume|unlock|status|report|update|matrix|queue|logs|help|-h|--help)
+    bootstrap|storage-init|tools-install|doctor|probe|test|dry-run|submit|resume|unlock|status|report|update|matrix|queue|logs|inspect|help|-h|--help)
       return 0
       ;;
     *) return 1 ;;
@@ -163,7 +313,7 @@ fi
 
 PYTHON_BIN=""
 case "${COMMAND}" in
-  help|-h|--help|queue|logs|update|probe|storage-init|tools-install) ;;
+  help|-h|--help|queue|logs|inspect|update|probe|storage-init|tools-install) ;;
   *) PYTHON_BIN="$(find_python)" ;;
 esac
 
@@ -474,6 +624,9 @@ case "${COMMAND}" in
       ls -1t -- "${log_files[@]}"
     fi
     ;;
+  inspect)
+    inspect_slurm_job "$@"
+    ;;
   matrix)
     "${PYTHON_BIN}" -m solvelec.cli matrix "$@"
     ;;
@@ -498,10 +651,11 @@ Commands:
   update      Fast-forward locally, then submit bootstrap through Slurm
   queue       Show the current user's Slurm queue (login-node-safe)
   logs        List Slurm logs; optionally filter by command, e.g. logs probe
+  inspect     Print a short Slurm/log summary; optional numeric JOBID
 
 On a host with sbatch, every task-like command above is automatically wrapped
 in configs/slurm/tmc-amd-driver.sbatch. Only help, queue, update's Git operation,
-logs, and the sbatch submission itself run on the login node.
+logs, inspect, and the sbatch submission itself run on the login node.
 
 Large workflow outputs on TMC are written below
 /data/home/storage/Backup_Data/$USER/li-thf-amine-solvated-electron/runs.
