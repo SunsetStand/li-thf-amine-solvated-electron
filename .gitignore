@@ -30,8 +30,9 @@ work/
 *.tpr
 *.gbw
 *.densities
+/mdout.mdp
 
-# Legacy AmberTools fixed-name scratch files (new runs isolate and clean them)
+Legacy AmberTools fixed-name scratch files (new runs isolate and clean them)
 /sqm.in
 /sqm.out
 /sqm.pdb
