@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "source_campaign": "hbond_pilot",
+  "source_commit": "969d194",
+  "slurm_controller_job": 17055,
+  "workflow_steps_complete": 116,
+  "workflow_steps_total": 116,
+  "source_run_root": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot",
+  "archive_name": "hbond_pilot_stage_a_report_data.tar.gz",
+  "archive_sha256": "96145612b9e5c24cef42341a36299ad673d0808915174b4e457c5e440efde069",
+  "imported_on": "2026-09-08",
+  "scientific_status": "SOLVENT_ONLY_CLASSICAL_MD_STAGE_A",
+  "contains_li": false,
+  "contains_excess_electron": false
+}

@@ -1,0 +1,325 @@
+{
+  "schema_version": 1,
+  "status": "READY",
+  "source": "hbond_pilot Stage A",
+  "source_campaign": "hbond_pilot",
+  "source_commit": "969d194",
+  "slurm_controller_job": 17055,
+  "systems": {
+    "pure_eda": {
+      "composition": {
+        "thf": 0,
+        "eda": 64,
+        "atom_count": 768
+      },
+      "replicas": 3,
+      "production_ns_per_replica": 20.0,
+      "analysis_frames_per_replica": 201,
+      "descriptors": {
+        "density_g_ml": {
+          "mean": 0.8828662015469108,
+          "replica_sd": 0.0020529364292343577,
+          "replica_means": [
+            0.8805773286228935,
+            0.883476462442506,
+            0.8845448135753328
+          ]
+        },
+        "volume_nm3": {
+          "mean": 7.2413211373613775,
+          "replica_sd": 0.017582588033270275,
+          "replica_means": [
+            7.260851952851084,
+            7.236357587244359,
+            7.226753871988691
+          ]
+        },
+        "void_radius_angstrom": {
+          "mean": 1.9484717851381619,
+          "replica_sd": 0.014088406324986858,
+          "replica_means": [
+            1.957367824289921,
+            1.9322284886119219,
+            1.955819042512643
+          ]
+        },
+        "eda_eda_hydrogen_bonds": {
+          "mean": 79.80265339966832,
+          "replica_sd": 0.12441127252743511,
+          "replica_means": [
+            79.67661691542288,
+            79.92537313432835,
+            79.80597014925372
+          ]
+        },
+        "cavity_associated_hydrogen_bonds": {
+          "mean": 2.459369817578773,
+          "replica_sd": 0.147613988799162,
+          "replica_means": [
+            2.4029850746268657,
+            2.3482587064676617,
+            2.626865671641791
+          ]
+        },
+        "cavity_bridging_hydrogen_bonds": {
+          "mean": 0.0,
+          "replica_sd": 0.0,
+          "replica_means": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "maximum_density_half_difference_percent": 1.144084886179136,
+      "minimum_effective_sample_size": 148.41092092133178,
+      "snapshots": [
+        {
+          "replica": 1,
+          "snapshot_id": "pure_eda_r1_t17600ps",
+          "time_ns": 17.6,
+          "density_g_ml": 0.8736009336597643,
+          "void_radius_angstrom": 1.998506908444239,
+          "whole_snapshot_hydrogen_bonds": {
+            "cavity_associated_hydrogen_bonds": 2,
+            "cavity_bridging_hydrogen_bonds": 0,
+            "eda_eda_hydrogen_bonds": 78,
+            "eda_thf_hydrogen_bonds": 0
+          },
+          "local_view_hydrogen_bonds": {
+            "cavity_associated_hydrogen_bonds": 2,
+            "cavity_bridging_hydrogen_bonds": 0,
+            "eda_eda_hydrogen_bonds": 6,
+            "eda_thf_hydrogen_bonds": 0
+          },
+          "local_atom_count": 180
+        },
+        {
+          "replica": 2,
+          "snapshot_id": "pure_eda_r2_t16500ps",
+          "time_ns": 16.5,
+          "density_g_ml": 0.875133072091157,
+          "void_radius_angstrom": 1.7955310364406099,
+          "whole_snapshot_hydrogen_bonds": {
+            "cavity_associated_hydrogen_bonds": 2,
+            "cavity_bridging_hydrogen_bonds": 0,
+            "eda_eda_hydrogen_bonds": 79,
+            "eda_thf_hydrogen_bonds": 0
+          },
+          "local_view_hydrogen_bonds": {
+            "cavity_associated_hydrogen_bonds": 2,
+            "cavity_bridging_hydrogen_bonds": 0,
+            "eda_eda_hydrogen_bonds": 10,
+            "eda_thf_hydrogen_bonds": 0
+          },
+          "local_atom_count": 204
+        },
+        {
+          "replica": 3,
+          "snapshot_id": "pure_eda_r3_t10900ps",
+          "time_ns": 10.9,
+          "density_g_ml": 0.8947377230414175,
+          "void_radius_angstrom": 1.9937457257748512,
+          "whole_snapshot_hydrogen_bonds": {
+            "cavity_associated_hydrogen_bonds": 1,
+            "cavity_bridging_hydrogen_bonds": 0,
+            "eda_eda_hydrogen_bonds": 79,
+            "eda_thf_hydrogen_bonds": 0
+          },
+          "local_view_hydrogen_bonds": {
+            "cavity_associated_hydrogen_bonds": 1,
+            "cavity_bridging_hydrogen_bonds": 0,
+            "eda_eda_hydrogen_bonds": 9,
+            "eda_thf_hydrogen_bonds": 0
+          },
+          "local_atom_count": 204
+        }
+      ],
+      "rdf_peaks": {
+        "eda_n-eda_n": {
+          "r_angstrom": 3.1500000000000004,
+          "g_r": 1.8737643328240934
+        }
+      }
+    },
+    "eda_1to1": {
+      "composition": {
+        "thf": 32,
+        "eda": 32,
+        "atom_count": 800
+      },
+      "replicas": 3,
+      "production_ns_per_replica": 20.0,
+      "analysis_frames_per_replica": 201,
+      "descriptors": {
+        "density_g_ml": {
+          "mean": 0.8628520229305399,
+          "replica_sd": 0.00034274745569683223,
+          "replica_means": [
+            0.862962773026796,
+            0.8624675937371392,
+            0.8631257020276845
+          ]
+        },
+        "volume_nm3": {
+          "mean": 8.148828279162776,
+          "replica_sd": 0.0033242094431466373,
+          "replica_means": [
+            8.148018716515946,
+            8.152482495000465,
+            8.145983625971919
+          ]
+        },
+        "void_radius_angstrom": {
+          "mean": 1.9717340437615452,
+          "replica_sd": 0.025389971034080312,
+          "replica_means": [
+            1.9731113198886006,
+            1.996407344937039,
+            1.945683466458996
+          ]
+        },
+        "eda_eda_hydrogen_bonds": {
+          "mean": 28.75953565505804,
+          "replica_sd": 0.19933637414682215,
+          "replica_means": [
+            28.746268656716417,
+            28.567164179104477,
+            28.965174129353233
+          ]
+        },
+        "cavity_associated_hydrogen_bonds": {
+          "mean": 0.8888888888888888,
+          "replica_sd": 0.07934244586338764,
+          "replica_means": [
+            0.9800995024875622,
+            0.835820895522388,
+            0.8507462686567164
+          ]
+        },
+        "cavity_bridging_hydrogen_bonds": {
+          "mean": 0.0,
+          "replica_sd": 0.0,
+          "replica_means": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "eda_thf_contacts": {
+          "mean": 14.492537313432836,
+          "replica_sd": 0.2068718695153418,
+          "replica_means": [
+            14.616915422885572,
+            14.606965174129353,
+            14.253731343283581
+          ]
+        },
+        "eda_thf_hydrogen_bonds": {
+          "mean": 8.03648424543947,
+          "replica_sd": 0.18657269201318774,
+          "replica_means": [
+            8.223880597014926,
+            8.034825870646767,
+            7.850746268656716
+          ]
+        }
+      },
+      "maximum_density_half_difference_percent": 0.46871360327464423,
+      "minimum_effective_sample_size": 141.85925012334528,
+      "snapshots": [
+        {
+          "replica": 1,
+          "snapshot_id": "eda_1to1_r1_t12300ps",
+          "time_ns": 12.3,
+          "density_g_ml": 0.8605835006208149,
+          "void_radius_angstrom": 1.9505357565878827,
+          "whole_snapshot_hydrogen_bonds": {
+            "cavity_associated_hydrogen_bonds": 0,
+            "cavity_bridging_hydrogen_bonds": 0,
+            "eda_eda_hydrogen_bonds": 30,
+            "eda_thf_hydrogen_bonds": 7
+          },
+          "local_view_hydrogen_bonds": {
+            "cavity_associated_hydrogen_bonds": 0,
+            "cavity_bridging_hydrogen_bonds": 0,
+            "eda_eda_hydrogen_bonds": 1,
+            "eda_thf_hydrogen_bonds": 0
+          },
+          "local_atom_count": 201
+        },
+        {
+          "replica": 2,
+          "snapshot_id": "eda_1to1_r2_t10700ps",
+          "time_ns": 10.7,
+          "density_g_ml": 0.8722149107672228,
+          "void_radius_angstrom": 1.9038481477701084,
+          "whole_snapshot_hydrogen_bonds": {
+            "cavity_associated_hydrogen_bonds": 0,
+            "cavity_bridging_hydrogen_bonds": 0,
+            "eda_eda_hydrogen_bonds": 28,
+            "eda_thf_hydrogen_bonds": 9
+          },
+          "local_view_hydrogen_bonds": {
+            "cavity_associated_hydrogen_bonds": 0,
+            "cavity_bridging_hydrogen_bonds": 0,
+            "eda_eda_hydrogen_bonds": 6,
+            "eda_thf_hydrogen_bonds": 2
+          },
+          "local_atom_count": 225
+        },
+        {
+          "replica": 3,
+          "snapshot_id": "eda_1to1_r3_t17000ps",
+          "time_ns": 17.0,
+          "density_g_ml": 0.8729961769574534,
+          "void_radius_angstrom": 1.8162334435805443,
+          "whole_snapshot_hydrogen_bonds": {
+            "cavity_associated_hydrogen_bonds": 0,
+            "cavity_bridging_hydrogen_bonds": 0,
+            "eda_eda_hydrogen_bonds": 32,
+            "eda_thf_hydrogen_bonds": 7
+          },
+          "local_view_hydrogen_bonds": {
+            "cavity_associated_hydrogen_bonds": 0,
+            "cavity_bridging_hydrogen_bonds": 0,
+            "eda_eda_hydrogen_bonds": 0,
+            "eda_thf_hydrogen_bonds": 0
+          },
+          "local_atom_count": 168
+        }
+      ],
+      "rdf_peaks": {
+        "eda_n-eda_n": {
+          "r_angstrom": 3.05,
+          "g_r": 3.137061470742539
+        },
+        "eda_n-thf_o": {
+          "r_angstrom": 3.05,
+          "g_r": 0.8244638135944501
+        },
+        "thf_o-thf_o": {
+          "r_angstrom": 4.75,
+          "g_r": 1.6052540311638068
+        }
+      }
+    }
+  },
+  "comparisons": {
+    "mixture_vs_pure_density_percent": -2.266954899995388,
+    "mixture_vs_pure_void_radius_percent": 1.1938719770445028
+  },
+  "hydrogen_bond_definition": {
+    "angle_cutoff_degree": 150.0,
+    "cavity_bridge_margin_angstrom": 0.25,
+    "cavity_shell_thickness_angstrom": 2.0,
+    "distance_cutoff_angstrom": 3.5,
+    "interpretation": "geometric cavity relation; no bond to the cavity center is implied"
+  },
+  "scientific_scope": {
+    "periodic_bulk_solvent": true,
+    "contains_li": false,
+    "contains_excess_electron": false,
+    "void_is_geometric_proxy_not_electron_density": true
+  }
+}

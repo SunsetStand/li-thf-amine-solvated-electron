@@ -1,0 +1,96 @@
+{
+  "inputs": {
+    "classical_validation": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/classical/pure_eda/r2/pilot/validation.json",
+      "sha256": "d518f021a9abdddc8b4d27d970136f86b7596672d628a9916eb75451f0841853"
+    },
+    "spec": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/specs/pure_eda/r2.json",
+      "sha256": "53d9f7518357ea9faeb35d455e1281a31fb576395b2062125c02541286c95057"
+    },
+    "tpr": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/classical/pure_eda/r2/pilot/production/production.tpr",
+      "sha256": "146c3cb528a2bc91ee7280c2dad81e0e25387e7abd25430e74b5b88dd6b78c60"
+    },
+    "trajectory": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/classical/pure_eda/r2/pilot/production/production.xtc",
+      "sha256": "c1c14c91cacea9f4ea8c2124a58a4f849e98d35f30cacad758af7390a74e9327"
+    }
+  },
+  "metrics": {
+    "analysis_stride_ps": 100.0,
+    "atom_count": 768,
+    "atom_groups": {
+      "eda_n": 128,
+      "heavy": 256,
+      "thf_o": 0
+    },
+    "autocorrelation": {
+      "cavity_associated_hydrogen_bonds": {
+        "effective_sample_size": 201.0,
+        "integrated_autocorrelation_time_ps": 50.0,
+        "statistical_inefficiency": 1.0
+      },
+      "cavity_bridging_hydrogen_bonds": {
+        "effective_sample_size": 201.0,
+        "integrated_autocorrelation_time_ps": 50.0,
+        "statistical_inefficiency": 1.0
+      },
+      "density_g_ml": {
+        "effective_sample_size": 164.11553734059447,
+        "integrated_autocorrelation_time_ps": 61.237346340602095,
+        "statistical_inefficiency": 1.224746926812042
+      },
+      "eda_eda_hydrogen_bonds": {
+        "effective_sample_size": 148.41092092133178,
+        "integrated_autocorrelation_time_ps": 67.71738856958652,
+        "statistical_inefficiency": 1.3543477713917302
+      },
+      "void_radius_angstrom": {
+        "effective_sample_size": 152.19302176151655,
+        "integrated_autocorrelation_time_ps": 66.03456507847089,
+        "statistical_inefficiency": 1.3206913015694177
+      },
+      "volume_nm3": {
+        "effective_sample_size": 163.0276847497272,
+        "integrated_autocorrelation_time_ps": 61.64597145220034,
+        "statistical_inefficiency": 1.2329194290440069
+      }
+    },
+    "checks": {
+      "classical_pilot_ready": true,
+      "effective_samples": true,
+      "minimum_analysis_frames": true,
+      "positive_void_proxy": true
+    },
+    "frame_count": 201,
+    "hydrogen_bond_definition": {
+      "angle_cutoff_degree": 150.0,
+      "cavity_bridge_margin_angstrom": 0.25,
+      "cavity_shell_thickness_angstrom": 2.0,
+      "distance_cutoff_angstrom": 3.5,
+      "interpretation": "geometric cavity relation; no bond to the cavity center is implied"
+    },
+    "hydrogen_bond_donor_count": 128,
+    "mean_descriptors": {
+      "cavity_associated_hydrogen_bonds": 2.3482587064676617,
+      "cavity_bridging_hydrogen_bonds": 0.0,
+      "density_g_ml": 0.883476462442506,
+      "eda_eda_hydrogen_bonds": 79.92537313432835,
+      "void_radius_angstrom": 1.9322284886119219,
+      "volume_nm3": 7.236357587244359
+    },
+    "ready": true,
+    "sampled_duration_ns": 20.0,
+    "trajectory_frame_count": 2001
+  },
+  "outputs": {
+    "hydrogen_bonds": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/pure_eda/r2/hydrogen_bonds.csv",
+    "rdf": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/pure_eda/r2/rdf.csv",
+    "timeseries": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/pure_eda/r2/timeseries.csv"
+  },
+  "ready": true,
+  "replica": 2,
+  "schema_version": 1,
+  "system_id": "pure_eda"
+}

@@ -1,0 +1,48 @@
+{
+  "cavity": {
+    "center_in_local_view_angstrom": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "center_in_periodic_cell_angstrom": [
+      5.009812831878662,
+      1.0019625663757328,
+      3.005887699127197
+    ],
+    "radius_angstrom": 1.8162334435805443,
+    "visualization_radius_angstrom": 7.0
+  },
+  "hydrogen_bond_counts_local_view": {
+    "cavity_associated_hydrogen_bonds": 0,
+    "cavity_bridging_hydrogen_bonds": 0,
+    "eda_eda_hydrogen_bonds": 0,
+    "eda_thf_hydrogen_bonds": 0
+  },
+  "hydrogen_bond_counts_whole_snapshot": {
+    "cavity_associated_hydrogen_bonds": 0,
+    "cavity_bridging_hydrogen_bonds": 0,
+    "eda_eda_hydrogen_bonds": 32,
+    "eda_thf_hydrogen_bonds": 7
+  },
+  "hydrogen_bond_definition": {
+    "angle_cutoff_degree": 150.0,
+    "cavity_bridge_margin_angstrom": 0.25,
+    "cavity_shell_thickness_angstrom": 2.0,
+    "distance_cutoff_angstrom": 3.5,
+    "interpretation": "geometric cavity relation; no bond to the cavity center is implied"
+  },
+  "interpretation": "Hydrogen bonds are classified relative to a geometric void proxy; no bond to the cavity center or electron localization is implied.",
+  "local_atom_count": 168,
+  "local_hydrogen_bonds": [],
+  "outputs": {
+    "local_pdb": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/eda_1to1/r3/snapshot/cavity_local.pdb",
+    "pymol": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/eda_1to1/r3/snapshot/cavity_hbonds.pml",
+    "svg": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/eda_1to1/r3/snapshot/cavity_hbonds.svg"
+  },
+  "replica": 3,
+  "schema_version": 1,
+  "scientific_status": "GEOMETRIC_CAVITY_HBOND_VISUALIZATION",
+  "snapshot_id": "eda_1to1_r3_t17000ps",
+  "system_id": "eda_1to1"
+}

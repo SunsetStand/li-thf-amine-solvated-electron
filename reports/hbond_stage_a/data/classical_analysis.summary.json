@@ -1,0 +1,167 @@
+{
+  "campaign": "hbond_pilot",
+  "kind": "analysis",
+  "ready": true,
+  "record_count": 6,
+  "schema_version": 1,
+  "systems": {
+    "eda_1to1": {
+      "checks": {
+        "all_records_ready": true,
+        "unique_replicas": true
+      },
+      "ensemble_mean_descriptors": {
+        "cavity_associated_hydrogen_bonds": {
+          "mean": 0.8888888888888888,
+          "replica_means": [
+            0.9800995024875622,
+            0.835820895522388,
+            0.8507462686567164
+          ],
+          "replica_standard_deviation": 0.07934244586338762
+        },
+        "cavity_bridging_hydrogen_bonds": {
+          "mean": 0.0,
+          "replica_means": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "replica_standard_deviation": 0.0
+        },
+        "density_g_ml": {
+          "mean": 0.8628520229305399,
+          "replica_means": [
+            0.862962773026796,
+            0.8624675937371392,
+            0.8631257020276845
+          ],
+          "replica_standard_deviation": 0.00034274745569683223
+        },
+        "eda_eda_hydrogen_bonds": {
+          "mean": 28.75953565505804,
+          "replica_means": [
+            28.746268656716417,
+            28.567164179104477,
+            28.965174129353233
+          ],
+          "replica_standard_deviation": 0.19933637414682215
+        },
+        "eda_thf_contacts": {
+          "mean": 14.492537313432836,
+          "replica_means": [
+            14.616915422885572,
+            14.606965174129353,
+            14.253731343283581
+          ],
+          "replica_standard_deviation": 0.2068718695153418
+        },
+        "eda_thf_hydrogen_bonds": {
+          "mean": 8.03648424543947,
+          "replica_means": [
+            8.223880597014926,
+            8.034825870646767,
+            7.850746268656716
+          ],
+          "replica_standard_deviation": 0.18657269201318774
+        },
+        "void_radius_angstrom": {
+          "mean": 1.9717340437615452,
+          "replica_means": [
+            1.9731113198886006,
+            1.996407344937039,
+            1.945683466458996
+          ],
+          "replica_standard_deviation": 0.025389971034080312
+        },
+        "volume_nm3": {
+          "mean": 8.148828279162776,
+          "replica_means": [
+            8.148018716515946,
+            8.152482495000465,
+            8.145983625971919
+          ],
+          "replica_standard_deviation": 0.0033242094431466377
+        }
+      },
+      "mean_void_radius_angstrom": 1.9717340437615452,
+      "minimum_effective_samples": 141.85925012334528,
+      "ready": true,
+      "replicas": [
+        1,
+        2,
+        3
+      ]
+    },
+    "pure_eda": {
+      "checks": {
+        "all_records_ready": true,
+        "unique_replicas": true
+      },
+      "ensemble_mean_descriptors": {
+        "cavity_associated_hydrogen_bonds": {
+          "mean": 2.459369817578773,
+          "replica_means": [
+            2.4029850746268657,
+            2.3482587064676617,
+            2.626865671641791
+          ],
+          "replica_standard_deviation": 0.147613988799162
+        },
+        "cavity_bridging_hydrogen_bonds": {
+          "mean": 0.0,
+          "replica_means": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "replica_standard_deviation": 0.0
+        },
+        "density_g_ml": {
+          "mean": 0.8828662015469108,
+          "replica_means": [
+            0.8805773286228935,
+            0.883476462442506,
+            0.8845448135753328
+          ],
+          "replica_standard_deviation": 0.0020529364292343577
+        },
+        "eda_eda_hydrogen_bonds": {
+          "mean": 79.80265339966832,
+          "replica_means": [
+            79.67661691542288,
+            79.92537313432835,
+            79.80597014925372
+          ],
+          "replica_standard_deviation": 0.12441127252743511
+        },
+        "void_radius_angstrom": {
+          "mean": 1.948471785138162,
+          "replica_means": [
+            1.957367824289921,
+            1.9322284886119219,
+            1.955819042512643
+          ],
+          "replica_standard_deviation": 0.014088406324986858
+        },
+        "volume_nm3": {
+          "mean": 7.241321137361378,
+          "replica_means": [
+            7.260851952851084,
+            7.236357587244359,
+            7.226753871988691
+          ],
+          "replica_standard_deviation": 0.017582588033270275
+        }
+      },
+      "mean_void_radius_angstrom": 1.948471785138162,
+      "minimum_effective_samples": 148.41092092133178,
+      "ready": true,
+      "replicas": [
+        1,
+        2,
+        3
+      ]
+    }
+  }
+}

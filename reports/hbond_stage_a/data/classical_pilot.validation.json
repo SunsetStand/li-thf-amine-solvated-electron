@@ -1,0 +1,36 @@
+{
+  "campaign": "hbond_pilot",
+  "ready": true,
+  "replica_density_relative_tolerance": 0.03,
+  "schema_version": 1,
+  "systems": {
+    "eda_1to1": {
+      "checks": {
+        "all_replicas_ready": true,
+        "replica_density_consistent": true
+      },
+      "mean_density_g_ml": 0.8625326816401121,
+      "ready": true,
+      "replica_density_relative_span": 0.0010367425462877414,
+      "replicas": [
+        1,
+        2,
+        3
+      ]
+    },
+    "pure_eda": {
+      "checks": {
+        "all_replicas_ready": true,
+        "replica_density_consistent": true
+      },
+      "mean_density_g_ml": 0.8816913447382132,
+      "ready": true,
+      "replica_density_relative_span": 0.0005416222026892505,
+      "replicas": [
+        1,
+        2,
+        3
+      ]
+    }
+  }
+}

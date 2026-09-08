@@ -1,0 +1,60 @@
+{
+  "cavity": {
+    "center_in_local_view_angstrom": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "center_in_periodic_cell_angstrom": [
+      15.436938794453942,
+      7.3828837712605795,
+      15.101353168487549
+    ],
+    "radius_angstrom": 1.9505357565878827,
+    "visualization_radius_angstrom": 7.0
+  },
+  "hydrogen_bond_counts_local_view": {
+    "cavity_associated_hydrogen_bonds": 0,
+    "cavity_bridging_hydrogen_bonds": 0,
+    "eda_eda_hydrogen_bonds": 1,
+    "eda_thf_hydrogen_bonds": 0
+  },
+  "hydrogen_bond_counts_whole_snapshot": {
+    "cavity_associated_hydrogen_bonds": 0,
+    "cavity_bridging_hydrogen_bonds": 0,
+    "eda_eda_hydrogen_bonds": 30,
+    "eda_thf_hydrogen_bonds": 7
+  },
+  "hydrogen_bond_definition": {
+    "angle_cutoff_degree": 150.0,
+    "cavity_bridge_margin_angstrom": 0.25,
+    "cavity_shell_thickness_angstrom": 2.0,
+    "distance_cutoff_angstrom": 3.5,
+    "interpretation": "geometric cavity relation; no bond to the cavity center is implied"
+  },
+  "interpretation": "Hydrogen bonds are classified relative to a geometric void proxy; no bond to the cavity center or electron localization is implied.",
+  "local_atom_count": 201,
+  "local_hydrogen_bonds": [
+    {
+      "acceptor_index": 644,
+      "bond_type": "eda_nh_eda_n",
+      "cavity_associated": false,
+      "cavity_bridging": false,
+      "cavity_segment_distance_angstrom": 5.519016212423164,
+      "donor_acceptor_distance_angstrom": 3.2211949140571323,
+      "donor_hydrogen_acceptor_angle_degree": 167.54881853448393,
+      "donor_index": 515,
+      "hydrogen_index": 523
+    }
+  ],
+  "outputs": {
+    "local_pdb": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/eda_1to1/r1/snapshot/cavity_local.pdb",
+    "pymol": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/eda_1to1/r1/snapshot/cavity_hbonds.pml",
+    "svg": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/eda_1to1/r1/snapshot/cavity_hbonds.svg"
+  },
+  "replica": 1,
+  "schema_version": 1,
+  "scientific_status": "GEOMETRIC_CAVITY_HBOND_VISUALIZATION",
+  "snapshot_id": "eda_1to1_r1_t12300ps",
+  "system_id": "eda_1to1"
+}

@@ -1,0 +1,108 @@
+{
+  "inputs": {
+    "classical_validation": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/classical/eda_1to1/r3/pilot/validation.json",
+      "sha256": "35e690b93cdc5d8fd4fc35fb0458577f71a349e8e060c32d8ea7350d58e08c0b"
+    },
+    "spec": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/specs/eda_1to1/r3.json",
+      "sha256": "b2e2ec126ebef303c4ec37dc74e98e332848266d9dced39d4369a95e72eda2dc"
+    },
+    "tpr": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/classical/eda_1to1/r3/pilot/production/production.tpr",
+      "sha256": "7c912a1cacc24c4f89e2e690e3f503741c85fbf23bd5ae7bfcd93772b655d074"
+    },
+    "trajectory": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/classical/eda_1to1/r3/pilot/production/production.xtc",
+      "sha256": "34967c76bf8ab377e49b9690bc1aa56f8b73f49d083fd6e0deb5ad8cfd248347"
+    }
+  },
+  "metrics": {
+    "analysis_stride_ps": 100.0,
+    "atom_count": 800,
+    "atom_groups": {
+      "eda_n": 64,
+      "heavy": 288,
+      "thf_o": 32
+    },
+    "autocorrelation": {
+      "cavity_associated_hydrogen_bonds": {
+        "effective_sample_size": 201.0,
+        "integrated_autocorrelation_time_ps": 50.0,
+        "statistical_inefficiency": 1.0
+      },
+      "cavity_bridging_hydrogen_bonds": {
+        "effective_sample_size": 201.0,
+        "integrated_autocorrelation_time_ps": 50.0,
+        "statistical_inefficiency": 1.0
+      },
+      "density_g_ml": {
+        "effective_sample_size": 155.96009328813534,
+        "integrated_autocorrelation_time_ps": 64.43956135261271,
+        "statistical_inefficiency": 1.2887912270522544
+      },
+      "eda_eda_hydrogen_bonds": {
+        "effective_sample_size": 153.21878634095427,
+        "integrated_autocorrelation_time_ps": 65.59247883373756,
+        "statistical_inefficiency": 1.311849576674751
+      },
+      "eda_thf_contacts": {
+        "effective_sample_size": 201.0,
+        "integrated_autocorrelation_time_ps": 50.0,
+        "statistical_inefficiency": 1.0
+      },
+      "eda_thf_hydrogen_bonds": {
+        "effective_sample_size": 201.0,
+        "integrated_autocorrelation_time_ps": 50.0,
+        "statistical_inefficiency": 1.0
+      },
+      "void_radius_angstrom": {
+        "effective_sample_size": 201.0,
+        "integrated_autocorrelation_time_ps": 50.0,
+        "statistical_inefficiency": 1.0
+      },
+      "volume_nm3": {
+        "effective_sample_size": 153.9963709087409,
+        "integrated_autocorrelation_time_ps": 65.26127817619603,
+        "statistical_inefficiency": 1.3052255635239205
+      }
+    },
+    "checks": {
+      "classical_pilot_ready": true,
+      "effective_samples": true,
+      "minimum_analysis_frames": true,
+      "positive_void_proxy": true
+    },
+    "frame_count": 201,
+    "hydrogen_bond_definition": {
+      "angle_cutoff_degree": 150.0,
+      "cavity_bridge_margin_angstrom": 0.25,
+      "cavity_shell_thickness_angstrom": 2.0,
+      "distance_cutoff_angstrom": 3.5,
+      "interpretation": "geometric cavity relation; no bond to the cavity center is implied"
+    },
+    "hydrogen_bond_donor_count": 64,
+    "mean_descriptors": {
+      "cavity_associated_hydrogen_bonds": 0.8507462686567164,
+      "cavity_bridging_hydrogen_bonds": 0.0,
+      "density_g_ml": 0.8631257020276845,
+      "eda_eda_hydrogen_bonds": 28.965174129353233,
+      "eda_thf_contacts": 14.253731343283581,
+      "eda_thf_hydrogen_bonds": 7.850746268656716,
+      "void_radius_angstrom": 1.945683466458996,
+      "volume_nm3": 8.145983625971919
+    },
+    "ready": true,
+    "sampled_duration_ns": 20.0,
+    "trajectory_frame_count": 2001
+  },
+  "outputs": {
+    "hydrogen_bonds": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/eda_1to1/r3/hydrogen_bonds.csv",
+    "rdf": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/eda_1to1/r3/rdf.csv",
+    "timeseries": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/eda_1to1/r3/timeseries.csv"
+  },
+  "ready": true,
+  "replica": 3,
+  "schema_version": 1,
+  "system_id": "eda_1to1"
+}

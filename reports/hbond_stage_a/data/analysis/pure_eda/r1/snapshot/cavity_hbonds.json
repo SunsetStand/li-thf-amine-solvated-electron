@@ -1,0 +1,115 @@
+{
+  "cavity": {
+    "center_in_local_view_angstrom": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "center_in_periodic_cell_angstrom": [
+      14.556860446929932,
+      9.381087843577067,
+      11.645488357543945
+    ],
+    "radius_angstrom": 1.998506908444239,
+    "visualization_radius_angstrom": 7.0
+  },
+  "hydrogen_bond_counts_local_view": {
+    "cavity_associated_hydrogen_bonds": 2,
+    "cavity_bridging_hydrogen_bonds": 0,
+    "eda_eda_hydrogen_bonds": 6,
+    "eda_thf_hydrogen_bonds": 0
+  },
+  "hydrogen_bond_counts_whole_snapshot": {
+    "cavity_associated_hydrogen_bonds": 2,
+    "cavity_bridging_hydrogen_bonds": 0,
+    "eda_eda_hydrogen_bonds": 78,
+    "eda_thf_hydrogen_bonds": 0
+  },
+  "hydrogen_bond_definition": {
+    "angle_cutoff_degree": 150.0,
+    "cavity_bridge_margin_angstrom": 0.25,
+    "cavity_shell_thickness_angstrom": 2.0,
+    "distance_cutoff_angstrom": 3.5,
+    "interpretation": "geometric cavity relation; no bond to the cavity center is implied"
+  },
+  "interpretation": "Hydrogen bonds are classified relative to a geometric void proxy; no bond to the cavity center or electron localization is implied.",
+  "local_atom_count": 180,
+  "local_hydrogen_bonds": [
+    {
+      "acceptor_index": 459,
+      "bond_type": "eda_nh_eda_n",
+      "cavity_associated": true,
+      "cavity_bridging": false,
+      "cavity_segment_distance_angstrom": 3.863235928126575,
+      "donor_acceptor_distance_angstrom": 3.3293892610071247,
+      "donor_hydrogen_acceptor_angle_degree": 167.07469909543113,
+      "donor_index": 300,
+      "hydrogen_index": 305
+    },
+    {
+      "acceptor_index": 603,
+      "bond_type": "eda_nh_eda_n",
+      "cavity_associated": true,
+      "cavity_bridging": false,
+      "cavity_segment_distance_angstrom": 3.6367632440918976,
+      "donor_acceptor_distance_angstrom": 3.2287608754872736,
+      "donor_hydrogen_acceptor_angle_degree": 163.7399223896252,
+      "donor_index": 351,
+      "hydrogen_index": 358
+    },
+    {
+      "acceptor_index": 456,
+      "bond_type": "eda_nh_eda_n",
+      "cavity_associated": false,
+      "cavity_bridging": false,
+      "cavity_segment_distance_angstrom": 5.153799426657817,
+      "donor_acceptor_distance_angstrom": 3.0050290877830554,
+      "donor_hydrogen_acceptor_angle_degree": 151.6610994019941,
+      "donor_index": 507,
+      "hydrogen_index": 514
+    },
+    {
+      "acceptor_index": 468,
+      "bond_type": "eda_nh_eda_n",
+      "cavity_associated": false,
+      "cavity_bridging": false,
+      "cavity_segment_distance_angstrom": 5.9348640888368225,
+      "donor_acceptor_distance_angstrom": 3.2001564708845005,
+      "donor_hydrogen_acceptor_angle_degree": 168.18514165502856,
+      "donor_index": 708,
+      "hydrogen_index": 712
+    },
+    {
+      "acceptor_index": 723,
+      "bond_type": "eda_nh_eda_n",
+      "cavity_associated": false,
+      "cavity_bridging": false,
+      "cavity_segment_distance_angstrom": 4.008620308503075,
+      "donor_acceptor_distance_angstrom": 3.383503884989161,
+      "donor_hydrogen_acceptor_angle_degree": 167.0866467208027,
+      "donor_index": 711,
+      "hydrogen_index": 719
+    },
+    {
+      "acceptor_index": 303,
+      "bond_type": "eda_nh_eda_n",
+      "cavity_associated": false,
+      "cavity_bridging": false,
+      "cavity_segment_distance_angstrom": 9.133125155017328,
+      "donor_acceptor_distance_angstrom": 3.236695369870899,
+      "donor_hydrogen_acceptor_angle_degree": 157.32129192218807,
+      "donor_index": 759,
+      "hydrogen_index": 767
+    }
+  ],
+  "outputs": {
+    "local_pdb": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/pure_eda/r1/snapshot/cavity_local.pdb",
+    "pymol": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/pure_eda/r1/snapshot/cavity_hbonds.pml",
+    "svg": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/pure_eda/r1/snapshot/cavity_hbonds.svg"
+  },
+  "replica": 1,
+  "schema_version": 1,
+  "scientific_status": "GEOMETRIC_CAVITY_HBOND_VISUALIZATION",
+  "snapshot_id": "pure_eda_r1_t17600ps",
+  "system_id": "pure_eda"
+}

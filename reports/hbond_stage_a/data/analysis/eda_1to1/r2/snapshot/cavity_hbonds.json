@@ -1,0 +1,137 @@
+{
+  "cavity": {
+    "center_in_local_view_angstrom": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "center_in_periodic_cell_angstrom": [
+      7.349918683369955,
+      16.70436064402262,
+      3.3408721288045244
+    ],
+    "radius_angstrom": 1.9038481477701084,
+    "visualization_radius_angstrom": 7.0
+  },
+  "hydrogen_bond_counts_local_view": {
+    "cavity_associated_hydrogen_bonds": 0,
+    "cavity_bridging_hydrogen_bonds": 0,
+    "eda_eda_hydrogen_bonds": 6,
+    "eda_thf_hydrogen_bonds": 2
+  },
+  "hydrogen_bond_counts_whole_snapshot": {
+    "cavity_associated_hydrogen_bonds": 0,
+    "cavity_bridging_hydrogen_bonds": 0,
+    "eda_eda_hydrogen_bonds": 28,
+    "eda_thf_hydrogen_bonds": 9
+  },
+  "hydrogen_bond_definition": {
+    "angle_cutoff_degree": 150.0,
+    "cavity_bridge_margin_angstrom": 0.25,
+    "cavity_shell_thickness_angstrom": 2.0,
+    "distance_cutoff_angstrom": 3.5,
+    "interpretation": "geometric cavity relation; no bond to the cavity center is implied"
+  },
+  "interpretation": "Hydrogen bonds are classified relative to a geometric void proxy; no bond to the cavity center or electron localization is implied.",
+  "local_atom_count": 225,
+  "local_hydrogen_bonds": [
+    {
+      "acceptor_index": 752,
+      "bond_type": "eda_nh_eda_n",
+      "cavity_associated": false,
+      "cavity_bridging": false,
+      "cavity_segment_distance_angstrom": 6.485938773087126,
+      "donor_acceptor_distance_angstrom": 3.4088565068100514,
+      "donor_hydrogen_acceptor_angle_degree": 178.27151583389872,
+      "donor_index": 440,
+      "hydrogen_index": 444
+    },
+    {
+      "acceptor_index": 635,
+      "bond_type": "eda_nh_eda_n",
+      "cavity_associated": false,
+      "cavity_bridging": false,
+      "cavity_segment_distance_angstrom": 3.9426932620876025,
+      "donor_acceptor_distance_angstrom": 3.098830646437853,
+      "donor_hydrogen_acceptor_angle_degree": 162.79038246900558,
+      "donor_index": 443,
+      "hydrogen_index": 451
+    },
+    {
+      "acceptor_index": 16,
+      "bond_type": "eda_nh_thf_o",
+      "cavity_associated": false,
+      "cavity_bridging": false,
+      "cavity_segment_distance_angstrom": 4.581897327468756,
+      "donor_acceptor_distance_angstrom": 3.216349118925973,
+      "donor_hydrogen_acceptor_angle_degree": 166.3451049061299,
+      "donor_index": 608,
+      "hydrogen_index": 612
+    },
+    {
+      "acceptor_index": 16,
+      "bond_type": "eda_nh_thf_o",
+      "cavity_associated": false,
+      "cavity_bridging": false,
+      "cavity_segment_distance_angstrom": 4.5801548628224005,
+      "donor_acceptor_distance_angstrom": 2.9660075629789255,
+      "donor_hydrogen_acceptor_angle_degree": 163.13740282204319,
+      "donor_index": 611,
+      "hydrogen_index": 618
+    },
+    {
+      "acceptor_index": 539,
+      "bond_type": "eda_nh_eda_n",
+      "cavity_associated": false,
+      "cavity_bridging": false,
+      "cavity_segment_distance_angstrom": 5.292567328905231,
+      "donor_acceptor_distance_angstrom": 3.1842431825380104,
+      "donor_hydrogen_acceptor_angle_degree": 167.90435650606904,
+      "donor_index": 632,
+      "hydrogen_index": 636
+    },
+    {
+      "acceptor_index": 539,
+      "bond_type": "eda_nh_eda_n",
+      "cavity_associated": false,
+      "cavity_bridging": false,
+      "cavity_segment_distance_angstrom": 3.942693262087603,
+      "donor_acceptor_distance_angstrom": 3.073191665879244,
+      "donor_hydrogen_acceptor_angle_degree": 166.5790631199714,
+      "donor_index": 635,
+      "hydrogen_index": 643
+    },
+    {
+      "acceptor_index": 440,
+      "bond_type": "eda_nh_eda_n",
+      "cavity_associated": false,
+      "cavity_bridging": false,
+      "cavity_segment_distance_angstrom": 6.399054363357506,
+      "donor_acceptor_distance_angstrom": 3.1427542071528562,
+      "donor_hydrogen_acceptor_angle_degree": 166.10200960442756,
+      "donor_index": 728,
+      "hydrogen_index": 732
+    },
+    {
+      "acceptor_index": 440,
+      "bond_type": "eda_nh_eda_n",
+      "cavity_associated": false,
+      "cavity_bridging": false,
+      "cavity_segment_distance_angstrom": 6.082101101704384,
+      "donor_acceptor_distance_angstrom": 3.3555329656742576,
+      "donor_hydrogen_acceptor_angle_degree": 178.06835929873557,
+      "donor_index": 755,
+      "hydrogen_index": 763
+    }
+  ],
+  "outputs": {
+    "local_pdb": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/eda_1to1/r2/snapshot/cavity_local.pdb",
+    "pymol": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/eda_1to1/r2/snapshot/cavity_hbonds.pml",
+    "svg": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/eda_1to1/r2/snapshot/cavity_hbonds.svg"
+  },
+  "replica": 2,
+  "schema_version": 1,
+  "scientific_status": "GEOMETRIC_CAVITY_HBOND_VISUALIZATION",
+  "snapshot_id": "eda_1to1_r2_t10700ps",
+  "system_id": "eda_1to1"
+}

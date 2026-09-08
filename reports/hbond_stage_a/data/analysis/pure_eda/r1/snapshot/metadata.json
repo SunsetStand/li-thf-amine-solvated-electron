@@ -1,0 +1,82 @@
+{
+  "li_atom_present": false,
+  "ready": true,
+  "replica": 1,
+  "schema_version": 1,
+  "selection": {
+    "candidate_start_ns": 10.0,
+    "descriptors": {
+      "cavity_associated_hydrogen_bonds": 2.0,
+      "cavity_bridging_hydrogen_bonds": 0.0,
+      "density_g_ml": 0.8736009336597643,
+      "eda_eda_hydrogen_bonds": 78.0,
+      "void_radius_angstrom": 1.998506908444239
+    },
+    "elapsed_ps": 17600.0,
+    "features": [
+      "density_g_ml",
+      "void_radius_angstrom",
+      "eda_eda_hydrogen_bonds",
+      "cavity_associated_hydrogen_bonds",
+      "cavity_bridging_hydrogen_bonds"
+    ],
+    "frame_index": 1760,
+    "method": "equilibrated robust-medoid",
+    "required_separation_ps": 1000.0,
+    "source_time_ps": 17600.0
+  },
+  "snapshot_id": "pure_eda_r1_t17600ps",
+  "source": {
+    "analysis": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/pure_eda/r1/analysis.json",
+      "sha256": "941cca50949ce80fd83c744b6c5b0d6c6cf261fc8da9ea303852ffedf8ece319"
+    },
+    "tpr_sha256": "3f941f40194fda616c152cc972eeb92c2449712bdd9e1eff9ca8e84932b34d47",
+    "trajectory_sha256": "d1d24a83f70a6b4baf3bd03d9d333feb68fddc27629048343b7c805655fffb1e"
+  },
+  "structure": {
+    "atom_count": 768,
+    "cavity_hbonds": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/pure_eda/r1/snapshot/cavity_hbonds.json",
+      "sha256": "0a5b77aa53228a2d18d471d66d2b41b2756e72e362c55d34712d62613faa403c"
+    },
+    "cavity_local_pdb": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/pure_eda/r1/snapshot/cavity_local.pdb",
+      "sha256": "0bf9df5cc6f4b8bfbc841238e193dfb9fc072b3dabef7804871c1cd9068c9b74"
+    },
+    "cavity_pymol": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/pure_eda/r1/snapshot/cavity_hbonds.pml",
+      "sha256": "2b31fc32d55cc283f51c5f0d4d84ec36bdf53446cc5b56a4ac2f7caffa48b619"
+    },
+    "cavity_svg": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/pure_eda/r1/snapshot/cavity_hbonds.svg",
+      "sha256": "900d9b61af133723b9ab0fc055a9c11a9137bad6a43d3b829633ca58c2b6abbb"
+    },
+    "cell": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/pure_eda/r1/snapshot/representative.cell.inc",
+      "sha256": "4d797ba670c67172f42ee40ceaac46a9a5d2c22506f11bb33844d7b03636319f"
+    },
+    "cell_vectors_angstrom": [
+      [
+        19.409147262573242,
+        0.0,
+        0.0
+      ],
+      [
+        1.1884675034644967e-15,
+        19.409147262573242,
+        0.0
+      ],
+      [
+        1.1884675034644967e-15,
+        1.1884675034644967e-15,
+        19.409147262573242
+      ]
+    ],
+    "xyz": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/hbond_pilot/analysis/pure_eda/r1/snapshot/representative.xyz",
+      "sha256": "28b47511316e3b87d5e3e2dfdd1b7a8e42223ff7c9d32556932efe374639d010"
+    }
+  },
+  "system_id": "pure_eda"
+}

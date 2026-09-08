@@ -159,6 +159,9 @@ Every representative structure includes an SVG overview, a local PDB, a PyMOL
 script, and JSON/CSV audit data. Hydrogen bonds are labeled as cavity-associated
 or geometrically bridging the void; no bond to the cavity center and no electron
 localization are implied. See [`docs/hbond-cavity.md`](docs/hbond-cavity.md).
+The completed six-replica campaign now has a shareable Chinese PDF, five PNG
+figures, aggregate metrics, and all compact audit inputs under
+[`reports/hbond_stage_a/`](reports/hbond_stage_a/README.md).
 
 Stage B converts the immutable snapshot bank into three configured Li/cavity
 seeds per replica and then runs only two periodic PBE-cDFT numerical smoke jobs
