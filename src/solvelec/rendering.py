@@ -100,6 +100,7 @@ def render_stage_b_cp2k(
     cell_path: str | Path,
     method: Mapping[str, Any],
     li_atom_index: int,
+    target_electrons: float | None = None,
 ) -> None:
     """Render the deliberately low-cost Stage-B numerical cDFT smoke input."""
 
@@ -108,9 +109,19 @@ def render_stage_b_cp2k(
     if method.get("scientific_status") != "NUMERICAL_SMOKE_ONLY":
         raise ValueError("Stage-B smoke method must remain explicitly non-production")
     li_valence = int(method["li_pseudopotential_valence_electrons"])
-    target = float(method["li_target_valence_electrons"])
-    if li_valence - target != 1.0:
+    configured_target = float(method["li_target_valence_electrons"])
+    if li_valence - configured_target != 1.0:
         raise ValueError("Li+ cDFT requires target = pseudopotential valence - 1")
+    if target_electrons is None:
+        target = configured_target
+    else:
+        target = float(target_electrons)
+        allowed_targets = {float(li_valence), float(li_valence - 1)}
+        if target not in allowed_targets:
+            raise ValueError(
+                "Stage-B mechanism smoke target must represent Li0 or Li+ "
+                f"({sorted(allowed_targets)} valence electrons)"
+            )
     substitutions = {
         "project": project,
         "coordinates_path": Path(coordinates_path).resolve().as_posix(),

@@ -110,6 +110,23 @@ set-resources:
     cpus_per_task: 4
     mem_mb: 4000
     runtime: 60
+  render_stage_b_mechanism_smoke:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
+  run_stage_b_mechanism_smoke:
+    slurm_partition: amd
+    tasks: 32
+    mpi: tmc-amd-mpirun.sh
+    cpus_per_task: 1
+    mem_mb: 128000
+    runtime: 720
+  summarize_stage_b_mechanism_smoke:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
   cp2k_cdft:
     slurm_partition: amd
     tasks: 32

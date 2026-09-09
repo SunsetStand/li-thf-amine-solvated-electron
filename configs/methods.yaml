@@ -79,6 +79,18 @@
     "cube_stride": 2,
     "li_pseudopotential_valence_electrons": 3,
     "li_target_valence_electrons": 2.0,
+    "mechanism_states": [
+      {
+        "id": "li0_diabatic",
+        "li_target_valence_electrons": 3.0,
+        "interpretation": "Numerical neutral-Li diabatic reference in the same neutral doublet cell."
+      },
+      {
+        "id": "li_plus_e_diabatic",
+        "li_target_valence_electrons": 2.0,
+        "interpretation": "Numerical Li+ plus excess-electron diabatic state in the same neutral doublet cell."
+      }
+    ],
     "scientific_status": "NUMERICAL_SMOKE_ONLY",
     "note": "This semilocal single point uses a 0.05-electron cDFT execution tolerance plus an independent final-population gate and tests the periodic pipeline only; it cannot pass the electron-localization gate."
   },

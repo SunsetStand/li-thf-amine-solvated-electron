@@ -171,12 +171,20 @@ one-step Stage-B target are:
 ```bash
 ./run.sh submit --campaign pilot --target stage_b_candidates
 ./run.sh submit --campaign pilot --target stage_b
+./run.sh submit --campaign pilot --target stage_b_mechanism_smoke
 ```
 
 The second command includes the first, so a fresh run needs only `stage_b`.
 Passing it proves the CP2K/cDFT execution chain, not the existence or stability
 of a solvated electron. Hybrid-DFT, constraint-release, VDE, and finite-size
 gates remain later stages. See `docs/stage-b.md`.
+
+The third command is the next, still non-production, mechanism test. On the same
+fixed `separated` geometry it pairs a neutral-Li diabatic reference (`TARGET
+3.0`) with a Li+ plus excess-electron diabatic state (`TARGET 2.0`) for replica
+1 of pure THF and THF/EDA 1.5 M. Its four CP2K jobs test whether both electronic
+branches can be obtained consistently and record their paired energy difference;
+that difference is not yet an ionization energy or localization result.
 
 ## What is implemented in v0.1
 

@@ -15,6 +15,7 @@ as a child Slurm job:
 ./run.sh doctor --require cdft
 ./run.sh dry-run --campaign pilot --target stage_b
 ./run.sh submit --campaign pilot --target stage_b
+./run.sh submit --campaign pilot --target stage_b_mechanism_smoke
 ```
 
 The one-step target first builds and gates all candidates, then launches the
@@ -98,6 +99,40 @@ qualitatively change an excess-electron state, and the ghost basis is not yet
 converged. No VDE, localization class, stability, or amine trend may be reported
 from this smoke calculation.
 
+## Paired Li0/Li+ plus excess-electron mechanism smoke
+
+The next target addresses the experimental mechanism question without yet
+expanding to the full amine matrix. It uses the correct primary pilot systems,
+pure THF and THF/EDA 1.5 M, not the supplementary neat-EDA or 1:1 THF/EDA
+hydrogen-bond campaign. Replica 1 and the existing `separated` candidate are
+held fixed. For each system, the workflow runs two neutral-doublet cDFT states
+with identical atoms, coordinates, cell, basis, ghost center, and numerical
+method:
+
+- `li0_diabatic`: Li valence population target 3.0 electrons;
+- `li_plus_e_diabatic`: Li valence population target 2.0 electrons, leaving the
+  conserved electron count available to the solvent/cavity basis space.
+
+Thus a fresh DAG contains six existing candidate builders, their summary and
+gate, four input renderers, four CP2K calculations, one paired summary, and one
+final gate: 18 jobs total. If the candidate bank is already complete, only the
+four renderers, four CP2K calculations, summary, and gate should remain.
+
+For each fixed geometry, the summary records
+
+```text
+Delta E = E(li_plus_e_diabatic) - E(li0_diabatic)
+```
+
+in Hartree and eV. `ready: true` requires both branches to terminate normally,
+produce an SCF energy, and satisfy the independent 0.05-electron cDFT population
+gate. This is a paired numerical mechanism smoke only. The energy difference is
+not yet a physical Li ionization energy because the electron state has not been
+classified, the constraint has not been released, PBE self-interaction and the
+ghost basis are uncalibrated, and no nuclear relaxation or finite-size test has
+been performed. Its purpose is to decide whether the two electronic branches
+are numerically accessible before investing in those higher-level gates.
+
 ## Outputs and success checks
 
 Large files are written below the configured storage run root, normally:
@@ -118,15 +153,24 @@ stage_b/<system>/r1/smoke/separated/cp2k.out
 stage_b_candidates.summary.json
 stage_b_cp2k_smoke.summary.json
 stage_b.done
+stage_b/<system>/r1/mechanism_smoke/separated/li0_diabatic/cp2k.inp
+stage_b/<system>/r1/mechanism_smoke/separated/li0_diabatic/cp2k.out
+stage_b/<system>/r1/mechanism_smoke/separated/li_plus_e_diabatic/cp2k.inp
+stage_b/<system>/r1/mechanism_smoke/separated/li_plus_e_diabatic/cp2k.out
+stage_b_mechanism_smoke.summary.json
+stage_b_mechanism_smoke.done
 ```
 
-Success requires `ready: true` in both summaries and a `stage_b.done` whose
-hash matches the smoke summary. While jobs run:
+The legacy target succeeds when both legacy summaries are `ready: true` and
+`stage_b.done` hashes the legacy smoke summary. The paired mechanism target
+separately requires `stage_b_mechanism_smoke.summary.json` to be `ready: true`
+and `stage_b_mechanism_smoke.done` to hash that summary. While jobs run:
 
 ```bash
 ./run.sh queue
 ./run.sh logs submit
 ./run.sh status --campaign pilot --target stage_b
+./run.sh status --campaign pilot --target stage_b_mechanism_smoke
 ```
 
 ## What follows

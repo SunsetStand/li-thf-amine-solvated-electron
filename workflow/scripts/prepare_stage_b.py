@@ -20,7 +20,7 @@ from solvelec.candidates import (
     select_candidate_pairs,
     write_xyz,
 )
-from solvelec.parsers import evaluate_cp2k_cdft_constraint, parse_cp2k_text
+from solvelec.parsers import HARTREE_TO_EV, evaluate_cp2k_cdft_constraint, parse_cp2k_text
 from solvelec.provenance import sha256_file
 from solvelec.rendering import render_stage_b_cp2k
 
@@ -123,9 +123,7 @@ def run_prepare(args: argparse.Namespace) -> int:
             "replica": int(spec["replica"]),
             "snapshot_id": metadata["snapshot_id"],
             "candidate_id": candidate["id"],
-            "target_li_cavity_distance_angstrom": candidate[
-                "target_li_cavity_distance_angstrom"
-            ],
+            "target_li_cavity_distance_angstrom": candidate["target_li_cavity_distance_angstrom"],
             "tolerance_angstrom": candidate["tolerance_angstrom"],
             "achieved_li_cavity_distance_angstrom": candidate[
                 "achieved_li_cavity_distance_angstrom"
@@ -215,6 +213,7 @@ def run_render(args: argparse.Namespace) -> int:
         cell_path=cell_path,
         method=methods["stage_b_smoke"],
         li_atom_index=int(structure["li_atom_index_cp2k"]),
+        target_electrons=args.target_electrons,
     )
     return 0
 
@@ -323,6 +322,153 @@ def run_smoke_summary(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_mechanism_summary(args: argparse.Namespace) -> int:
+    cardinalities = {
+        len(args.outputs),
+        len(args.cp2k_inputs),
+        len(args.manifests),
+        len(args.states),
+        len(args.targets),
+    }
+    if len(cardinalities) != 1:
+        raise ValueError(
+            "mechanism outputs, inputs, manifests, states, and targets must have "
+            "the same cardinality"
+        )
+    methods = _read_json(args.methods)
+    smoke_method = methods["stage_b_smoke"]
+    tolerance = float(smoke_method["cdft_eps_scf"])
+    state_configuration = {str(record["id"]): record for record in smoke_method["mechanism_states"]}
+    configured_states = {
+        state_id: float(record["li_target_valence_electrons"])
+        for state_id, record in state_configuration.items()
+    }
+    expected_state_ids = {"li0_diabatic", "li_plus_e_diabatic"}
+    if set(configured_states) != expected_state_ids:
+        raise ValueError("Stage-B mechanism smoke requires the configured Li0 and Li+e states")
+
+    states: list[dict[str, Any]] = []
+    for output_path, input_path, manifest_path, state_id, target_value in zip(
+        args.outputs,
+        args.cp2k_inputs,
+        args.manifests,
+        args.states,
+        args.targets,
+        strict=True,
+    ):
+        target = float(target_value)
+        if state_id not in configured_states or target != configured_states[state_id]:
+            raise ValueError(f"state {state_id!r} does not match the configured cDFT target")
+        output = Path(output_path)
+        cp2k_input = Path(input_path)
+        output_text = output.read_text(encoding="utf-8", errors="replace")
+        result = parse_cp2k_text(output_text)
+        cdft = evaluate_cp2k_cdft_constraint(
+            output_text,
+            expected_target_electrons=target,
+            tolerance_electrons=tolerance,
+        )
+        manifest = _read_json(manifest_path)
+        matches = [
+            record
+            for record in manifest.get("candidates", [])
+            if record.get("candidate_id") == args.candidate and record.get("ready")
+        ]
+        if len(matches) != 1:
+            raise ValueError(
+                f"manifest {manifest_path} lacks one ready {args.candidate!r} candidate"
+            )
+        states.append(
+            {
+                "system_id": manifest["system_id"],
+                "amine": manifest.get("amine"),
+                "replica": int(manifest["replica"]),
+                "candidate_id": args.candidate,
+                "state_id": state_id,
+                "li_target_valence_electrons": target,
+                "interpretation": str(state_configuration[state_id]["interpretation"]),
+                "converged": result.converged and cdft.converged,
+                "normal_termination": result.normal_termination,
+                "energy_hartree": result.energy_hartree,
+                "problems": [*result.problems, *cdft.problems],
+                "cdft_constraint_gate": cdft.as_dict(),
+                "input": {
+                    "path": str(cp2k_input.resolve()),
+                    "sha256": sha256_file(cp2k_input),
+                },
+                "output": {"path": str(output.resolve()), "sha256": sha256_file(output)},
+            }
+        )
+
+    grouped: dict[tuple[str, int, str], list[dict[str, Any]]] = defaultdict(list)
+    for state in states:
+        grouped[
+            (str(state["system_id"]), int(state["replica"]), str(state["candidate_id"]))
+        ].append(state)
+    records: list[dict[str, Any]] = []
+    for (system_id, replica, candidate_id), group in sorted(grouped.items()):
+        by_state = {str(state["state_id"]): state for state in group}
+        complete_pair = len(group) == 2 and set(by_state) == expected_state_ids
+        li0 = by_state.get("li0_diabatic")
+        separated = by_state.get("li_plus_e_diabatic")
+        energies_present = (
+            li0 is not None
+            and separated is not None
+            and li0["energy_hartree"] is not None
+            and separated["energy_hartree"] is not None
+        )
+        delta_hartree = None
+        if energies_present:
+            delta_hartree = float(separated["energy_hartree"]) - float(li0["energy_hartree"])
+        pair_ready = complete_pair and all(bool(state["converged"]) for state in group)
+        records.append(
+            {
+                "system_id": system_id,
+                "amine": group[0].get("amine"),
+                "replica": replica,
+                "candidate_id": candidate_id,
+                "ready": pair_ready,
+                "complete_pair": complete_pair,
+                "states": sorted(group, key=lambda record: str(record["state_id"])),
+                "delta_energy_hartree_li_plus_e_minus_li0": delta_hartree,
+                "fixed_geometry_diabatic_gap_ev": (
+                    delta_hartree * HARTREE_TO_EV if delta_hartree is not None else None
+                ),
+            }
+        )
+    expected_record_count = len(states) // 2
+    ready = (
+        bool(records)
+        and len(states) % 2 == 0
+        and len(records) == expected_record_count
+        and all(record["ready"] for record in records)
+    )
+    _write_json(
+        args.output,
+        {
+            "schema_version": 1,
+            "campaign": args.campaign,
+            "kind": "stage_b_mechanism_smoke",
+            "ready": ready,
+            "scientific_status": (
+                "NUMERICAL_MECHANISM_SMOKE_ONLY_NOT_A_STABILITY_OR_LOCALIZATION_RESULT"
+            ),
+            "energy_definition": "E(li_plus_e_diabatic) - E(li0_diabatic)",
+            "methods": {
+                "path": str(Path(args.methods).resolve()),
+                "sha256": sha256_file(args.methods),
+            },
+            "cdft_tolerance_electrons": tolerance,
+            "interpretation": (
+                "Fixed-geometry, same-electron-count paired cDFT execution check. "
+                "Neither the sign nor magnitude is a solvated-electron stability result."
+            ),
+            "records": records,
+        },
+    )
+    return 0
+
+
 def run_gate(args: argparse.Namespace) -> int:
     summary_path = Path(args.summary)
     summary = _read_json(summary_path)
@@ -353,6 +499,7 @@ def build_parser() -> argparse.ArgumentParser:
     render.add_argument("--template", required=True)
     render.add_argument("--candidate", required=True)
     render.add_argument("--project", required=True)
+    render.add_argument("--target-electrons", type=float)
     render.add_argument("--output", required=True)
     render.set_defaults(func=run_render)
     summary = subparsers.add_parser("summary")
@@ -369,6 +516,17 @@ def build_parser() -> argparse.ArgumentParser:
     smoke.add_argument("--cp2k-inputs", nargs="+", required=True)
     smoke.add_argument("--manifests", nargs="+", required=True)
     smoke.set_defaults(func=run_smoke_summary)
+    mechanism = subparsers.add_parser("mechanism-summary")
+    mechanism.add_argument("--campaign", required=True)
+    mechanism.add_argument("--candidate", required=True)
+    mechanism.add_argument("--methods", required=True)
+    mechanism.add_argument("--output", required=True)
+    mechanism.add_argument("--outputs", nargs="+", required=True)
+    mechanism.add_argument("--cp2k-inputs", nargs="+", required=True)
+    mechanism.add_argument("--manifests", nargs="+", required=True)
+    mechanism.add_argument("--states", nargs="+", required=True)
+    mechanism.add_argument("--targets", nargs="+", required=True, type=float)
+    mechanism.set_defaults(func=run_mechanism_summary)
     gate = subparsers.add_parser("gate")
     gate.add_argument("--summary", required=True)
     gate.add_argument("--output", required=True)

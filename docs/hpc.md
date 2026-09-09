@@ -181,6 +181,7 @@ Finally, preview the input bundle, smoke chains, or restricted classical pilot:
 ./run.sh dry-run --campaign pilot --target snapshot_bank
 ./run.sh dry-run --campaign pilot --target stage_b_candidates
 ./run.sh dry-run --campaign pilot --target stage_b
+./run.sh dry-run --campaign pilot --target stage_b_mechanism_smoke
 ./run.sh submit --campaign smoke --target classical_smoke
 ```
 
@@ -214,6 +215,7 @@ single-command numerical smoke chain:
 ./run.sh submit --campaign pilot --target stage_b_candidates
 # Inspect pilot/stage_b_candidates.summary.json and require ready=true.
 ./run.sh submit --campaign pilot --target stage_b
+./run.sh submit --campaign pilot --target stage_b_mechanism_smoke
 ```
 
 For a fresh run, the second command alone schedules both layers. Its DAG must
@@ -222,6 +224,13 @@ current pilot, and must contain no GROMACS or Stage-A rule. Each CP2K job uses
 32 MPI ranks, one CPU per rank, 128 GB, and at most 12 hours on `amd`. All input,
 wavefunction, cube, and output files remain under the configured storage run
 root. See `docs/stage-b.md`.
+
+The `stage_b_mechanism_smoke` target reuses the same immutable candidate bank
+and schedules four CP2K jobs: two pilot systems, replica 1 only, and two cDFT
+states on identical coordinates. A clean DAG contains 18 jobs; after the
+candidate bank exists, the incremental DAG normally contains ten. It remains a
+numerical execution gate, so do not interpret its paired energy difference as
+an ionization energy or a solvated-electron stability result.
 
 MPI rules use Snakemake's standard `mpi` and `tasks` resources. The reusable
 rule defaults to `mpirun`, and the generic Slurm profile overrides the launcher

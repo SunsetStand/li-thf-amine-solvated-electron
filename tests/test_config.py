@@ -52,6 +52,21 @@ class ConfigTests(unittest.TestCase):
     def test_repository_config_is_valid(self) -> None:
         self.assertEqual(validate_repository_configs(ROOT), [])
 
+    def test_stage_b_mechanism_states_are_a_fixed_pair(self) -> None:
+        campaign, _systems, methods = load_repository_configs(ROOT)
+        state_targets = {
+            state["id"]: state["li_target_valence_electrons"]
+            for state in methods["stage_b_smoke"]["mechanism_states"]
+        }
+        self.assertEqual(state_targets, {"li0_diabatic": 3.0, "li_plus_e_diabatic": 2.0})
+        self.assertEqual(campaign["campaigns"]["pilot"]["systems"], ["pure_thf", "eda_1p5m"])
+        self.assertEqual(
+            len(campaign["campaigns"]["pilot"]["systems"])
+            * methods["stage_b"]["smoke_replicas_per_system"]
+            * len(state_targets),
+            4,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

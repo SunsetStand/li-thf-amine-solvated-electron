@@ -97,6 +97,18 @@ class SlurmSafetyTests(unittest.TestCase):
         )
         self.assertNotIn("mpirun -np", rules)
 
+        mechanism_rules = (
+            ROOT / "workflow" / "rules" / "56_stage_b_mechanism_smoke.smk"
+        ).read_text(encoding="utf-8")
+        snakefile = (ROOT / "workflow" / "Snakefile").read_text(encoding="utf-8")
+        self.assertIn("stage_b_mechanism_smoke", runner)
+        self.assertIn("run_stage_b_mechanism_smoke:", profile)
+        self.assertIn("stage_b_mechanism_candidate_gate", mechanism_rules)
+        self.assertIn('CAMPAIGN not in {"pilot", "production"}', snakefile)
+        self.assertIn("bash {STAGE_RUNNER:q} cdft --", mechanism_rules)
+        self.assertIn("{resources.mpi} -n {resources.tasks} cp2k.psmp", mechanism_rules)
+        self.assertNotIn("mpirun -np", mechanism_rules)
+
     def test_tmc_mpi_launcher_enforces_the_slurm_allocation(self) -> None:
         launcher = TMC_MPI_LAUNCHER.read_text(encoding="utf-8")
         self.assertIn('[[ -n "${SLURM_JOB_ID:-}" ]]', launcher)

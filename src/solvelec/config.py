@@ -356,6 +356,20 @@ def validate_repository_configs(root: Path | None = None) -> list[str]:
             raise ValueError
     except (KeyError, TypeError, ValueError):
         errors.append("Stage-B Li+ must pair GTH-PBE-q3 with a 2.0-electron cDFT target")
+    try:
+        mechanism_states = stage_b_smoke["mechanism_states"]
+        if not isinstance(mechanism_states, list) or len(mechanism_states) != 2:
+            raise ValueError
+        state_targets = {
+            str(record["id"]): float(record["li_target_valence_electrons"])
+            for record in mechanism_states
+        }
+        if state_targets != {"li0_diabatic": 3.0, "li_plus_e_diabatic": 2.0}:
+            raise ValueError
+        if any(not str(record.get("interpretation", "")).strip() for record in mechanism_states):
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append("Stage-B mechanism smoke must define interpreted Li0=3.0 and Li+e=2.0 states")
     for key in ("cutoff_ry", "rel_cutoff_ry", "max_scf", "cube_stride"):
         try:
             if float(stage_b_smoke[key]) <= 0:

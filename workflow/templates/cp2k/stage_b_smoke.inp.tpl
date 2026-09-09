@@ -24,8 +24,9 @@
         TYPE_OF_CONSTRAINT BECKE
         ATOMIC_CHARGES TRUE
         STRENGTH 0.0
-        # TARGET is a valence-electron population. The installed Li
-        # GTH-PBE-q3 potential therefore represents Li+ at 2 electrons.
+        # TARGET is a valence-electron population. With GTH-PBE-q3,
+        # 3 electrons define the Li0 diabatic smoke reference and
+        # 2 electrons define the Li+ plus excess-electron diabatic smoke state.
         TARGET $li_target_valence_electrons
         &ATOM_GROUP
           ATOMS $li_atom_index

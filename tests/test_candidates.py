@@ -102,6 +102,29 @@ class CandidateTests(unittest.TestCase):
             self.assertNotIn("&SPIN_DENSITY_CUBE", text)
             self.assertNotIn("&HF", text)
 
+            render_stage_b_cp2k(
+                ROOT / "workflow" / "templates" / "cp2k" / "stage_b_smoke.inp.tpl",
+                output,
+                project="candidate_li0_smoke",
+                coordinates_path=xyz,
+                cell_path=cell,
+                method=methods["stage_b_smoke"],
+                li_atom_index=1,
+                target_electrons=3.0,
+            )
+            self.assertIn("TARGET 3.0", output.read_text(encoding="utf-8"))
+            with self.assertRaisesRegex(ValueError, "represent Li0 or Li\\+"):
+                render_stage_b_cp2k(
+                    ROOT / "workflow" / "templates" / "cp2k" / "stage_b_smoke.inp.tpl",
+                    output,
+                    project="invalid_mechanism_target",
+                    coordinates_path=xyz,
+                    cell_path=cell,
+                    method=methods["stage_b_smoke"],
+                    li_atom_index=1,
+                    target_electrons=1.5,
+                )
+
             inconsistent = deepcopy(methods["stage_b_smoke"])
             inconsistent["li_target_valence_electrons"] = 0.0
             with self.assertRaisesRegex(ValueError, "pseudopotential valence - 1"):
