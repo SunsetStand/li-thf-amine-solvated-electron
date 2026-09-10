@@ -122,6 +122,38 @@ class SlurmSafetyTests(unittest.TestCase):
         self.assertIn("SPIN_DENSITY", localization_rules)
         self.assertNotIn("cp2k.psmp", localization_rules)
 
+        state_rule, remaining_localization_rules = localization_rules.split(
+            "rule analyze_stage_b_localization_pair:", 1
+        )
+        state_inputs, state_parameters = state_rule.split("    params:", 1)
+        pair_rule = remaining_localization_rules.split(
+            "rule summarize_stage_b_localization:", 1
+        )[0]
+        pair_inputs, pair_parameters = pair_rule.split("    params:", 1)
+        for immutable_name in (
+            "mechanism_gate",
+            "spin_cube",
+            "electron_cube",
+            "candidate_metadata",
+            "coordinates",
+            "cell",
+            "spec",
+        ):
+            self.assertNotIn(f"        {immutable_name}=", state_inputs)
+            self.assertIn(f"        {immutable_name}=", state_parameters)
+        for immutable_name in (
+            "mechanism_gate",
+            "li0_electron_cube",
+            "li_plus_e_electron_cube",
+            "candidate_metadata",
+            "coordinates",
+            "cell",
+            "spec",
+        ):
+            self.assertNotIn(f"        {immutable_name}=", pair_inputs)
+            self.assertIn(f"        {immutable_name}=", pair_parameters)
+        self.assertIn("tokens != [\"sha256\", digest, summary.name]", snakefile)
+
     def test_tmc_mpi_launcher_enforces_the_slurm_allocation(self) -> None:
         launcher = TMC_MPI_LAUNCHER.read_text(encoding="utf-8")
         self.assertIn('[[ -n "${SLURM_JOB_ID:-}" ]]', launcher)

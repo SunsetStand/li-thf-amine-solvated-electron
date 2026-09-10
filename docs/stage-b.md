@@ -169,7 +169,15 @@ Each system also receives an `electron_density_difference.cube` on the original
 grid for direct inspection in Multiwfn, VMD, or another cube viewer.
 
 With the completed pilot mechanism smoke present, the incremental dry-run is
-expected to contain eight light analysis jobs and no CP2K/GROMACS calculation:
+expected to contain eight light analysis jobs and no CP2K/GROMACS calculation.
+
+The accepted mechanism gate, source cubes, candidate geometry, and composition
+specification are immutable handoff parameters rather than producer-linked
+Snakemake inputs. The gate checksum is checked against the accepted mechanism
+summary while the DAG is built, so this target cannot silently regenerate any
+upstream candidate or electronic-structure result.
+
+Run the check and analysis with:
 
 ```bash
 ./run.sh dry-run --campaign pilot --target stage_b_localization

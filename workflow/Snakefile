@@ -1,3 +1,4 @@
+import hashlib
 import json
 import shlex
 import sys
@@ -283,7 +284,29 @@ def stage_b_localization_mechanism_gate(_wildcards):
             "stage_b_localization requires the primary 'pilot' or 'production' "
             f"campaign, not {CAMPAIGN!r}"
         )
-    return f"{RUN_ROOT}/{CAMPAIGN}/stage_b_mechanism_smoke.done"
+    summary = Path(f"{RUN_ROOT}/{CAMPAIGN}/stage_b_mechanism_smoke.summary.json")
+    gate = Path(f"{RUN_ROOT}/{CAMPAIGN}/stage_b_mechanism_smoke.done")
+    for label, path in (("summary", summary), ("gate", gate)):
+        if not path.is_file():
+            raise ValueError(
+                f"stage_b_localization requires the accepted mechanism {label}: {path}"
+            )
+    tokens = gate.read_text(encoding="utf-8").split()
+    digest = hashlib.sha256(summary.read_bytes()).hexdigest()
+    if tokens != ["sha256", digest, summary.name]:
+        raise ValueError(
+            "stage_b_localization mechanism gate does not match the current mechanism summary"
+        )
+    return gate.as_posix()
+
+
+def stage_b_localization_artifact(path):
+    artifact = Path(path)
+    if not artifact.is_file():
+        raise ValueError(
+            f"stage_b_localization immutable handoff artifact is missing: {artifact}"
+        )
+    return artifact.as_posix()
 
 
 rule all:
