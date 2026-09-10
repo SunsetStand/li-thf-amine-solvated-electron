@@ -101,6 +101,18 @@ set-resources:
     cpus_per_task: 4
     mem_mb: 4000
     runtime: 60
+  analyze_stage_b_localization_state:
+    cpus_per_task: 4
+    mem_mb: 16000
+    runtime: 120
+  analyze_stage_b_localization_pair:
+    cpus_per_task: 4
+    mem_mb: 16000
+    runtime: 120
+  summarize_stage_b_localization:
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
   cp2k_cdft:
     tasks: 32
     mpi: srun

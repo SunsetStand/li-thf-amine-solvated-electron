@@ -94,6 +94,21 @@
     "scientific_status": "NUMERICAL_SMOKE_ONLY",
     "note": "This semilocal single point uses a 0.05-electron cDFT execution tolerance plus an independent final-population gate and tests the periodic pipeline only; it cannot pass the electron-localization gate."
   },
+  "stage_b_localization": {
+    "scientific_status": "NUMERICAL_LOCALIZATION_DIAGNOSTIC_ONLY",
+    "signed_spin_integral_min": 0.75,
+    "signed_spin_integral_max": 1.25,
+    "cube_grid_tolerance_angstrom": 0.001,
+    "density_difference_charge_tolerance_electrons": 0.10,
+    "covalent_bond_scale": 1.25,
+    "vdw_region_scale": 1.0,
+    "cavity_probe_radius_angstrom": 2.5,
+    "li_positive_spin_fraction_threshold": 0.50,
+    "molecular_positive_spin_fraction_threshold": 0.50,
+    "cavity_positive_spin_fraction_threshold": 0.55,
+    "interstitial_positive_spin_fraction_threshold": 0.55,
+    "note": "All regions and flags are geometric screening proxies. They are not Bader, Hirshfeld, orbital, stability, or production localization conclusions."
+  },
   "cp2k": {
     "functional": "PBE0-D3",
     "exact_exchange_fraction": 0.25,

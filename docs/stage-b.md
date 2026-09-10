@@ -16,6 +16,7 @@ as a child Slurm job:
 ./run.sh dry-run --campaign pilot --target stage_b
 ./run.sh submit --campaign pilot --target stage_b
 ./run.sh submit --campaign pilot --target stage_b_mechanism_smoke
+./run.sh submit --campaign pilot --target stage_b_localization
 ```
 
 The one-step target first builds and gates all candidates, then launches the
@@ -133,6 +134,52 @@ ghost basis are uncalibrated, and no nuclear relaxation or finite-size test has
 been performed. Its purpose is to decide whether the two electronic branches
 are numerically accessible before investing in those higher-level gates.
 
+## Stage B1: cube localization diagnostics
+
+After the paired mechanism smoke succeeds, `stage_b_localization` analyzes its
+four spin-density and four electron-density cubes without rerunning CP2K. It
+first requires the existing `stage_b_mechanism_smoke.done` handoff, then runs:
+
+- four independent spin-density analyses, one per system/state;
+- two same-grid density-difference analyses, one per system;
+- one combined JSON/CSV summary and one checksum gate.
+
+The periodic candidate XYZ is reconstructed into solvent molecules by a
+conservative covalent-radius graph. The detected molecule formulas and counts
+must agree with the composition specification. Positive spin density is then
+assigned to the nearest scaled van-der-Waals sphere; density outside the union
+is called `interstitial`. A separate 2.5-angstrom sphere around the existing
+ghost center is reported as a cavity probe. These regions can overlap and the
+threshold flags are deliberately non-exclusive geometric proxies. They are not
+Bader/Hirshfeld populations and do not establish electron stability.
+
+For each state the audit records the signed/positive/negative spin integrals,
+periodic centroid when defined, radius of gyration, IPR, Li fraction, strongest
+solvent atom and molecule, interstitial fraction, cavity-probe fraction, source
+paths, and SHA-256 hashes. The paired electron-density quantity is
+
+```text
+Delta rho = rho(li_plus_e_diabatic) - rho(li0_diabatic).
+```
+
+Both states have the same total electron count, so the signed integral of
+`Delta rho` must remain close to zero. The report also records accumulation,
+depletion, and half of the L1 norm as the amount of density rearranged.
+Each system also receives an `electron_density_difference.cube` on the original
+grid for direct inspection in Multiwfn, VMD, or another cube viewer.
+
+With the completed pilot mechanism smoke present, the incremental dry-run is
+expected to contain eight light analysis jobs and no CP2K/GROMACS calculation:
+
+```bash
+./run.sh dry-run --campaign pilot --target stage_b_localization
+./run.sh submit --campaign pilot --target stage_b_localization
+```
+
+`ready: true` means only that the inputs match, the molecular reconstruction
+passes, the signed spin lies in the configured numerical range, and the paired
+density difference conserves charge within its configured tolerance.
+
 ## Outputs and success checks
 
 Large files are written below the configured storage run root, normally:
@@ -159,6 +206,14 @@ stage_b/<system>/r1/mechanism_smoke/separated/li_plus_e_diabatic/cp2k.inp
 stage_b/<system>/r1/mechanism_smoke/separated/li_plus_e_diabatic/cp2k.out
 stage_b_mechanism_smoke.summary.json
 stage_b_mechanism_smoke.done
+stage_b/<system>/r1/mechanism_smoke/separated/<state>/localization.json
+stage_b/<system>/r1/mechanism_smoke/separated/localization_pair.json
+stage_b/<system>/r1/mechanism_smoke/separated/electron_density_difference.cube
+stage_b_localization.summary.json
+stage_b_localization.states.csv
+stage_b_localization.molecules.csv
+stage_b_localization.pairs.csv
+stage_b_localization.done
 ```
 
 The legacy target succeeds when both legacy summaries are `ready: true` and
@@ -171,6 +226,7 @@ and `stage_b_mechanism_smoke.done` to hash that summary. While jobs run:
 ./run.sh logs submit
 ./run.sh status --campaign pilot --target stage_b
 ./run.sh status --campaign pilot --target stage_b_mechanism_smoke
+./run.sh status --campaign pilot --target stage_b_localization
 ```
 
 ## What follows

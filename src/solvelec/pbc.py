@@ -64,9 +64,10 @@ def periodic_radius_of_gyration(
     total = float(weight.sum())
     if total <= 0:
         raise ValueError("weights must sum to a positive value")
-    displacements = np.vstack(
-        [minimum_image_displacement(point, centroid, box) for point in coords]
-    )
+    matrix = as_box_matrix(box)
+    fractional = (coords - np.asarray(centroid, dtype=float)) @ np.linalg.inv(matrix)
+    fractional -= np.floor(fractional + 0.5)
+    displacements = fractional @ matrix
     return float(
         np.sqrt(np.dot(weight, np.einsum("ij,ij->i", displacements, displacements)) / total)
     )

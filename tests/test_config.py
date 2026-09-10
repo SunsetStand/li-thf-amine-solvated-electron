@@ -67,6 +67,17 @@ class ConfigTests(unittest.TestCase):
             4,
         )
 
+    def test_stage_b_localization_is_explicitly_diagnostic(self) -> None:
+        _campaign, systems, methods = load_repository_configs(ROOT)
+        settings = methods["stage_b_localization"]
+        self.assertEqual(
+            settings["scientific_status"], "NUMERICAL_LOCALIZATION_DIAGNOSTIC_ONLY"
+        )
+        self.assertLess(settings["signed_spin_integral_min"], 1.0)
+        self.assertGreater(settings["signed_spin_integral_max"], 1.0)
+        for definition in [systems["thf"], *systems["amines"].values()]:
+            self.assertTrue(definition["element_counts"])
+
 
 if __name__ == "__main__":
     unittest.main()

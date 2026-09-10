@@ -109,6 +109,19 @@ class SlurmSafetyTests(unittest.TestCase):
         self.assertIn("{resources.mpi} -n {resources.tasks} cp2k.psmp", mechanism_rules)
         self.assertNotIn("mpirun -np", mechanism_rules)
 
+        localization_rules = (
+            ROOT / "workflow" / "rules" / "57_stage_b_localization.smk"
+        ).read_text(encoding="utf-8")
+        self.assertIn("stage_b_localization", runner)
+        self.assertIn("stage_b_localization_mechanism_gate", localization_rules)
+        self.assertIn("stage_b_mechanism_smoke.done", snakefile)
+        self.assertIn("analyze_stage_b_localization_state:", profile)
+        self.assertIn("analyze_stage_b_localization_pair:", profile)
+        self.assertIn("bash {STAGE_RUNNER:q} trajectory_analysis --", localization_rules)
+        self.assertIn("ELECTRON_DENSITY", localization_rules)
+        self.assertIn("SPIN_DENSITY", localization_rules)
+        self.assertNotIn("cp2k.psmp", localization_rules)
+
     def test_tmc_mpi_launcher_enforces_the_slurm_allocation(self) -> None:
         launcher = TMC_MPI_LAUNCHER.read_text(encoding="utf-8")
         self.assertIn('[[ -n "${SLURM_JOB_ID:-}" ]]', launcher)

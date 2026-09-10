@@ -29,6 +29,20 @@ class PbcCubeTests(unittest.TestCase):
         self.assertGreater(metrics.radius, 0)
         self.assertTrue(np.isfinite(metrics.inverse_participation_ratio))
 
+    def test_symmetric_density_reports_undefined_periodic_centroid(self) -> None:
+        cube = read_cube(ROOT / "tests" / "fixtures" / "boundary_spin.cube")
+        symmetric = type(cube)(
+            comments=cube.comments,
+            origin=cube.origin,
+            axes=cube.axes,
+            atoms=cube.atoms,
+            values=np.full(cube.shape, 0.25),
+            coordinate_unit=cube.coordinate_unit,
+        )
+        metrics = analyze_spin_density(symmetric)
+        self.assertIsNone(metrics.centroid)
+        self.assertIsNone(metrics.radius)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -172,6 +172,7 @@ one-step Stage-B target are:
 ./run.sh submit --campaign pilot --target stage_b_candidates
 ./run.sh submit --campaign pilot --target stage_b
 ./run.sh submit --campaign pilot --target stage_b_mechanism_smoke
+./run.sh submit --campaign pilot --target stage_b_localization
 ```
 
 The second command includes the first, so a fresh run needs only `stage_b`.
@@ -185,6 +186,14 @@ fixed `separated` geometry it pairs a neutral-Li diabatic reference (`TARGET
 1 of pure THF and THF/EDA 1.5 M. Its four CP2K jobs test whether both electronic
 branches can be obtained consistently and record their paired energy difference;
 that difference is not yet an ionization energy or localization result.
+
+The fourth command is a cube-only Stage-B1 diagnostic. It does not rerun CP2K:
+it checks the four existing spin/electron-density cube pairs, reconstructs
+solvent molecules across periodic boundaries, measures Li-, molecular-,
+interstitial-, and ghost-cavity geometric spin fractions, and audits the
+same-grid density redistribution between the two constrained states. Its
+labels are screening proxies pending independent Multiwfn/Hirshfeld/Bader and
+higher-level-method checks.
 
 ## What is implemented in v0.1
 
@@ -203,6 +212,8 @@ that difference is not yet an ionization energy or localization result.
   EDA--EDA/EDA--THF hydrogen-bond network visualization.
 - Config-driven Li/cavity candidate generation and a two-system periodic
   CP2K cDFT numerical smoke gate that cannot be mistaken for production data.
+- Checksummed Stage-B1 cube analysis with periodic molecular reconstruction,
+  geometric spin partitions, and charge-conserving paired density differences.
 - Provenance manifests with Git SHA, software versions, inputs, and checksums.
 - Dependency-light unit and integration tests using only core package dependencies.
 

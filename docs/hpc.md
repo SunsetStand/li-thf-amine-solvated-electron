@@ -182,6 +182,7 @@ Finally, preview the input bundle, smoke chains, or restricted classical pilot:
 ./run.sh dry-run --campaign pilot --target stage_b_candidates
 ./run.sh dry-run --campaign pilot --target stage_b
 ./run.sh dry-run --campaign pilot --target stage_b_mechanism_smoke
+./run.sh dry-run --campaign pilot --target stage_b_localization
 ./run.sh submit --campaign smoke --target classical_smoke
 ```
 
@@ -216,6 +217,7 @@ single-command numerical smoke chain:
 # Inspect pilot/stage_b_candidates.summary.json and require ready=true.
 ./run.sh submit --campaign pilot --target stage_b
 ./run.sh submit --campaign pilot --target stage_b_mechanism_smoke
+./run.sh submit --campaign pilot --target stage_b_localization
 ```
 
 For a fresh run, the second command alone schedules both layers. Its DAG must
@@ -231,6 +233,14 @@ states on identical coordinates. A clean DAG contains 18 jobs; after the
 candidate bank exists, the incremental DAG normally contains ten. It remains a
 numerical execution gate, so do not interpret its paired energy difference as
 an ionization energy or a solvated-electron stability result.
+
+Once the mechanism smoke has its ready summary and `.done` marker, the
+`stage_b_localization` target reads the existing cube files in place. With the
+current pilot already complete, its incremental dry-run should contain eight
+light Slurm jobs: four state analyses, two paired density differences, one
+summary, and one final gate. It must contain no CP2K or GROMACS engine job.
+State/pair jobs request 4 CPUs and 16 GB because the text cube grids are held in
+memory; the raw cubes remain under storage and are never copied into Git.
 
 MPI rules use Snakemake's standard `mpi` and `tasks` resources. The reusable
 rule defaults to `mpirun`, and the generic Slurm profile overrides the launcher

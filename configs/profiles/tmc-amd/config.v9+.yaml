@@ -127,6 +127,21 @@ set-resources:
     cpus_per_task: 4
     mem_mb: 4000
     runtime: 60
+  analyze_stage_b_localization_state:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 16000
+    runtime: 120
+  analyze_stage_b_localization_pair:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 16000
+    runtime: 120
+  summarize_stage_b_localization:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
   cp2k_cdft:
     slurm_partition: amd
     tasks: 32

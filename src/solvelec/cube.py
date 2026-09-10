@@ -43,16 +43,16 @@ class CubeData:
 class SpinDensityMetrics:
     electron_count: float
     signed_integral: float
-    centroid: tuple[float, float, float]
-    radius: float
+    centroid: tuple[float, float, float] | None
+    radius: float | None
     inverse_participation_ratio: float
     positive_voxels: int
 
-    def as_dict(self) -> dict[str, float | int | list[float]]:
+    def as_dict(self) -> dict[str, float | int | list[float] | None]:
         return {
             "electron_count": self.electron_count,
             "signed_integral": self.signed_integral,
-            "centroid": list(self.centroid),
+            "centroid": list(self.centroid) if self.centroid is not None else None,
             "radius": self.radius,
             "inverse_participation_ratio": self.inverse_participation_ratio,
             "positive_voxels": self.positive_voxels,
@@ -100,6 +100,32 @@ def read_cube(path: str | Path) -> CubeData:
     )
 
 
+def write_cube(path: str | Path, cube: CubeData) -> None:
+    output = Path(path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    temporary = output.with_name(f".{output.name}.tmp")
+    count_sign = -1 if cube.coordinate_unit == "angstrom" else 1
+    lines = [*cube.comments]
+    lines.append(
+        f"{len(cube.atoms):5d} {cube.origin[0]: .10E} "
+        f"{cube.origin[1]: .10E} {cube.origin[2]: .10E}"
+    )
+    for count, axis in zip(cube.shape, cube.axes, strict=True):
+        lines.append(
+            f"{count_sign * count:5d} {axis[0]: .10E} {axis[1]: .10E} {axis[2]: .10E}"
+        )
+    for atom in cube.atoms:
+        lines.append(
+            f"{int(atom[0]):5d} {atom[1]: .10E} {atom[2]: .10E} "
+            f"{atom[3]: .10E} {atom[4]: .10E}"
+        )
+    values = cube.values.reshape(-1)
+    for start in range(0, len(values), 6):
+        lines.append(" ".join(f"{value: .10E}" for value in values[start : start + 6]))
+    temporary.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    temporary.replace(output)
+
+
 def analyze_spin_density(cube: CubeData, clip_negative: bool = True) -> SpinDensityMetrics:
     density = cube.values.reshape(-1)
     signed_integral = float(density.sum() * cube.voxel_volume)
@@ -109,13 +135,22 @@ def analyze_spin_density(cube: CubeData, clip_negative: bool = True) -> SpinDens
     if electron_count <= 0:
         raise ValueError("Spin-density cube has no positive integrated density")
     positions = cube.grid_positions()
-    centroid = periodic_weighted_centroid(positions, weights, cube.box, cube.origin)
-    radius = periodic_radius_of_gyration(positions, weights, centroid, cube.box)
+    try:
+        centroid = periodic_weighted_centroid(positions, weights, cube.box, cube.origin)
+    except ValueError:
+        centroid = None
+        radius = None
+    else:
+        radius = periodic_radius_of_gyration(positions, weights, centroid, cube.box)
     ipr = float(np.sum(weights_density**2) * cube.voxel_volume / electron_count**2)
     return SpinDensityMetrics(
         electron_count=electron_count,
         signed_integral=signed_integral,
-        centroid=(float(centroid[0]), float(centroid[1]), float(centroid[2])),
+        centroid=(
+            (float(centroid[0]), float(centroid[1]), float(centroid[2]))
+            if centroid is not None
+            else None
+        ),
         radius=radius,
         inverse_participation_ratio=ipr,
         positive_voxels=int(np.count_nonzero(weights_density > 0)),

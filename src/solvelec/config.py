@@ -382,6 +382,43 @@ def validate_repository_configs(root: Path | None = None) -> list[str]:
             raise ValueError
     except (KeyError, TypeError, ValueError):
         errors.append("methods.stage_b_smoke.cdft_eps_scf must be in (0, 0.05]")
+    localization = methods.get("stage_b_localization", {})
+    if localization.get("scientific_status") != "NUMERICAL_LOCALIZATION_DIAGNOSTIC_ONLY":
+        errors.append("Stage-B localization status must remain explicitly diagnostic-only")
+    try:
+        lower = float(localization["signed_spin_integral_min"])
+        upper = float(localization["signed_spin_integral_max"])
+        if not 0 < lower < upper:
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append("Stage-B localization signed-spin bounds must be ordered and positive")
+    for key in (
+        "cube_grid_tolerance_angstrom",
+        "density_difference_charge_tolerance_electrons",
+        "vdw_region_scale",
+        "cavity_probe_radius_angstrom",
+    ):
+        try:
+            if float(localization[key]) <= 0:
+                raise ValueError
+        except (KeyError, TypeError, ValueError):
+            errors.append(f"methods.stage_b_localization.{key} must be positive")
+    try:
+        if float(localization["covalent_bond_scale"]) <= 1:
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append("methods.stage_b_localization.covalent_bond_scale must exceed one")
+    for key in (
+        "li_positive_spin_fraction_threshold",
+        "molecular_positive_spin_fraction_threshold",
+        "cavity_positive_spin_fraction_threshold",
+        "interstitial_positive_spin_fraction_threshold",
+    ):
+        try:
+            if not 0 < float(localization[key]) <= 1:
+                raise ValueError
+        except (KeyError, TypeError, ValueError):
+            errors.append(f"methods.stage_b_localization.{key} must be in (0, 1]")
     cp2k = methods.get("cp2k", {})
     try:
         if cp2k["li_potential"] != "GTH-PBE-q3":
