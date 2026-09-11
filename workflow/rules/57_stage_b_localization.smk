@@ -147,7 +147,9 @@ rule summarize_stage_b_localization:
         pairs_csv=f"{RUN_ROOT}/{CAMPAIGN}/stage_b_localization.pairs.csv",
     params:
         campaign=CAMPAIGN,
-        mechanism_summary=stage_b_localization_artifact(
+        # Delay this immutable-handoff check until the localization target is
+        # actually selected.  Eager evaluation breaks unrelated smoke DAGs.
+        mechanism_summary=lambda _wildcards: stage_b_localization_artifact(
             f"{RUN_ROOT}/{CAMPAIGN}/stage_b_mechanism_smoke.summary.json"
         ),
     threads: 4

@@ -20,7 +20,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
       - run: python -m pip install --upgrade pip
-      - run: python -m pip install -e .
+      # The core suite includes publication tests that read the committed PDF
+      # and exercise the report renderer, so install its declared runtime.
+      - run: python -m pip install -e ".[report]"
       - run: bash run.sh test
       - run: python -m compileall -q src tests workflow/scripts
 
