@@ -113,6 +113,37 @@ class StageBLocalizationTests(unittest.TestCase):
         self.assertEqual(self.topology.molecule_ids[0], -1)
         self.assertEqual(self.topology.molecule_ids[-1], -1)
 
+    def test_legacy_stage_a_specs_reconstruct_component_counts(self) -> None:
+        module = _load_script()
+        pure_thf = {
+            "system_id": "pure_thf",
+            "amine": None,
+            "thf_count": 64,
+            "amine_count_initial": 0,
+        }
+        mixed = {
+            "system_id": "eda_1p5m",
+            "amine": "eda",
+            "thf_count": 64,
+            "amine_count_initial": 9,
+        }
+        self.assertEqual(module._component_counts_from_spec(pure_thf), {"thf": 64})
+        self.assertEqual(
+            module._component_counts_from_spec(mixed), {"thf": 64, "eda": 9}
+        )
+
+    def test_current_spec_component_counts_take_precedence(self) -> None:
+        module = _load_script()
+        spec = {
+            "component_counts": {"thf": 32, "eda": 32},
+            "thf_count": 64,
+            "amine": "eda",
+            "amine_count_initial": 9,
+        }
+        self.assertEqual(
+            module._component_counts_from_spec(spec), {"thf": 32, "eda": 32}
+        )
+
     def test_state_partition_distinguishes_li_and_ghost_regions(self) -> None:
         values = np.zeros((22, 22, 22))
         values[1, 1, 1] = 1.0

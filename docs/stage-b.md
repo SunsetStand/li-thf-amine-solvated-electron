@@ -175,7 +175,9 @@ The accepted mechanism gate, source cubes, candidate geometry, and composition
 specification are immutable handoff parameters rather than producer-linked
 Snakemake inputs. The gate checksum is checked against the accepted mechanism
 summary while the DAG is built, so this target cannot silently regenerate any
-upstream candidate or electronic-structure result.
+upstream candidate or electronic-structure result. Specs produced before the
+explicit `component_counts` schema are read from their equivalent immutable
+`thf_count`, `amine`, and `amine_count_initial` fields.
 
 Run the check and analysis with:
 

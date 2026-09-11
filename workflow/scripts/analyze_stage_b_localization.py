@@ -58,6 +58,33 @@ def _component_definitions(systems: dict[str, Any]) -> dict[str, dict[str, Any]]
     }
 
 
+def _component_counts_from_spec(spec: dict[str, Any]) -> dict[str, int]:
+    """Read current specs and reconstruct immutable pre-schema Stage-A specs."""
+    configured = spec.get("component_counts")
+    if configured is not None:
+        if not isinstance(configured, dict) or not configured:
+            raise ValueError("component_counts must be a non-empty mapping")
+        counts = {str(name): int(count) for name, count in configured.items()}
+    else:
+        # Pilot Stage A predates component_counts. Preserve that accepted
+        # handoff and recover the equivalent counts from its original fields.
+        counts = {}
+        thf_count = int(spec.get("thf_count", 0))
+        if thf_count > 0:
+            counts["thf"] = thf_count
+        amine = spec.get("amine")
+        amine_count = int(spec.get("amine_count_initial", 0))
+        if amine:
+            if amine_count <= 0:
+                raise ValueError("legacy mixed-solvent spec has no positive amine count")
+            counts[str(amine)] = amine_count
+        elif amine_count != 0:
+            raise ValueError("legacy spec has an amine count but no amine identifier")
+    if not counts or any(count <= 0 for count in counts.values()):
+        raise ValueError("spec must contain at least one positive solvent component count")
+    return counts
+
+
 def _validated_inputs(args: argparse.Namespace) -> tuple[
     dict[str, Any],
     dict[str, Any],
@@ -101,7 +128,7 @@ def _validated_inputs(args: argparse.Namespace) -> tuple[
         elements,
         positions,
         cell,
-        spec["component_counts"],
+        _component_counts_from_spec(spec),
         _component_definitions(systems),
         bond_scale=float(settings["covalent_bond_scale"]),
     )
