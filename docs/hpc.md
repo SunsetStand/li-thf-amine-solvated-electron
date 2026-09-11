@@ -183,6 +183,7 @@ Finally, preview the input bundle, smoke chains, or restricted classical pilot:
 ./run.sh dry-run --campaign pilot --target stage_b
 ./run.sh dry-run --campaign pilot --target stage_b_mechanism_smoke
 ./run.sh dry-run --campaign pilot --target stage_b_localization
+./run.sh dry-run --campaign pilot --target stage_b_report
 ./run.sh submit --campaign smoke --target classical_smoke
 ```
 
@@ -218,6 +219,7 @@ single-command numerical smoke chain:
 ./run.sh submit --campaign pilot --target stage_b
 ./run.sh submit --campaign pilot --target stage_b_mechanism_smoke
 ./run.sh submit --campaign pilot --target stage_b_localization
+./run.sh submit --campaign pilot --target stage_b_report
 ```
 
 For a fresh run, the second command alone schedules both layers. Its DAG must
@@ -241,6 +243,11 @@ light Slurm jobs: four state analyses, two paired density differences, one
 summary, and one final gate. It must contain no CP2K or GROMACS engine job.
 State/pair jobs request 4 CPUs and 16 GB because the text cube grids are held in
 memory; the raw cubes remain under storage and are never copied into Git.
+
+After that gate succeeds, `stage_b_report` is a two-job lightweight handoff:
+one report builder and one SHA-256 gate. It reads all completed Stage-B layers,
+writes a Chinese PDF plus compact figures/audit data, and must not contain any
+CP2K or GROMACS job in its incremental dry-run.
 
 MPI rules use Snakemake's standard `mpi` and `tasks` resources. The reusable
 rule defaults to `mpirun`, and the generic Slurm profile overrides the launcher

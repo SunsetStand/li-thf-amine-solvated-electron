@@ -173,7 +173,13 @@ one-step Stage-B target are:
 ./run.sh submit --campaign pilot --target stage_b
 ./run.sh submit --campaign pilot --target stage_b_mechanism_smoke
 ./run.sh submit --campaign pilot --target stage_b_localization
+./run.sh submit --campaign pilot --target stage_b_report
 ```
+
+After the cube-only localization gate succeeds, `stage_b_report` creates the
+complete Chinese Stage-B PDF, five figures, compact audit data, metrics, and a
+SHA-256 provenance manifest. It is a two-job lightweight target and does not
+schedule CP2K or GROMACS. See [reports/stage_b/README.md](reports/stage_b/README.md).
 
 The second command includes the first, so a fresh run needs only `stage_b`.
 Passing it proves the CP2K/cDFT execution chain, not the existence or stability

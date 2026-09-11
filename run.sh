@@ -336,9 +336,9 @@ workflow_target_from_args() {
     previous="${item}"
   done
   case "${target}" in
-    input_bundle|classical_smoke|classical_pilot|classical_analysis|snapshot_bank|hbond_stage_a|stage_b_candidates|stage_b|stage_b_mechanism_smoke|stage_b_localization) ;;
+    input_bundle|classical_smoke|classical_pilot|classical_analysis|snapshot_bank|hbond_stage_a|stage_b_candidates|stage_b|stage_b_mechanism_smoke|stage_b_localization|stage_b_report) ;;
     *)
-      printf 'ERROR: unknown workflow target %s; choose input_bundle, classical_smoke, classical_pilot, classical_analysis, snapshot_bank, hbond_stage_a, stage_b_candidates, stage_b, stage_b_mechanism_smoke, or stage_b_localization.\n' \
+      printf 'ERROR: unknown workflow target %s; choose input_bundle, classical_smoke, classical_pilot, classical_analysis, snapshot_bank, hbond_stage_a, stage_b_candidates, stage_b, stage_b_mechanism_smoke, stage_b_localization, or stage_b_report.\n' \
         "${target}" >&2
       return 2
       ;;
@@ -371,7 +371,7 @@ case "${COMMAND}" in
     fi
     PYTHON_BIN="$(find_python)"
     "${PYTHON_BIN}" -m pip install --upgrade pip
-    extras="workflow,analysis,dev"
+    extras="workflow,analysis,report,dev"
     if command -v sbatch >/dev/null 2>&1; then
       extras="${extras},slurm"
     fi
@@ -675,6 +675,8 @@ The paired fixed-geometry Li0 versus Li+ plus excess-electron numerical test is:
 ./run.sh submit --campaign pilot --target stage_b_mechanism_smoke
 The cube-only Stage-B1 localization diagnostic is:
 ./run.sh submit --campaign pilot --target stage_b_localization
+The complete Stage-B report target is:
+./run.sh submit --campaign pilot --target stage_b_report
 EOF
     ;;
   *)

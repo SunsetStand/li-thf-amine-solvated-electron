@@ -142,6 +142,16 @@ set-resources:
     cpus_per_task: 4
     mem_mb: 4000
     runtime: 60
+  build_stage_b_report:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 16000
+    runtime: 120
+  stage_b_report:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
   cp2k_cdft:
     slurm_partition: amd
     tasks: 32

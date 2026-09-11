@@ -17,6 +17,7 @@ as a child Slurm job:
 ./run.sh submit --campaign pilot --target stage_b
 ./run.sh submit --campaign pilot --target stage_b_mechanism_smoke
 ./run.sh submit --campaign pilot --target stage_b_localization
+./run.sh submit --campaign pilot --target stage_b_report
 ```
 
 The one-step target first builds and gates all candidates, then launches the
@@ -238,6 +239,36 @@ and `stage_b_mechanism_smoke.done` to hash that summary. While jobs run:
 ./run.sh status --campaign pilot --target stage_b_mechanism_smoke
 ./run.sh status --campaign pilot --target stage_b_localization
 ```
+
+## Complete report target
+
+Once `stage_b_localization.done` exists and matches its accepted summary, the
+complete Stage-B report is generated without revisiting any producer rule:
+
+```bash
+./run.sh dry-run --campaign pilot --target stage_b_report
+./run.sh submit --campaign pilot --target stage_b_report
+```
+
+The dry-run should list two jobs, `build_stage_b_report` and `stage_b_report`,
+with no CP2K or GROMACS rule. The builder validates the four accepted summary
+and gate pairs, all six candidate manifests and 18 candidate structures, the
+paired CP2K inputs/outputs, and the localization cube hashes. It then writes:
+
+```text
+stage_b_report/stage_b_report_zh.pdf
+stage_b_report/stage_b_metrics.json
+stage_b_report/report_provenance.json
+stage_b_report/figures/*.png
+stage_b_report/data/*
+stage_b_report.done
+```
+
+The PDF covers Stage B0 candidate construction, the legacy single-branch
+execution smoke, paired fixed-geometry cDFT states, energy gaps, Stage B1 spin
+and density localization, experimental interpretation, limitations, and the
+next production gates. Its scientific status remains explicitly numerical:
+`COMPLETED_NUMERICAL_STAGE_B_PILOT_NOT_PRODUCTION_MECHANISM`.
 
 ## What follows
 

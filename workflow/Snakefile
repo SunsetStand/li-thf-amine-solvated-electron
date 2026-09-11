@@ -42,6 +42,7 @@ PREPARE_STAGE_B = (ROOT / "workflow" / "scripts" / "prepare_stage_b.py").as_posi
 ANALYZE_STAGE_B_LOCALIZATION = (
     ROOT / "workflow" / "scripts" / "analyze_stage_b_localization.py"
 ).as_posix()
+BUILD_STAGE_B_REPORT = (ROOT / "reports" / "stage_b" / "build_report.py").as_posix()
 ENGINE_RUNNER = (ROOT / "workflow" / "scripts" / "run_checked_engine.py").as_posix()
 AMBER_PYTHON = f"{STORAGE_ROOT}/software/conda/envs/ambertools/bin/python"
 STAGE_RUNTIME_INPUTS = [
@@ -309,6 +310,31 @@ def stage_b_localization_artifact(path):
     return artifact.as_posix()
 
 
+def stage_b_report_handoff(_wildcards):
+    if CAMPAIGN not in {"pilot", "production"}:
+        raise ValueError(
+            "stage_b_report requires the primary 'pilot' or 'production' "
+            f"campaign, not {CAMPAIGN!r}"
+        )
+    names = (
+        ("stage_b_candidates.summary.json", "stage_b_candidates.done"),
+        ("stage_b_cp2k_smoke.summary.json", "stage_b.done"),
+        ("stage_b_mechanism_smoke.summary.json", "stage_b_mechanism_smoke.done"),
+        ("stage_b_localization.summary.json", "stage_b_localization.done"),
+    )
+    for summary_name, gate_name in names:
+        summary = Path(f"{RUN_ROOT}/{CAMPAIGN}/{summary_name}")
+        gate = Path(f"{RUN_ROOT}/{CAMPAIGN}/{gate_name}")
+        for label, path in (("summary", summary), ("gate", gate)):
+            if not path.is_file():
+                raise ValueError(f"stage_b_report requires accepted {label}: {path}")
+        tokens = gate.read_text(encoding="utf-8").split()
+        digest = hashlib.sha256(summary.read_bytes()).hexdigest()
+        if tokens != ["sha256", digest, summary.name]:
+            raise ValueError(f"stage_b_report gate does not match summary: {gate}")
+    return f"{RUN_ROOT}/{CAMPAIGN}/stage_b_localization.done"
+
+
 rule all:
     input:
         f"{RUN_ROOT}/{CAMPAIGN}/input_bundle.done"
@@ -323,4 +349,5 @@ include: "rules/50_cp2k_cdft.smk"
 include: "rules/55_stage_b.smk"
 include: "rules/56_stage_b_mechanism_smoke.smk"
 include: "rules/57_stage_b_localization.smk"
+include: "rules/58_stage_b_report.smk"
 include: "rules/70_report.smk"
