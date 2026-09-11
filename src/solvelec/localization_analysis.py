@@ -386,6 +386,35 @@ def _periodic_distance(
     return float(np.linalg.norm(vector))
 
 
+def _nearest_real_atom_surface(
+    point_angstrom: NDArray[np.float64],
+    elements: Sequence[str],
+    positions_angstrom: NDArray[np.float64],
+    cell_angstrom: NDArray[np.float64],
+) -> dict[str, Any]:
+    real_indices = [index for index, element in enumerate(elements) if element.upper() != "GH"]
+    if not real_indices:
+        raise ValueError("localization analysis requires at least one real atom")
+    reference = np.asarray(point_angstrom, dtype=float).reshape(1, 3)
+    positions = np.asarray(positions_angstrom, dtype=float)[real_indices]
+    vectors = minimum_image_vectors(reference, positions, cell_angstrom)[0]
+    distances = np.linalg.norm(vectors, axis=1)
+    clearances = []
+    for local_index, atom_index in enumerate(real_indices):
+        element = elements[atom_index].upper()
+        if element not in VDW_RADII_ANGSTROM:
+            raise ValueError(f"unsupported element for centroid clearance: {element!r}")
+        clearances.append(float(distances[local_index] - VDW_RADII_ANGSTROM[element]))
+    selected = int(np.argmin(clearances))
+    atom_index = real_indices[selected]
+    return {
+        "atom_index_1based": atom_index + 1,
+        "element": elements[atom_index],
+        "center_distance_angstrom": float(distances[selected]),
+        "vdw_surface_clearance_angstrom": float(clearances[selected]),
+    }
+
+
 def state_localization_record(
     cube: CubeData,
     elements: Sequence[str],
@@ -416,9 +445,9 @@ def state_localization_record(
     positive_total = float(integrated["positive_integral"])
     denominator = positive_total if positive_total > 0 else 1.0
     li_indices = [index for index, element in enumerate(elements) if element.upper() == "LI"]
-    if len(li_indices) != 1:
-        raise ValueError(f"candidate must contain exactly one Li atom, found {len(li_indices)}")
-    li_index = li_indices[0]
+    if len(li_indices) > 1:
+        raise ValueError(f"candidate may contain at most one Li atom, found {len(li_indices)}")
+    li_index = li_indices[0] if li_indices else None
     atom_positive = np.asarray(integrated.pop("atom_positive_integrals"), dtype=float)
     atom_negative = np.asarray(
         integrated.pop("atom_negative_magnitude_integrals"), dtype=float
@@ -452,15 +481,39 @@ def state_localization_record(
     max_molecule_fraction = (
         float(molecule_records[0]["positive_spin_fraction"]) if molecule_records else 0.0
     )
-    li_fraction = float(atom_positive[li_index] / denominator)
+    li_fraction = float(atom_positive[li_index] / denominator) if li_index is not None else None
+    centroid_probe_fraction = None
+    nearest_atom = None
+    if centroid is not None:
+        centroid_partition = build_geometric_partition(
+            cube,
+            elements,
+            positions_angstrom,
+            centroid,
+            vdw_scale=float(settings["vdw_region_scale"]),
+            cavity_probe_radius_angstrom=float(settings["cavity_probe_radius_angstrom"]),
+        )
+        centroid_integrated = integrate_partitioned_field(
+            cube, cube.values, centroid_partition, topology.molecule_ids
+        )
+        centroid_probe_fraction = float(centroid_integrated["cavity_probe_positive_fraction"])
+        nearest_atom = _nearest_real_atom_surface(
+            centroid, elements, positions_angstrom, cell_angstrom
+        )
     proxy_flags = {
-        "li_centered": li_fraction >= float(settings["li_positive_spin_fraction_threshold"]),
+        "li_centered": (
+            li_fraction is not None
+            and li_fraction >= float(settings["li_positive_spin_fraction_threshold"])
+        ),
         "single_solvent_molecule": max_molecule_fraction
         >= float(settings["molecular_positive_spin_fraction_threshold"]),
         "ghost_cavity_centered": float(integrated["cavity_probe_positive_fraction"])
         >= float(settings["cavity_positive_spin_fraction_threshold"]),
         "interstitial": float(integrated["interstitial_positive_fraction"])
         >= float(settings["interstitial_positive_spin_fraction_threshold"]),
+        "centroid_in_geometric_void": (
+            nearest_atom is not None and float(nearest_atom["vdw_surface_clearance_angstrom"]) > 0.0
+        ),
     }
     return {
         "spin_density": {
@@ -474,7 +527,7 @@ def state_localization_record(
             "absolute_integral": float(integrated["absolute_integral"]),
             "centroid_to_li_angstrom": (
                 _periodic_distance(centroid, positions_angstrom[li_index], cell_angstrom)
-                if centroid is not None
+                if centroid is not None and li_index is not None
                 else None
             ),
             "centroid_to_ghost_cavity_angstrom": (
@@ -482,14 +535,23 @@ def state_localization_record(
                 if centroid is not None
                 else None
             ),
+            "nearest_real_atom": nearest_atom,
+            "centroid_probe_positive_spin_fraction": centroid_probe_fraction,
         },
         "geometric_partition": {
             "definition": "nearest scaled van-der-Waals sphere; outside union is interstitial",
             "vdw_region_scale": float(settings["vdw_region_scale"]),
             "cavity_probe_radius_angstrom": float(settings["cavity_probe_radius_angstrom"]),
-            "li_signed_spin_electrons": float(atom_signed[li_index]),
-            "li_positive_spin_electrons": float(atom_positive[li_index]),
-            "li_negative_spin_magnitude_electrons": float(atom_negative[li_index]),
+            "li_atom_present": li_index is not None,
+            "li_signed_spin_electrons": (
+                float(atom_signed[li_index]) if li_index is not None else None
+            ),
+            "li_positive_spin_electrons": (
+                float(atom_positive[li_index]) if li_index is not None else None
+            ),
+            "li_negative_spin_magnitude_electrons": (
+                float(atom_negative[li_index]) if li_index is not None else None
+            ),
             "li_positive_spin_fraction": li_fraction,
             "maximum_solvent_atom": {
                 "atom_index_1based": max_atom_index + 1,

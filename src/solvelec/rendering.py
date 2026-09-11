@@ -145,6 +145,47 @@ def render_stage_b_cp2k(
     output.write_text(rendered.rstrip() + "\n", encoding="utf-8")
 
 
+def render_stage_b2_intrinsic_cp2k(
+    template_path: str | Path,
+    output_path: str | Path,
+    *,
+    project: str,
+    coordinates_path: str | Path,
+    cell_path: str | Path,
+    method: Mapping[str, Any],
+) -> None:
+    """Render a Li-free, unconstrained excess-electron numerical smoke input."""
+
+    if method.get("scientific_status") != "NUMERICAL_VERTICAL_ELECTRON_ONLY_SMOKE":
+        raise ValueError("Stage-B2 intrinsic method must remain explicitly smoke-only")
+    if int(method.get("charge", 0)) != -1 or int(method.get("multiplicity", 0)) != 2:
+        raise ValueError("Stage-B2 intrinsic smoke requires a charge -1 doublet")
+    substitutions = {
+        "project": project,
+        "coordinates_path": Path(coordinates_path).resolve().as_posix(),
+        "cell_path": Path(cell_path).resolve().as_posix(),
+        "charge": int(method["charge"]),
+        "multiplicity": int(method["multiplicity"]),
+        "basis_set": method["basis_set"],
+        "ghost_basis_set": method["ghost_basis_set"],
+        "potential": method["potential"],
+        "cutoff_ry": method["cutoff_ry"],
+        "rel_cutoff_ry": method["rel_cutoff_ry"],
+        "eps_scf": method["eps_scf"],
+        "max_scf": int(method["max_scf"]),
+        "cube_stride": int(method["cube_stride"]),
+    }
+    rendered = _load_template(template_path).substitute(substitutions)
+    upper = rendered.upper()
+    if "&CDFT" in upper or "&CONSTRAINT" in upper:
+        raise ValueError("Stage-B2 intrinsic smoke must not contain localization constraints")
+    if "&KIND LI" in upper:
+        raise ValueError("Stage-B2 intrinsic smoke must not define a Li kind")
+    output = Path(output_path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(rendered.rstrip() + "\n", encoding="utf-8")
+
+
 def render_orca(
     template_path: str | Path,
     output_path: str | Path,

@@ -419,6 +419,55 @@ def validate_repository_configs(root: Path | None = None) -> list[str]:
                 raise ValueError
         except (KeyError, TypeError, ValueError):
             errors.append(f"methods.stage_b_localization.{key} must be in (0, 1]")
+    intrinsic = methods.get("stage_b2_intrinsic_smoke", {})
+    if intrinsic.get("scientific_status") != "NUMERICAL_VERTICAL_ELECTRON_ONLY_SMOKE":
+        errors.append("Stage-B2 intrinsic status must remain explicitly vertical-smoke-only")
+    try:
+        smoke_systems = [str(value) for value in intrinsic["smoke_systems"]]
+        pilot_systems = set(campaign["campaigns"]["pilot"]["systems"])
+        if not smoke_systems or len(smoke_systems) != len(set(smoke_systems)):
+            raise ValueError
+        if not set(smoke_systems).issubset(pilot_systems):
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append("methods.stage_b2_intrinsic_smoke.smoke_systems must be unique pilot systems")
+    for key in ("smoke_replicas_per_system", "void_seed_count", "max_scf", "cube_stride"):
+        try:
+            value = int(intrinsic[key])
+            minimum = 2 if key == "void_seed_count" else 1
+            if value < minimum or value != float(intrinsic[key]):
+                raise ValueError
+        except (KeyError, TypeError, ValueError):
+            qualifier = "an integer >= 2" if key == "void_seed_count" else "a positive integer"
+            errors.append(f"methods.stage_b2_intrinsic_smoke.{key} must be {qualifier}")
+    try:
+        pilot_replicas = campaign["campaigns"]["pilot"].get("replicas", campaign["replicas"])
+        if int(intrinsic["smoke_replicas_per_system"]) > len(pilot_replicas):
+            raise ValueError
+        if int(intrinsic["void_seed_count"]) > int(stage_b["candidate_site_count"]):
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append("Stage-B2 intrinsic smoke size exceeds the accepted pilot candidate bank")
+    for key in ("cutoff_ry", "rel_cutoff_ry", "eps_scf", "cavity_probe_radius_angstrom"):
+        try:
+            if float(intrinsic[key]) <= 0:
+                raise ValueError
+        except (KeyError, TypeError, ValueError):
+            errors.append(f"methods.stage_b2_intrinsic_smoke.{key} must be positive")
+    try:
+        if int(intrinsic["charge"]) != -1 or int(intrinsic["multiplicity"]) != 2:
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append("Stage-B2 intrinsic electronic state must be a charge -1 doublet")
+    experiment = intrinsic.get("experiment_context", {})
+    if (
+        experiment.get("pfas_present") is not False
+        or experiment.get("electron_generation_is_rate_limiting") is not True
+        or experiment.get("electron_accumulates_without_pfas") is not True
+        or not str(experiment.get("pfas_electron_consumption_timescale", "")).strip()
+        or not str(experiment.get("provenance", "")).strip()
+    ):
+        errors.append("Stage-B2 intrinsic experiment context is incomplete or inconsistent")
     cp2k = methods.get("cp2k", {})
     try:
         if cp2k["li_potential"] != "GTH-PBE-q3":

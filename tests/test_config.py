@@ -78,6 +78,24 @@ class ConfigTests(unittest.TestCase):
         for definition in [systems["thf"], *systems["amines"].values()]:
             self.assertTrue(definition["element_counts"])
 
+    def test_stage_b2_intrinsic_smoke_is_li_and_pfas_free(self) -> None:
+        _campaign, _systems, methods = load_repository_configs(ROOT)
+        settings = methods["stage_b2_intrinsic_smoke"]
+        self.assertEqual(settings["scientific_status"], "NUMERICAL_VERTICAL_ELECTRON_ONLY_SMOKE")
+        self.assertEqual(settings["smoke_systems"], ["pure_thf", "eda_1p5m"])
+        self.assertEqual(settings["void_seed_count"], 2)
+        self.assertEqual((settings["charge"], settings["multiplicity"]), (-1, 2))
+        experiment = settings["experiment_context"]
+        self.assertFalse(experiment["pfas_present"])
+        self.assertTrue(experiment["electron_generation_is_rate_limiting"])
+        self.assertTrue(experiment["electron_accumulates_without_pfas"])
+        self.assertEqual(
+            len(settings["smoke_systems"])
+            * settings["smoke_replicas_per_system"]
+            * settings["void_seed_count"],
+            4,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

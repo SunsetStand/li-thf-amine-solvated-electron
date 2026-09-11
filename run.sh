@@ -336,9 +336,9 @@ workflow_target_from_args() {
     previous="${item}"
   done
   case "${target}" in
-    input_bundle|classical_smoke|classical_pilot|classical_analysis|snapshot_bank|hbond_stage_a|stage_b_candidates|stage_b|stage_b_mechanism_smoke|stage_b_localization|stage_b_report) ;;
+    input_bundle|classical_smoke|classical_pilot|classical_analysis|snapshot_bank|hbond_stage_a|stage_b_candidates|stage_b|stage_b_mechanism_smoke|stage_b_localization|stage_b_report|stage_b2_intrinsic_smoke) ;;
     *)
-      printf 'ERROR: unknown workflow target %s; choose input_bundle, classical_smoke, classical_pilot, classical_analysis, snapshot_bank, hbond_stage_a, stage_b_candidates, stage_b, stage_b_mechanism_smoke, stage_b_localization, or stage_b_report.\n' \
+      printf 'ERROR: unknown workflow target %s; choose input_bundle, classical_smoke, classical_pilot, classical_analysis, snapshot_bank, hbond_stage_a, stage_b_candidates, stage_b, stage_b_mechanism_smoke, stage_b_localization, stage_b_report, or stage_b2_intrinsic_smoke.\n' \
         "${target}" >&2
       return 2
       ;;
@@ -677,6 +677,8 @@ The cube-only Stage-B1 localization diagnostic is:
 ./run.sh submit --campaign pilot --target stage_b_localization
 The complete Stage-B report target is:
 ./run.sh submit --campaign pilot --target stage_b_report
+The Li-free, PFAS-free, unconstrained vertical excess-electron Stage-B2 smoke is:
+./run.sh submit --campaign pilot --target stage_b2_intrinsic_smoke
 EOF
     ;;
   *)

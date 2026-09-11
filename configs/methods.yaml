@@ -109,6 +109,32 @@
     "interstitial_positive_spin_fraction_threshold": 0.55,
     "note": "All regions and flags are geometric screening proxies. They are not Bader, Hirshfeld, orbital, stability, or production localization conclusions."
   },
+  "stage_b2_intrinsic_smoke": {
+    "scientific_status": "NUMERICAL_VERTICAL_ELECTRON_ONLY_SMOKE",
+    "smoke_systems": ["pure_thf", "eda_1p5m"],
+    "smoke_replicas_per_system": 1,
+    "void_seed_count": 2,
+    "charge": -1,
+    "multiplicity": 2,
+    "functional": "PBE-D3(BJ)",
+    "basis_set": "DZVP-MOLOPT-SR-GTH",
+    "ghost_basis_set": "TZV2P-MOLOPT-GTH-q1",
+    "potential": "GTH-PBE",
+    "cutoff_ry": 400,
+    "rel_cutoff_ry": 50,
+    "eps_scf": "1.0E-5",
+    "max_scf": 160,
+    "cube_stride": 2,
+    "cavity_probe_radius_angstrom": 4.0,
+    "experiment_context": {
+      "pfas_present": false,
+      "electron_generation_is_rate_limiting": true,
+      "electron_accumulates_without_pfas": true,
+      "pfas_electron_consumption_timescale": "seconds_or_faster",
+      "provenance": "user-reported experimental observation on 2026-09-11"
+    },
+    "interpretation": "Li-free, PFAS-free, fixed-nuclei excess-electron screening. Multiple ghost-basis locations are independent basis/initial-condition probes; no cDFT or spatial restraint is permitted. A successful run is not evidence of equilibrium stability, Li ionization thermodynamics, or PFAS reaction kinetics."
+  },
   "cp2k": {
     "functional": "PBE0-D3",
     "exact_exchange_fraction": 0.25,

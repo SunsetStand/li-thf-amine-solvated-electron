@@ -184,6 +184,7 @@ Finally, preview the input bundle, smoke chains, or restricted classical pilot:
 ./run.sh dry-run --campaign pilot --target stage_b_mechanism_smoke
 ./run.sh dry-run --campaign pilot --target stage_b_localization
 ./run.sh dry-run --campaign pilot --target stage_b_report
+./run.sh dry-run --campaign pilot --target stage_b2_intrinsic_smoke
 ./run.sh submit --campaign smoke --target classical_smoke
 ```
 
@@ -220,6 +221,7 @@ single-command numerical smoke chain:
 ./run.sh submit --campaign pilot --target stage_b_mechanism_smoke
 ./run.sh submit --campaign pilot --target stage_b_localization
 ./run.sh submit --campaign pilot --target stage_b_report
+./run.sh submit --campaign pilot --target stage_b2_intrinsic_smoke
 ```
 
 For a fresh run, the second command alone schedules both layers. Its DAG must
@@ -248,6 +250,13 @@ After that gate succeeds, `stage_b_report` is a two-job lightweight handoff:
 one report builder and one SHA-256 gate. It reads all completed Stage-B layers,
 writes a Chinese PDF plus compact figures/audit data, and must not contain any
 CP2K or GROMACS job in its incremental dry-run.
+
+`stage_b2_intrinsic_smoke` is a separate Li-free/PFAS-free branch. It reuses
+the accepted candidate-bank geometry only as an immutable solvent/void handoff,
+removes Li, and launches two unconstrained charge -1 doublets for each of the
+two pilot solvents. Its incremental DAG contains 16 jobs, including exactly
+four CP2K runs and no GROMACS jobs. See `docs/stage-b2.md` for the scientific
+boundary and acceptance checks.
 
 MPI rules use Snakemake's standard `mpi` and `tasks` resources. The reusable
 rule defaults to `mpirun`, and the generic Slurm profile overrides the launcher

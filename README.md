@@ -174,6 +174,7 @@ one-step Stage-B target are:
 ./run.sh submit --campaign pilot --target stage_b_mechanism_smoke
 ./run.sh submit --campaign pilot --target stage_b_localization
 ./run.sh submit --campaign pilot --target stage_b_report
+./run.sh submit --campaign pilot --target stage_b2_intrinsic_smoke
 ```
 
 After the cube-only localization gate succeeds, `stage_b_report` creates the
@@ -201,6 +202,13 @@ same-grid density redistribution between the two constrained states. Its
 labels are screening proxies pending independent Multiwfn/Hirshfeld/Bader and
 higher-level-method checks.
 
+The final command is the independent Stage-B2 pilot requested for the
+Li-free/PFAS-free hypothesis. It removes Li, releases every localization
+constraint, and runs a charge -1 doublet from two different ghost-basis seed
+locations in pure THF and 1.5 M EDA/THF. This four-CP2K-job target is a frozen-
+nuclei numerical probe, not evidence of equilibrium electron stability or PFAS
+kinetics. See [`docs/stage-b2.md`](docs/stage-b2.md).
+
 ## What is implemented in v0.1
 
 - Config-driven 11-system matrix (pure THF plus five amines at 1.5/3.0 M).
@@ -218,6 +226,8 @@ higher-level-method checks.
   EDA--EDA/EDA--THF hydrogen-bond network visualization.
 - Config-driven Li/cavity candidate generation and a two-system periodic
   CP2K cDFT numerical smoke gate that cannot be mistaken for production data.
+- Li-free, PFAS-free, unconstrained two-seed excess-electron smoke analysis
+  with explicit experimental provenance and interpretation limits.
 - Checksummed Stage-B1 cube analysis with periodic molecular reconstruction,
   geometric spin partitions, and charge-conserving paired density differences.
 - Provenance manifests with Git SHA, software versions, inputs, and checksums.

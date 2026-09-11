@@ -18,6 +18,7 @@ as a child Slurm job:
 ./run.sh submit --campaign pilot --target stage_b_mechanism_smoke
 ./run.sh submit --campaign pilot --target stage_b_localization
 ./run.sh submit --campaign pilot --target stage_b_report
+./run.sh submit --campaign pilot --target stage_b2_intrinsic_smoke
 ```
 
 The one-step target first builds and gates all candidates, then launches the
@@ -27,6 +28,9 @@ only:
 ```bash
 ./run.sh submit --campaign pilot --target stage_b_candidates
 ```
+
+The Li-free/PFAS-free hypothesis is intentionally isolated from this paired
+Li/cDFT chain as `stage_b2_intrinsic_smoke`; see `docs/stage-b2.md`.
 
 The current pilot DAG contains 14 jobs: six candidate builders, one candidate
 summary and gate, two CP2K input renderers, two CP2K jobs, one smoke summary,

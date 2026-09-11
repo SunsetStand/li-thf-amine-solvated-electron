@@ -177,6 +177,34 @@ class StageBLocalizationTests(unittest.TestCase):
         self.assertTrue(cavity["localization_proxy_flags"]["ghost_cavity_centered"])
         self.assertTrue(cavity["localization_proxy_flags"]["interstitial"])
 
+    def test_state_partition_accepts_a_li_free_excess_electron(self) -> None:
+        elements = [*THF_ELEMENTS, "GH"]
+        positions = np.vstack([THF_POSITIONS, [10.0, 10.0, 10.0]])
+        topology = infer_molecular_topology(
+            elements,
+            positions,
+            self.cell,
+            {"thf": 1},
+            {"thf": {"element_counts": {"C": 4, "H": 8, "O": 1}}},
+            bond_scale=1.25,
+        )
+        values = np.zeros((22, 22, 22))
+        values[10, 10, 10] = 1.0
+        result = state_localization_record(
+            _cube(values),
+            elements,
+            positions,
+            self.cell,
+            topology,
+            positions[-1],
+            SETTINGS,
+        )
+        self.assertFalse(result["geometric_partition"]["li_atom_present"])
+        self.assertIsNone(result["geometric_partition"]["li_positive_spin_fraction"])
+        self.assertFalse(result["localization_proxy_flags"]["li_centered"])
+        self.assertTrue(result["localization_proxy_flags"]["centroid_in_geometric_void"])
+        self.assertGreater(result["spin_density"]["centroid_probe_positive_spin_fraction"], 0.9)
+
     def test_density_difference_is_same_grid_charge_redistribution(self) -> None:
         li0 = np.zeros((22, 22, 22))
         separated = np.zeros((22, 22, 22))

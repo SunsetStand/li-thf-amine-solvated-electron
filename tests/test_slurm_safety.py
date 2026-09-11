@@ -154,6 +154,19 @@ class SlurmSafetyTests(unittest.TestCase):
             self.assertIn(f"        {immutable_name}=", pair_parameters)
         self.assertIn("tokens != [\"sha256\", digest, summary.name]", snakefile)
 
+        intrinsic_rules = (ROOT / "workflow" / "rules" / "59_stage_b2_intrinsic.smk").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("stage_b2_intrinsic_smoke", runner)
+        self.assertIn("stage_b2_intrinsic_candidate_gate", intrinsic_rules)
+        self.assertIn("run_stage_b2_intrinsic_smoke:", profile)
+        self.assertIn("bash {STAGE_RUNNER:q} cdft --", intrinsic_rules)
+        self.assertIn("{resources.mpi} -n {resources.tasks} cp2k.psmp", intrinsic_rules)
+        self.assertIn("electron_cube=(", intrinsic_rules)
+        self.assertNotIn("electron_cube=lambda", intrinsic_rules)
+        self.assertNotIn("gmx", intrinsic_rules.lower())
+        self.assertNotIn("mpirun -np", intrinsic_rules)
+
     def test_tmc_mpi_launcher_enforces_the_slurm_allocation(self) -> None:
         launcher = TMC_MPI_LAUNCHER.read_text(encoding="utf-8")
         self.assertIn('[[ -n "${SLURM_JOB_ID:-}" ]]', launcher)

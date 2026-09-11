@@ -39,6 +39,9 @@ ANALYZE_CLASSICAL = (
     ROOT / "workflow" / "scripts" / "analyze_classical_ensemble.py"
 ).as_posix()
 PREPARE_STAGE_B = (ROOT / "workflow" / "scripts" / "prepare_stage_b.py").as_posix()
+PREPARE_STAGE_B2_INTRINSIC = (
+    ROOT / "workflow" / "scripts" / "prepare_stage_b2_intrinsic.py"
+).as_posix()
 ANALYZE_STAGE_B_LOCALIZATION = (
     ROOT / "workflow" / "scripts" / "analyze_stage_b_localization.py"
 ).as_posix()
@@ -145,6 +148,53 @@ STAGE_B_LOCALIZATION_PAIR_RECORDS = [
     )
     for system, replica in STAGE_B_SMOKE_PAIRS
 ]
+STAGE_B2_INTRINSIC_SETTINGS = METHOD_CATALOG["stage_b2_intrinsic_smoke"]
+STAGE_B2_INTRINSIC_SYSTEMS = [
+    str(system)
+    for system in STAGE_B2_INTRINSIC_SETTINGS["smoke_systems"]
+    if str(system) in SYSTEMS
+]
+STAGE_B2_INTRINSIC_REPLICAS = sorted(int(value) for value in REPLICAS)[
+    : int(STAGE_B2_INTRINSIC_SETTINGS["smoke_replicas_per_system"])
+]
+STAGE_B2_INTRINSIC_PAIRS = [
+    (system, replica)
+    for system in STAGE_B2_INTRINSIC_SYSTEMS
+    for replica in STAGE_B2_INTRINSIC_REPLICAS
+]
+STAGE_B2_INTRINSIC_SEEDS = [
+    f"void_{rank:02d}"
+    for rank in range(1, int(STAGE_B2_INTRINSIC_SETTINGS["void_seed_count"]) + 1)
+]
+STAGE_B2_INTRINSIC_JOBS = [
+    (system, replica, seed)
+    for system, replica in STAGE_B2_INTRINSIC_PAIRS
+    for seed in STAGE_B2_INTRINSIC_SEEDS
+]
+STAGE_B2_INTRINSIC_INPUTS = [
+    (
+        f"{RUN_ROOT}/{CAMPAIGN}/stage_b2_intrinsic/{system}/r{replica}/"
+        f"{seed}/cp2k.inp"
+    )
+    for system, replica, seed in STAGE_B2_INTRINSIC_JOBS
+]
+STAGE_B2_INTRINSIC_OUTPUTS = [path.replace("cp2k.inp", "cp2k.out") for path in STAGE_B2_INTRINSIC_INPUTS]
+STAGE_B2_INTRINSIC_ANALYSES = [
+    path.replace("cp2k.inp", "analysis.json") for path in STAGE_B2_INTRINSIC_INPUTS
+]
+
+
+def stage_b2_intrinsic_project(system, replica, seed):
+    return f"{system}_r{replica}_{seed}_stage_b2_intrinsic_smoke"
+
+
+def stage_b2_intrinsic_directory(system, replica, seed):
+    return f"{RUN_ROOT}/{CAMPAIGN}/stage_b2_intrinsic/{system}/r{replica}/{seed}"
+
+
+def stage_b2_intrinsic_cube(system, replica, seed, density_kind):
+    project = stage_b2_intrinsic_project(system, replica, seed)
+    return f"{stage_b2_intrinsic_directory(system, replica, seed)}/{project}-{density_kind}-1_0.cube"
 
 
 def stage_b_mechanism_directory(system, replica, state):
@@ -310,6 +360,37 @@ def stage_b_localization_artifact(path):
     return artifact.as_posix()
 
 
+def stage_b2_intrinsic_candidate_gate(_wildcards):
+    if CAMPAIGN not in {"pilot", "production"}:
+        raise ValueError(
+            "stage_b2_intrinsic_smoke requires the primary 'pilot' or 'production' "
+            f"campaign, not {CAMPAIGN!r}"
+        )
+    configured = {str(value) for value in STAGE_B2_INTRINSIC_SETTINGS["smoke_systems"]}
+    missing = sorted(configured - set(SYSTEMS))
+    if missing:
+        raise ValueError(
+            f"stage_b2_intrinsic_smoke source campaign lacks configured systems: {missing}"
+        )
+    summary = Path(f"{RUN_ROOT}/{CAMPAIGN}/stage_b_candidates.summary.json")
+    gate = Path(f"{RUN_ROOT}/{CAMPAIGN}/stage_b_candidates.done")
+    for label, path in (("summary", summary), ("gate", gate)):
+        if not path.is_file():
+            raise ValueError(f"stage_b2_intrinsic_smoke requires accepted candidate {label}: {path}")
+    tokens = gate.read_text(encoding="utf-8").split()
+    digest = hashlib.sha256(summary.read_bytes()).hexdigest()
+    if tokens != ["sha256", digest, summary.name]:
+        raise ValueError("stage_b2_intrinsic_smoke candidate gate does not match its summary")
+    return gate.as_posix()
+
+
+def stage_b2_intrinsic_artifact(path):
+    artifact = Path(path)
+    if not artifact.is_file():
+        raise ValueError(f"stage_b2_intrinsic_smoke immutable handoff is missing: {artifact}")
+    return artifact.as_posix()
+
+
 def stage_b_report_handoff(_wildcards):
     if CAMPAIGN not in {"pilot", "production"}:
         raise ValueError(
@@ -350,4 +431,5 @@ include: "rules/55_stage_b.smk"
 include: "rules/56_stage_b_mechanism_smoke.smk"
 include: "rules/57_stage_b_localization.smk"
 include: "rules/58_stage_b_report.smk"
+include: "rules/59_stage_b2_intrinsic.smk"
 include: "rules/70_report.smk"
