@@ -1,0 +1,329 @@
+{
+  "campaign": "pilot",
+  "candidate_bank": {
+    "eda_1p5m": {
+      "compact": {
+        "achieved_distance_max_angstrom": 3.5874948807045195,
+        "achieved_distance_mean_angstrom": 3.5299466320288686,
+        "achieved_distance_min_angstrom": 3.459099160269572,
+        "achieved_distances_angstrom": [
+          3.5874948807045195,
+          3.5432458551125148,
+          3.459099160269572
+        ],
+        "cavity_clearance_mean_angstrom": 1.643227762017455,
+        "li_clearance_mean_angstrom": 1.8744555136857584,
+        "replica_count": 3,
+        "target_distance_angstrom": 3.5
+      },
+      "distant": {
+        "achieved_distance_max_angstrom": 9.036519759423195,
+        "achieved_distance_mean_angstrom": 9.02235391815345,
+        "achieved_distance_min_angstrom": 9.009331233784119,
+        "achieved_distances_angstrom": [
+          9.036519759423195,
+          9.021210761253032,
+          9.009331233784119
+        ],
+        "cavity_clearance_mean_angstrom": 1.6250306829761403,
+        "li_clearance_mean_angstrom": 1.7327674768238959,
+        "replica_count": 3,
+        "target_distance_angstrom": 9.0
+      },
+      "separated": {
+        "achieved_distance_max_angstrom": 6.098377443049629,
+        "achieved_distance_mean_angstrom": 6.0291340087540695,
+        "achieved_distance_min_angstrom": 5.9828037606898326,
+        "achieved_distances_angstrom": [
+          6.098377443049629,
+          5.9828037606898326,
+          6.006220822522745
+        ],
+        "cavity_clearance_mean_angstrom": 1.6023332784193436,
+        "li_clearance_mean_angstrom": 1.7994084443643625,
+        "replica_count": 3,
+        "target_distance_angstrom": 6.0
+      }
+    },
+    "pure_thf": {
+      "compact": {
+        "achieved_distance_max_angstrom": 3.562319180550096,
+        "achieved_distance_mean_angstrom": 3.5243657498816288,
+        "achieved_distance_min_angstrom": 3.471772127063074,
+        "achieved_distances_angstrom": [
+          3.5390059420317157,
+          3.562319180550096,
+          3.471772127063074
+        ],
+        "cavity_clearance_mean_angstrom": 1.5591277158176904,
+        "li_clearance_mean_angstrom": 1.7424704859455045,
+        "replica_count": 3,
+        "target_distance_angstrom": 3.5
+      },
+      "distant": {
+        "achieved_distance_max_angstrom": 9.036956961580758,
+        "achieved_distance_mean_angstrom": 9.001928046515426,
+        "achieved_distance_min_angstrom": 8.984088758272572,
+        "achieved_distances_angstrom": [
+          8.984088758272572,
+          8.98473841969295,
+          9.036956961580758
+        ],
+        "cavity_clearance_mean_angstrom": 1.671159742662508,
+        "li_clearance_mean_angstrom": 1.845378888111587,
+        "replica_count": 3,
+        "target_distance_angstrom": 9.0
+      },
+      "separated": {
+        "achieved_distance_max_angstrom": 6.008345127105715,
+        "achieved_distance_mean_angstrom": 5.957541766373403,
+        "achieved_distance_min_angstrom": 5.926463667328418,
+        "achieved_distances_angstrom": [
+          6.008345127105715,
+          5.926463667328418,
+          5.937816504686074
+        ],
+        "cavity_clearance_mean_angstrom": 1.6222737090650685,
+        "li_clearance_mean_angstrom": 1.8687344371945056,
+        "replica_count": 3,
+        "target_distance_angstrom": 6.0
+      }
+    }
+  },
+  "interpretation": {
+    "amine_trend": "EDA lowers the fixed-geometry diabatic gap in this one-snapshot PBE smoke, but the result is not yet a free energy or production trend.",
+    "cavity": "The configured ghost-cavity probe contains only a minor fraction of positive spin and density accumulation.",
+    "delocalization": "No single geometric region crosses the configured dominance threshold; the separated branch is distributed across solvent and interstitial regions.",
+    "li_to_environment": "The Li+e branch removes nearly all positive spin from the Li region and increases its radius of gyration.",
+    "numerical": "All candidate, cDFT, cube-integrity, and charge-conservation gates passed."
+  },
+  "kind": "complete_stage_b_pilot_report",
+  "legacy_smoke": {
+    "ready": true,
+    "records": [
+      {
+        "candidate_id": "separated",
+        "current_electrons": 2.045021367901,
+        "deviation_electrons": 0.04502136790100009,
+        "energy_hartree": -3117.3215608767355,
+        "ready": true,
+        "replica": 1,
+        "system_id": "eda_1p5m",
+        "target_electrons": 2.0,
+        "tolerance_electrons": 0.05
+      },
+      {
+        "candidate_id": "separated",
+        "current_electrons": 2.035839353097,
+        "deviation_electrons": 0.035839353096999815,
+        "energy_hartree": -2792.9701710048616,
+        "ready": true,
+        "replica": 1,
+        "system_id": "pure_thf",
+        "target_electrons": 2.0,
+        "tolerance_electrons": 0.05
+      }
+    ],
+    "scientific_status": "NUMERICAL_SMOKE_ONLY_NOT_A_LOCALIZATION_RESULT"
+  },
+  "limitations": [
+    "One quantum snapshot per system; no replica uncertainty.",
+    "Semilocal PBE can over-delocalize an excess electron through self-interaction error.",
+    "The ghost basis, cutoff, basis size, and cell-size dependence are not calibrated.",
+    "Nuclei are fixed and the cDFT constraint has not been released.",
+    "Geometric regions are not Bader, Hirshfeld, or orbital populations.",
+    "Only pure THF and EDA 1.5 M are in the quantum pilot; other amines and 3 M remain untested."
+  ],
+  "localization": {
+    "pairs": [
+      {
+        "difference_cube": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/mechanism_smoke/separated/electron_density_difference.cube",
+        "ghost_cavity_accumulation_fraction": 0.025082329341010793,
+        "interstitial_accumulation_fraction": 0.23477761902691327,
+        "li_density_change_electrons": -1.136636546889667,
+        "ready": true,
+        "rearranged_electrons_half_l1": 1.8384524260432524,
+        "signed_integral_electrons": 0.0004665729894943807,
+        "system_id": "eda_1p5m"
+      },
+      {
+        "difference_cube": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/mechanism_smoke/separated/electron_density_difference.cube",
+        "ghost_cavity_accumulation_fraction": 0.016319430273536113,
+        "interstitial_accumulation_fraction": 0.23738640717911863,
+        "li_density_change_electrons": -1.0153918149384389,
+        "ready": true,
+        "rearranged_electrons_half_l1": 1.8111571598280403,
+        "signed_integral_electrons": -7.437520434820655e-05,
+        "system_id": "pure_thf"
+      }
+    ],
+    "states": [
+      {
+        "flags": {
+          "ghost_cavity_centered": false,
+          "interstitial": false,
+          "li_centered": false,
+          "single_solvent_molecule": false
+        },
+        "ghost_cavity_probe_positive_spin_fraction": 0.005154772006294384,
+        "interstitial_positive_spin_fraction": 0.09742956390736192,
+        "inverse_participation_ratio": 0.005049978652114074,
+        "li_positive_spin_fraction": 0.46819131634456096,
+        "maximum_solvent_molecule_positive_spin_fraction": 0.15473995694212989,
+        "radius_angstrom": 3.3869812396826506,
+        "ready": true,
+        "signed_spin_electrons": 0.9999856183252831,
+        "solvent_vdw_positive_spin_fraction": 0.4343791197480771,
+        "spin_cube": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/mechanism_smoke/separated/li0_diabatic/eda_1p5m_r1_separated_li0_diabatic_mechanism_smoke-SPIN_DENSITY-1_0.cube",
+        "state_id": "li0_diabatic",
+        "system_id": "eda_1p5m"
+      },
+      {
+        "flags": {
+          "ghost_cavity_centered": false,
+          "interstitial": false,
+          "li_centered": false,
+          "single_solvent_molecule": false
+        },
+        "ghost_cavity_probe_positive_spin_fraction": 0.05060148089009986,
+        "interstitial_positive_spin_fraction": 0.4530960250544117,
+        "inverse_participation_ratio": 0.0005632011959491605,
+        "li_positive_spin_fraction": 0.017998721408147803,
+        "maximum_solvent_molecule_positive_spin_fraction": 0.07853142115174414,
+        "radius_angstrom": 4.39203775805145,
+        "ready": true,
+        "signed_spin_electrons": 1.0003203042964681,
+        "solvent_vdw_positive_spin_fraction": 0.5289052535374404,
+        "spin_cube": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/mechanism_smoke/separated/li_plus_e_diabatic/eda_1p5m_r1_separated_li_plus_e_diabatic_mechanism_smoke-SPIN_DENSITY-1_0.cube",
+        "state_id": "li_plus_e_diabatic",
+        "system_id": "eda_1p5m"
+      },
+      {
+        "flags": {
+          "ghost_cavity_centered": false,
+          "interstitial": false,
+          "li_centered": false,
+          "single_solvent_molecule": false
+        },
+        "ghost_cavity_probe_positive_spin_fraction": 0.00030616308892144484,
+        "interstitial_positive_spin_fraction": 0.1374295226681886,
+        "inverse_participation_ratio": 0.0032711829940166985,
+        "li_positive_spin_fraction": 0.4488851873306993,
+        "maximum_solvent_molecule_positive_spin_fraction": 0.10142842490430277,
+        "radius_angstrom": 4.241037960610502,
+        "ready": true,
+        "signed_spin_electrons": 0.9999954286650138,
+        "solvent_vdw_positive_spin_fraction": 0.41368529000111204,
+        "spin_cube": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/mechanism_smoke/separated/li0_diabatic/pure_thf_r1_separated_li0_diabatic_mechanism_smoke-SPIN_DENSITY-1_0.cube",
+        "state_id": "li0_diabatic",
+        "system_id": "pure_thf"
+      },
+      {
+        "flags": {
+          "ghost_cavity_centered": false,
+          "interstitial": false,
+          "li_centered": false,
+          "single_solvent_molecule": false
+        },
+        "ghost_cavity_probe_positive_spin_fraction": 0.028532787860770365,
+        "interstitial_positive_spin_fraction": 0.4474017090214084,
+        "inverse_participation_ratio": 0.0005510791075360582,
+        "li_positive_spin_fraction": 0.007575799333189114,
+        "maximum_solvent_molecule_positive_spin_fraction": 0.1027658519320402,
+        "radius_angstrom": 4.5542263909930645,
+        "ready": true,
+        "signed_spin_electrons": 0.9999943079574236,
+        "solvent_vdw_positive_spin_fraction": 0.5450224916454025,
+        "spin_cube": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/mechanism_smoke/separated/li_plus_e_diabatic/pure_thf_r1_separated_li_plus_e_diabatic_mechanism_smoke-SPIN_DENSITY-1_0.cube",
+        "state_id": "li_plus_e_diabatic",
+        "system_id": "pure_thf"
+      }
+    ]
+  },
+  "mechanism": {
+    "eda_gap_reduction_vs_pure_thf_ev": 1.441546558489072,
+    "energy_definition": "E(li_plus_e_diabatic) - E(li0_diabatic)",
+    "gaps_ev": {
+      "eda_1p5m": 0.5081838643066795,
+      "pure_thf": 1.9497304227957517
+    },
+    "states": [
+      {
+        "current_electrons": 2.992804421057,
+        "deviation_electrons": -0.007195578943000047,
+        "energy_hartree": -2793.041822276325,
+        "iteration": 5,
+        "ready": true,
+        "state_id": "li0_diabatic",
+        "system_id": "pure_thf",
+        "target_electrons": 3.0,
+        "tolerance_electrons": 0.05
+      },
+      {
+        "current_electrons": 2.035839353097,
+        "deviation_electrons": 0.035839353096999815,
+        "energy_hartree": -2792.970171004862,
+        "iteration": 3,
+        "ready": true,
+        "state_id": "li_plus_e_diabatic",
+        "system_id": "pure_thf",
+        "target_electrons": 2.0,
+        "tolerance_electrons": 0.05
+      },
+      {
+        "current_electrons": 2.969287908158,
+        "deviation_electrons": -0.030712091842000078,
+        "energy_hartree": -3117.3402362892894,
+        "iteration": 3,
+        "ready": true,
+        "state_id": "li0_diabatic",
+        "system_id": "eda_1p5m",
+        "target_electrons": 3.0,
+        "tolerance_electrons": 0.05
+      },
+      {
+        "current_electrons": 2.045021367901,
+        "deviation_electrons": 0.04502136790100009,
+        "energy_hartree": -3117.3215608767355,
+        "iteration": 4,
+        "ready": true,
+        "state_id": "li_plus_e_diabatic",
+        "system_id": "eda_1p5m",
+        "target_electrons": 2.0,
+        "tolerance_electrons": 0.05
+      }
+    ]
+  },
+  "next_gates": [
+    "Common-threshold and fixed-enclosed-spin three-dimensional visualization.",
+    "Multiwfn/Critic2 or CP2K Hirshfeld cross-check of spin and density redistribution.",
+    "Ghost-basis removal/translation and basis/cutoff convergence.",
+    "PBE0/ADMM fixed-geometry paired states, then cDFT release and VDE.",
+    "Replica and finite-size checks before the five-amine 1.5/3.0 M matrix."
+  ],
+  "ready": true,
+  "schema_version": 1,
+  "scientific_status": "COMPLETED_NUMERICAL_STAGE_B_PILOT_NOT_PRODUCTION_MECHANISM",
+  "scope": {
+    "candidate_ids": [
+      "compact",
+      "separated",
+      "distant"
+    ],
+    "fixed_geometry": true,
+    "periodic": true,
+    "quantum_candidate_id": "separated",
+    "replicas_in_candidate_bank": 3,
+    "replicas_in_quantum_smoke": 1,
+    "states": [
+      "li0_diabatic",
+      "li_plus_e_diabatic"
+    ],
+    "systems": [
+      "pure_thf",
+      "eda_1p5m"
+    ]
+  },
+  "source_bytes": 326496740,
+  "source_file_count": 93
+}

@@ -27,3 +27,19 @@ pilot rather than a production mechanism or stability result. Large cube and
 CP2K output files remain in storage and are referenced by path, size, and hash;
 only compact summaries, candidate geometry, CP2K inputs, figures, and the PDF
 are copied into the report directory.
+
+## Published pilot report
+
+The accepted `pilot` result generated on TMC-AMD is published here as
+[`stage_b_report_zh.pdf`](stage_b_report_zh.pdf). Supporting files are:
+
+- `figures/`: the five figures embedded in the PDF;
+- `stage_b_metrics.json`: compact report-level values and scientific status;
+- `report_provenance.json`: source and product paths, byte sizes, and SHA-256;
+- `data/`: accepted summaries, localization CSV tables, six candidate
+  manifests, the two selected structures, and four paired CP2K inputs.
+
+The large CP2K output and cube files are intentionally retained only in project
+storage. The provenance manifest records their immutable server paths and
+hashes, so the published report remains auditable without committing hundreds
+of megabytes of grids to Git.

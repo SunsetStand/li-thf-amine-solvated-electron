@@ -1,0 +1,807 @@
+{
+  "campaign": "pilot",
+  "kind": "stage_b_report_provenance",
+  "products": [
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b_report/stage_b_report_zh.pdf",
+      "sha256": "3d315a70c1370341b381e609ee1400ee5dfdabfef3bde8abed5fcc7d7d09be88",
+      "size_bytes": 1746071
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b_report/stage_b_metrics.json",
+      "sha256": "cf5a37a1c82a71ee463108e5948e41c0685e488cdd6f6cfd0f3795cfe89f2ee5",
+      "size_bytes": 13474
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b_report/figures/stage_b_pipeline.png",
+      "sha256": "935b591c14e7e0c75394345bc848048f6a156e4892a42996181c161914cd6793",
+      "size_bytes": 49768
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b_report/figures/candidate_bank.png",
+      "sha256": "8b1885dbe764298d170134108b53df61c34f697b0dbd15a96a539788e9cf0229",
+      "size_bytes": 41370
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b_report/figures/mechanism_energy.png",
+      "sha256": "f521d5d0b2f69655e3821d2c511718e08d81d9d6b8ba27b376b39a315b5fe2e0",
+      "size_bytes": 48685
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b_report/figures/spin_partition.png",
+      "sha256": "7de9c90b10798e50cd53ceb39ad06c36e10067f79bd030a7f69aa084d962990a",
+      "size_bytes": 42854
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b_report/figures/cube_maps.png",
+      "sha256": "5e618a756d14456dd81d03641fedce0ac113b7c8f5becce0bd93a78ed710791c",
+      "size_bytes": 670647
+    }
+  ],
+  "ready": true,
+  "schema_version": 1,
+  "scientific_status": "COMPLETED_NUMERICAL_STAGE_B_PILOT_NOT_PRODUCTION_MECHANISM",
+  "sources": [
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/specs/eda_1p5m/r1.json",
+      "roles": [
+        "localization:eda_1p5m:li0_diabatic:spec",
+        "localization:eda_1p5m:li_plus_e_diabatic:spec"
+      ],
+      "sha256": "b9de1783065a6cc85b54351c1874e1fe2bd8fd6ca853e44140fbf6a1946bd4ba",
+      "size_bytes": 265
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/specs/pure_thf/r1.json",
+      "roles": [
+        "localization:pure_thf:li0_diabatic:spec",
+        "localization:pure_thf:li_plus_e_diabatic:spec"
+      ],
+      "sha256": "4002add53fa1bc7c600798c90934ea8e8586c5a7e5585929ab3e75e1879bb6de",
+      "size_bytes": 264
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b.done",
+      "roles": [
+        "legacy_gate"
+      ],
+      "sha256": "23000d4bfa39ddeae3b5020c5affb5803a23bdad6ea9615fac1504e9efffa374",
+      "size_bytes": 105
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/candidates/compact/cell.inc",
+      "roles": [
+        "candidate_cell:eda_1p5m:r1:compact"
+      ],
+      "sha256": "e6a8a476ad7834c36b0d2001d9cefb022fc1609c5c34d05a416ee7998848eaed",
+      "size_bytes": 163
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/candidates/compact/coordinates.xyz",
+      "roles": [
+        "candidate_xyz:eda_1p5m:r1:compact"
+      ],
+      "sha256": "735c0167db3c00515b0b57d91e12cde94fdba7876d37daab344117ec28032afb",
+      "size_bytes": 43976
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/candidates/compact/metadata.json",
+      "roles": [
+        "candidate_metadata:eda_1p5m:r1:compact"
+      ],
+      "sha256": "e89d56aba8b16e6f57d0a9d222f8273090ac8c39e6b5f7c6e1957ff160a3fc32",
+      "size_bytes": 2528
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/candidates/distant/cell.inc",
+      "roles": [
+        "candidate_cell:eda_1p5m:r1:distant"
+      ],
+      "sha256": "e6a8a476ad7834c36b0d2001d9cefb022fc1609c5c34d05a416ee7998848eaed",
+      "size_bytes": 163
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/candidates/distant/coordinates.xyz",
+      "roles": [
+        "candidate_xyz:eda_1p5m:r1:distant"
+      ],
+      "sha256": "cbc92dddd31ca1841ca6df244dd6d48e3606093affc1f9c3aec7bdf9d6895717",
+      "size_bytes": 43974
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/candidates/distant/metadata.json",
+      "roles": [
+        "candidate_metadata:eda_1p5m:r1:distant"
+      ],
+      "sha256": "bdc824083013b7bfcb8d3328ffecf37fc0d2cce557155f5816d47f5913ca6d16",
+      "size_bytes": 2511
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/candidates/manifest.json",
+      "roles": [
+        "candidate_manifest:eda_1p5m:r1"
+      ],
+      "sha256": "7dfb1dd9b099b84814ee1a17091e2d2eab83a5a26279ebb2c388c1a9caf52a1c",
+      "size_bytes": 18671
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/candidates/separated/cell.inc",
+      "roles": [
+        "candidate_cell:eda_1p5m:r1:separated",
+        "localization:eda_1p5m:li0_diabatic:cell",
+        "localization:eda_1p5m:li_plus_e_diabatic:cell"
+      ],
+      "sha256": "e6a8a476ad7834c36b0d2001d9cefb022fc1609c5c34d05a416ee7998848eaed",
+      "size_bytes": 163
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/candidates/separated/coordinates.xyz",
+      "roles": [
+        "candidate_xyz:eda_1p5m:r1:separated",
+        "localization:eda_1p5m:li0_diabatic:coordinates",
+        "localization:eda_1p5m:li_plus_e_diabatic:coordinates"
+      ],
+      "sha256": "953b50b0d112bf9c8db3121b47f80a90c0702af68539934c516824d2939a31cc",
+      "size_bytes": 43979
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/candidates/separated/metadata.json",
+      "roles": [
+        "candidate_metadata:eda_1p5m:r1:separated",
+        "localization:eda_1p5m:li0_diabatic:candidate_metadata",
+        "localization:eda_1p5m:li_plus_e_diabatic:candidate_metadata"
+      ],
+      "sha256": "c02158695ef55e14193130d4f14540ceb63ef86c6c320eeef035ef2c0e2e643d",
+      "size_bytes": 2528
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/mechanism_smoke/separated/electron_density_difference.cube",
+      "roles": [
+        "density_difference_cube:eda_1p5m"
+      ],
+      "sha256": "62f4140892e8232e5f349bb98cd5f5258926d5c2d46787e99cf7f8a039082198",
+      "size_bytes": 44360601
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/mechanism_smoke/separated/li0_diabatic/cp2k.inp",
+      "roles": [
+        "mechanism:eda_1p5m:li0_diabatic:input"
+      ],
+      "sha256": "597269b7e82bb9e4a2523d317800752b6d77875519222172731f205c6cb4ba54",
+      "size_bytes": 3366
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/mechanism_smoke/separated/li0_diabatic/cp2k.out",
+      "roles": [
+        "mechanism:eda_1p5m:li0_diabatic:output"
+      ],
+      "sha256": "66605b63464008bd80786a56c4ad1dd3c65d877fe4fa51b33ea85ba111ab90a2",
+      "size_bytes": 444559
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/mechanism_smoke/separated/li0_diabatic/eda_1p5m_r1_separated_li0_diabatic_mechanism_smoke-ELECTRON_DENSITY-1_0.cube",
+      "roles": [
+        "localization:eda_1p5m:li0_diabatic:electron_cube"
+      ],
+      "sha256": "5eb9af4161eb6a7df9fa07039450415b47a6abd1d4353713e6b3b2ac966880ea",
+      "size_bytes": 32455128
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/mechanism_smoke/separated/li0_diabatic/eda_1p5m_r1_separated_li0_diabatic_mechanism_smoke-SPIN_DENSITY-1_0.cube",
+      "roles": [
+        "localization:eda_1p5m:li0_diabatic:spin_cube"
+      ],
+      "sha256": "a9277dac326155e2c84a5b3916e6ae727e7695b54574eb588966e20a10474d99",
+      "size_bytes": 32455111
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/mechanism_smoke/separated/li_plus_e_diabatic/cp2k.inp",
+      "roles": [
+        "mechanism:eda_1p5m:li_plus_e_diabatic:input"
+      ],
+      "sha256": "79372a12900ce7f09d47cdc00383c0be8d6f7163f16544d73f6a84f67ad7cdea",
+      "size_bytes": 3372
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/mechanism_smoke/separated/li_plus_e_diabatic/cp2k.out",
+      "roles": [
+        "mechanism:eda_1p5m:li_plus_e_diabatic:output"
+      ],
+      "sha256": "ddd22187570f54d68a84dd1ed6300ccded56fdc94754b757b1e8c4c1ad335999",
+      "size_bytes": 450442
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/mechanism_smoke/separated/li_plus_e_diabatic/eda_1p5m_r1_separated_li_plus_e_diabatic_mechanism_smoke-ELECTRON_DENSITY-1_0.cube",
+      "roles": [
+        "localization:eda_1p5m:li_plus_e_diabatic:electron_cube"
+      ],
+      "sha256": "3402421a911c88adb1c763e62f5177a18684b391276d780243b9407668d94daf",
+      "size_bytes": 32455128
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/mechanism_smoke/separated/li_plus_e_diabatic/eda_1p5m_r1_separated_li_plus_e_diabatic_mechanism_smoke-SPIN_DENSITY-1_0.cube",
+      "roles": [
+        "localization:eda_1p5m:li_plus_e_diabatic:spin_cube"
+      ],
+      "sha256": "f330b9f066cde78e3fbf64efc9a8d44cf0f1c0e0935656d49dd3a853768616c8",
+      "size_bytes": 32455111
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/smoke/separated/cp2k.inp",
+      "roles": [
+        "legacy_smoke:eda_1p5m:input"
+      ],
+      "sha256": "d803daf8362f18fec5578e8fb9a86ee9afad964bffcbfedaa4ad7ca179b0553d",
+      "size_bytes": 3270
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/smoke/separated/cp2k.out",
+      "roles": [
+        "legacy_smoke:eda_1p5m:output"
+      ],
+      "sha256": "e87cbae713c5c64bc376eb0edb77b8b2a88cb6ff13afff9b2c24ecaab2806af7",
+      "size_bytes": 450166
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r2/candidates/compact/cell.inc",
+      "roles": [
+        "candidate_cell:eda_1p5m:r2:compact"
+      ],
+      "sha256": "192d872d305447caa014073341c8d7149f88080472ebbb600792ba6f0a54557c",
+      "size_bytes": 163
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r2/candidates/compact/coordinates.xyz",
+      "roles": [
+        "candidate_xyz:eda_1p5m:r2:compact"
+      ],
+      "sha256": "aaa63cf7e0328917a36c92c9236ea9cdce861b9b4da8a404ad3633c5820b1422",
+      "size_bytes": 43980
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r2/candidates/compact/metadata.json",
+      "roles": [
+        "candidate_metadata:eda_1p5m:r2:compact"
+      ],
+      "sha256": "a6a4e55a884b2e6412aa1586be5926b12ccb2a463274ec2f484f269bd6adb154",
+      "size_bytes": 2521
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r2/candidates/distant/cell.inc",
+      "roles": [
+        "candidate_cell:eda_1p5m:r2:distant"
+      ],
+      "sha256": "192d872d305447caa014073341c8d7149f88080472ebbb600792ba6f0a54557c",
+      "size_bytes": 163
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r2/candidates/distant/coordinates.xyz",
+      "roles": [
+        "candidate_xyz:eda_1p5m:r2:distant"
+      ],
+      "sha256": "7957ef131fa61f4316120ffc70079f34380ba52bd4497a99f9a19987304ada88",
+      "size_bytes": 43980
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r2/candidates/distant/metadata.json",
+      "roles": [
+        "candidate_metadata:eda_1p5m:r2:distant"
+      ],
+      "sha256": "6f346e5c74cbf2fc9dd10d83ac6a4f6bf0addefca61597b3b4d994b047bb66b9",
+      "size_bytes": 2492
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r2/candidates/manifest.json",
+      "roles": [
+        "candidate_manifest:eda_1p5m:r2"
+      ],
+      "sha256": "7295c680c6c08b292841dd943caf1cf0b605dde9bb4a897f4e4e6ed8c4c4c9a6",
+      "size_bytes": 18542
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r2/candidates/separated/cell.inc",
+      "roles": [
+        "candidate_cell:eda_1p5m:r2:separated"
+      ],
+      "sha256": "192d872d305447caa014073341c8d7149f88080472ebbb600792ba6f0a54557c",
+      "size_bytes": 163
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r2/candidates/separated/coordinates.xyz",
+      "roles": [
+        "candidate_xyz:eda_1p5m:r2:separated"
+      ],
+      "sha256": "2d00fc5fe04e3c2b363187c58d0cb20a349136e4388058f83fe9384e27ade3ac",
+      "size_bytes": 43981
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r2/candidates/separated/metadata.json",
+      "roles": [
+        "candidate_metadata:eda_1p5m:r2:separated"
+      ],
+      "sha256": "241469760f6b381d5eb0e2a9e0beefc44bf779b89b17f0a33195394b51b33f1f",
+      "size_bytes": 2505
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r3/candidates/compact/cell.inc",
+      "roles": [
+        "candidate_cell:eda_1p5m:r3:compact"
+      ],
+      "sha256": "a0eedeeb6966057dce5b507fc50b9eff4010d60490f5a0678edae851e7d067d2",
+      "size_bytes": 163
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r3/candidates/compact/coordinates.xyz",
+      "roles": [
+        "candidate_xyz:eda_1p5m:r3:compact"
+      ],
+      "sha256": "8d72a04c35a3c7495cdae4b9e4578ee8ec8b7825de16103ab6a6c18490ed526e",
+      "size_bytes": 43996
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r3/candidates/compact/metadata.json",
+      "roles": [
+        "candidate_metadata:eda_1p5m:r3:compact"
+      ],
+      "sha256": "db881b6744c6a0440bf7d4e38a9222c324f699b28c37cff75e7b32e7f2578cbe",
+      "size_bytes": 2527
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r3/candidates/distant/cell.inc",
+      "roles": [
+        "candidate_cell:eda_1p5m:r3:distant"
+      ],
+      "sha256": "a0eedeeb6966057dce5b507fc50b9eff4010d60490f5a0678edae851e7d067d2",
+      "size_bytes": 163
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r3/candidates/distant/coordinates.xyz",
+      "roles": [
+        "candidate_xyz:eda_1p5m:r3:distant"
+      ],
+      "sha256": "c6649de6e6a9245a5ad0315a8b385eaac665297df8a336aee22fd488620c25dc",
+      "size_bytes": 43997
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r3/candidates/distant/metadata.json",
+      "roles": [
+        "candidate_metadata:eda_1p5m:r3:distant"
+      ],
+      "sha256": "a5db1b67cc91dd380aade1cc7626fe18694d21380d38564f6ff9c13525f1ceea",
+      "size_bytes": 2509
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r3/candidates/manifest.json",
+      "roles": [
+        "candidate_manifest:eda_1p5m:r3"
+      ],
+      "sha256": "d213b653d11b71ce5c3e8b213851bc17b18b08b65a46961a92e55e9b0f004342",
+      "size_bytes": 18636
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r3/candidates/separated/cell.inc",
+      "roles": [
+        "candidate_cell:eda_1p5m:r3:separated"
+      ],
+      "sha256": "a0eedeeb6966057dce5b507fc50b9eff4010d60490f5a0678edae851e7d067d2",
+      "size_bytes": 163
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r3/candidates/separated/coordinates.xyz",
+      "roles": [
+        "candidate_xyz:eda_1p5m:r3:separated"
+      ],
+      "sha256": "32422d17cf2dc72a99418c14150a95df6dcf278bb7299136cc5a4496ed644b3a",
+      "size_bytes": 44000
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r3/candidates/separated/metadata.json",
+      "roles": [
+        "candidate_metadata:eda_1p5m:r3:separated"
+      ],
+      "sha256": "eff931ea8fcd6b1c1520ee7012eee58f1b4903ff4e07daafcea0d863c81a5c73",
+      "size_bytes": 2528
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/candidates/compact/cell.inc",
+      "roles": [
+        "candidate_cell:pure_thf:r1:compact"
+      ],
+      "sha256": "e8415048e807d19c497763aaa48a2143794586208e4466d40bdedf4c26dc0610",
+      "size_bytes": 163
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/candidates/compact/coordinates.xyz",
+      "roles": [
+        "candidate_xyz:pure_thf:r1:compact"
+      ],
+      "sha256": "423fc200399300fd90678d568960c9b27a175b181dda4600d75f0f82074088c3",
+      "size_bytes": 38917
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/candidates/compact/metadata.json",
+      "roles": [
+        "candidate_metadata:pure_thf:r1:compact"
+      ],
+      "sha256": "95cf485256ae740c1b152ae52b918f0b181a953b2f2cbd375640c8d4ffe9aab0",
+      "size_bytes": 2521
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/candidates/distant/cell.inc",
+      "roles": [
+        "candidate_cell:pure_thf:r1:distant"
+      ],
+      "sha256": "e8415048e807d19c497763aaa48a2143794586208e4466d40bdedf4c26dc0610",
+      "size_bytes": 163
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/candidates/distant/coordinates.xyz",
+      "roles": [
+        "candidate_xyz:pure_thf:r1:distant"
+      ],
+      "sha256": "8f0f21bbf385b1775eacc32975a04f91f21d40a4636c5d4d12d550a981f33b57",
+      "size_bytes": 38914
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/candidates/distant/metadata.json",
+      "roles": [
+        "candidate_metadata:pure_thf:r1:distant"
+      ],
+      "sha256": "01d5589501e92c5484976d66e3fbd2a1d2d7d1042b2d9f4d47d73f5dda5df65e",
+      "size_bytes": 2524
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/candidates/manifest.json",
+      "roles": [
+        "candidate_manifest:pure_thf:r1"
+      ],
+      "sha256": "615ff5ca4ef1741beb7aaacea9e61957e0cc494293450cc97c3d22b68d34cf05",
+      "size_bytes": 18631
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/candidates/separated/cell.inc",
+      "roles": [
+        "candidate_cell:pure_thf:r1:separated",
+        "localization:pure_thf:li0_diabatic:cell",
+        "localization:pure_thf:li_plus_e_diabatic:cell"
+      ],
+      "sha256": "e8415048e807d19c497763aaa48a2143794586208e4466d40bdedf4c26dc0610",
+      "size_bytes": 163
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/candidates/separated/coordinates.xyz",
+      "roles": [
+        "candidate_xyz:pure_thf:r1:separated",
+        "localization:pure_thf:li0_diabatic:coordinates",
+        "localization:pure_thf:li_plus_e_diabatic:coordinates"
+      ],
+      "sha256": "571c9358561636d1ec1da8a8db03990e2a0025df3676b74814744272c0bf97ca",
+      "size_bytes": 38916
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/candidates/separated/metadata.json",
+      "roles": [
+        "candidate_metadata:pure_thf:r1:separated",
+        "localization:pure_thf:li0_diabatic:candidate_metadata",
+        "localization:pure_thf:li_plus_e_diabatic:candidate_metadata"
+      ],
+      "sha256": "da140edeea5a3b31a2e42b519e2eb01b311176567789b13b31b6519be7cad3ef",
+      "size_bytes": 2512
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/mechanism_smoke/separated/electron_density_difference.cube",
+      "roles": [
+        "density_difference_cube:pure_thf"
+      ],
+      "sha256": "cfb6e91cc45d62aedb09e5fa3f66052350aea463f9a515eea289ce49434beea1",
+      "size_bytes": 37814163
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/mechanism_smoke/separated/li0_diabatic/cp2k.inp",
+      "roles": [
+        "mechanism:pure_thf:li0_diabatic:input"
+      ],
+      "sha256": "c4464a886b419963476fd70ab46a4af3f2ef7db00ab9e4abbe7620e0332b701e",
+      "size_bytes": 3366
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/mechanism_smoke/separated/li0_diabatic/cp2k.out",
+      "roles": [
+        "mechanism:pure_thf:li0_diabatic:output"
+      ],
+      "sha256": "9cdb851341eeb76bcdac5710d5f898578d8ffa4311124a258930def6d092a68a",
+      "size_bytes": 418327
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/mechanism_smoke/separated/li0_diabatic/pure_thf_r1_separated_li0_diabatic_mechanism_smoke-ELECTRON_DENSITY-1_0.cube",
+      "roles": [
+        "localization:pure_thf:li0_diabatic:electron_cube"
+      ],
+      "sha256": "364a2e896098d61b29b88906347d49880273926c85c6ddbfcd06c164358b85a3",
+      "size_bytes": 27668670
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/mechanism_smoke/separated/li0_diabatic/pure_thf_r1_separated_li0_diabatic_mechanism_smoke-SPIN_DENSITY-1_0.cube",
+      "roles": [
+        "localization:pure_thf:li0_diabatic:spin_cube"
+      ],
+      "sha256": "c430cd67fa205371a31186719d11d13acd3f0279d4acfa87d377d17aeb493851",
+      "size_bytes": 27668653
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/mechanism_smoke/separated/li_plus_e_diabatic/cp2k.inp",
+      "roles": [
+        "mechanism:pure_thf:li_plus_e_diabatic:input"
+      ],
+      "sha256": "8d326960b97b3cf8a8b7ea64137c6a16686ba5cabad467578d76afbc0be110df",
+      "size_bytes": 3372
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/mechanism_smoke/separated/li_plus_e_diabatic/cp2k.out",
+      "roles": [
+        "mechanism:pure_thf:li_plus_e_diabatic:output"
+      ],
+      "sha256": "ed8f517813e699bf4ae208dfff9b70b1d787f946b0cb923477226689997f86a5",
+      "size_bytes": 405903
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/mechanism_smoke/separated/li_plus_e_diabatic/pure_thf_r1_separated_li_plus_e_diabatic_mechanism_smoke-ELECTRON_DENSITY-1_0.cube",
+      "roles": [
+        "localization:pure_thf:li_plus_e_diabatic:electron_cube"
+      ],
+      "sha256": "df76ef2d6ae54fb460c03d76a08b205808c1c9f8169e6d5e65d8dd1a80df3ea0",
+      "size_bytes": 27668670
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/mechanism_smoke/separated/li_plus_e_diabatic/pure_thf_r1_separated_li_plus_e_diabatic_mechanism_smoke-SPIN_DENSITY-1_0.cube",
+      "roles": [
+        "localization:pure_thf:li_plus_e_diabatic:spin_cube"
+      ],
+      "sha256": "47e1eeace5f4eaf6d7d14f8baed9ce06aac32be8b4d3a27bc7147f6fe70f512d",
+      "size_bytes": 27668653
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/smoke/separated/cp2k.inp",
+      "roles": [
+        "legacy_smoke:pure_thf:input"
+      ],
+      "sha256": "b8b9d940449fe279aa7de2036979626d1c89f56402f968273debccbe40879901",
+      "size_bytes": 3270
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/smoke/separated/cp2k.out",
+      "roles": [
+        "legacy_smoke:pure_thf:output"
+      ],
+      "sha256": "3d673587c10512060c2b033e3c3075d3864003ba6daee9b6858c5eca03b26c3c",
+      "size_bytes": 405227
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r2/candidates/compact/cell.inc",
+      "roles": [
+        "candidate_cell:pure_thf:r2:compact"
+      ],
+      "sha256": "7c7e72734b484ecdd97ea3b6e14246a0a363b23963f49f8e70227069f7f20cdc",
+      "size_bytes": 163
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r2/candidates/compact/coordinates.xyz",
+      "roles": [
+        "candidate_xyz:pure_thf:r2:compact"
+      ],
+      "sha256": "37b6e7aba3a53f7c1efbaf03c6a1f4a13a9b39cd29cc1b05f0df3f844e19ecf9",
+      "size_bytes": 38924
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r2/candidates/compact/metadata.json",
+      "roles": [
+        "candidate_metadata:pure_thf:r2:compact"
+      ],
+      "sha256": "62ed161eb724c287ddf48488a1ee459f095e72f0ba726cccc8edc069bd7b8f54",
+      "size_bytes": 2520
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r2/candidates/distant/cell.inc",
+      "roles": [
+        "candidate_cell:pure_thf:r2:distant"
+      ],
+      "sha256": "7c7e72734b484ecdd97ea3b6e14246a0a363b23963f49f8e70227069f7f20cdc",
+      "size_bytes": 163
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r2/candidates/distant/coordinates.xyz",
+      "roles": [
+        "candidate_xyz:pure_thf:r2:distant"
+      ],
+      "sha256": "954551e89050324a234fc2ae0e809699deae07c037a8f7c71570ab5020d07d3b",
+      "size_bytes": 38926
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r2/candidates/distant/metadata.json",
+      "roles": [
+        "candidate_metadata:pure_thf:r2:distant"
+      ],
+      "sha256": "0aa76c181c97de737608ca45c1f4f007015a01337a7772b6902a1f1c30212ef2",
+      "size_bytes": 2519
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r2/candidates/manifest.json",
+      "roles": [
+        "candidate_manifest:pure_thf:r2"
+      ],
+      "sha256": "a9d66a119b0ce18d7205c10a170848302e338a375d8a18ca6f5b0605c2866f6b",
+      "size_bytes": 18591
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r2/candidates/separated/cell.inc",
+      "roles": [
+        "candidate_cell:pure_thf:r2:separated"
+      ],
+      "sha256": "7c7e72734b484ecdd97ea3b6e14246a0a363b23963f49f8e70227069f7f20cdc",
+      "size_bytes": 163
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r2/candidates/separated/coordinates.xyz",
+      "roles": [
+        "candidate_xyz:pure_thf:r2:separated"
+      ],
+      "sha256": "981b06a1e1f9b41c2411e89160352dd711a2db3cf98856fce4c9b1da33752492",
+      "size_bytes": 38929
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r2/candidates/separated/metadata.json",
+      "roles": [
+        "candidate_metadata:pure_thf:r2:separated"
+      ],
+      "sha256": "eb95fe2120bd073d9ff0dc78fdace0680270080eb2b4757ee98d6494ca8cb681",
+      "size_bytes": 2528
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r3/candidates/compact/cell.inc",
+      "roles": [
+        "candidate_cell:pure_thf:r3:compact"
+      ],
+      "sha256": "9454fbb7688bdf5cbeb4af2bcdc10e23e1cd41330810c7f105e7b8541223700c",
+      "size_bytes": 163
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r3/candidates/compact/coordinates.xyz",
+      "roles": [
+        "candidate_xyz:pure_thf:r3:compact"
+      ],
+      "sha256": "a59b506c4527071ac732f27887b24569fa687b226ad37262fb7a9fd3b9efbd2d",
+      "size_bytes": 38890
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r3/candidates/compact/metadata.json",
+      "roles": [
+        "candidate_metadata:pure_thf:r3:compact"
+      ],
+      "sha256": "0f83aae0185419aefb9d224acb640ec6250715adfec09c63831cbd0e942da41d",
+      "size_bytes": 2505
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r3/candidates/distant/cell.inc",
+      "roles": [
+        "candidate_cell:pure_thf:r3:distant"
+      ],
+      "sha256": "9454fbb7688bdf5cbeb4af2bcdc10e23e1cd41330810c7f105e7b8541223700c",
+      "size_bytes": 163
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r3/candidates/distant/coordinates.xyz",
+      "roles": [
+        "candidate_xyz:pure_thf:r3:distant"
+      ],
+      "sha256": "fc893c818c46ef83df0e07d117e7c5073bf5cade42569e8790cd4df05ccbbf3b",
+      "size_bytes": 38888
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r3/candidates/distant/metadata.json",
+      "roles": [
+        "candidate_metadata:pure_thf:r3:distant"
+      ],
+      "sha256": "0373e29a64949a45ce959026adc4aab07a95aecb4ffa3c19c935b453cd05477c",
+      "size_bytes": 2510
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r3/candidates/manifest.json",
+      "roles": [
+        "candidate_manifest:pure_thf:r3"
+      ],
+      "sha256": "41d5e7ca1a6384ff5a7732e760e5b29a6f9396e9838073f3f1415cee9e38d6af",
+      "size_bytes": 18554
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r3/candidates/separated/cell.inc",
+      "roles": [
+        "candidate_cell:pure_thf:r3:separated"
+      ],
+      "sha256": "9454fbb7688bdf5cbeb4af2bcdc10e23e1cd41330810c7f105e7b8541223700c",
+      "size_bytes": 163
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r3/candidates/separated/coordinates.xyz",
+      "roles": [
+        "candidate_xyz:pure_thf:r3:separated"
+      ],
+      "sha256": "8a012130cde356b925adf2b1a82ec763c10b6073081d91926d3caea1cf2248cc",
+      "size_bytes": 38889
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r3/candidates/separated/metadata.json",
+      "roles": [
+        "candidate_metadata:pure_thf:r3:separated"
+      ],
+      "sha256": "7b56f3fb0bbac3c6054880af8223d4d078bb6f310cb13f6a158ee15662962f0e",
+      "size_bytes": 2513
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b_candidates.done",
+      "roles": [
+        "candidates_gate"
+      ],
+      "sha256": "d0d639047581760070ee8da3e47ed7b350db3c9ce3d77297ee0782c8ea406be0",
+      "size_bytes": 105
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b_candidates.summary.json",
+      "roles": [
+        "candidates"
+      ],
+      "sha256": "6d48ae3075d9c7a23a7074e217f6406edfa712f88426a4e4ddb1a8506356ea0f",
+      "size_bytes": 700
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b_cp2k_smoke.summary.json",
+      "roles": [
+        "legacy_smoke"
+      ],
+      "sha256": "1094cd7d954c7e66ad6c8a8b7a971213bfc028411b582c4b989c1f5109f48b7d",
+      "size_bytes": 2694
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b_localization.done",
+      "roles": [
+        "localization_gate"
+      ],
+      "sha256": "0f20cc140b8c40d7df78dfd42d8c690c21e2f4f95a06a5534ecd91d5b3d7bd31",
+      "size_bytes": 107
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b_localization.summary.json",
+      "roles": [
+        "localization"
+      ],
+      "sha256": "7a1fc6af48b376b7adad1049ee0ceeefb881ac8fe7f14130c82d7e6643b2e41d",
+      "size_bytes": 309004
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b_mechanism_smoke.done",
+      "roles": [
+        "mechanism_gate"
+      ],
+      "sha256": "8392ec323e64043796560833c76e6a624b8aa3e83a445deffb5854f568d1c3af",
+      "size_bytes": 110
+    },
+    {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b_mechanism_smoke.summary.json",
+      "roles": [
+        "mechanism"
+      ],
+      "sha256": "1c2b4d173485028ab221d383efbd5ceec0d536e2da13e1f83b057a2cca78ab24",
+      "size_bytes": 7842
+    },
+    {
+      "path": "/data/home/wangcx/li-thf-amine-solvated-electron/configs/methods.yaml",
+      "roles": [
+        "localization:eda_1p5m:li0_diabatic:methods",
+        "localization:eda_1p5m:li_plus_e_diabatic:methods",
+        "localization:pure_thf:li0_diabatic:methods",
+        "localization:pure_thf:li_plus_e_diabatic:methods"
+      ],
+      "sha256": "e44e2b330494759641c18defc5c7cfae082e0c0e3c414259b6e7e43f809c9e3b",
+      "size_bytes": 5100
+    }
+  ]
+}

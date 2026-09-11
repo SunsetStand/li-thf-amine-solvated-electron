@@ -1,0 +1,71 @@
+{
+  "achieved_li_cavity_distance_angstrom": 6.008345127105715,
+  "amine": null,
+  "candidate_id": "separated",
+  "cavity_basis_site": {
+    "cartesian_angstrom": [
+      13.733360290527346,
+      5.150010108947755,
+      8.29723850886027
+    ],
+    "fractional": [
+      0.6666666666666667,
+      0.25,
+      0.4027777777777778
+    ],
+    "radius_angstrom": 1.6200254739402633,
+    "rank": 12
+  },
+  "li_site": {
+    "cartesian_angstrom": [
+      14.877806981404623,
+      2.8611167271931977,
+      13.733360290527346
+    ],
+    "fractional": [
+      0.7222222222222222,
+      0.1388888888888889,
+      0.6666666666666667
+    ],
+    "radius_angstrom": 1.7963136584942723,
+    "rank": 4
+  },
+  "ready": true,
+  "replica": 1,
+  "schema_version": 1,
+  "scientific_status": "GEOMETRIC_SEED_NOT_LOCALIZATION_EVIDENCE",
+  "snapshot_id": "pure_thf_r1_t14600ps",
+  "source": {
+    "methods": {
+      "path": "/data/home/wangcx/li-thf-amine-solvated-electron/configs/methods.yaml",
+      "sha256": "c20323aaddcfca60b6a359aa0d04effb95b36c3d1b42a8357759ee68611039a9"
+    },
+    "snapshot_cell_sha256": "e8415048e807d19c497763aaa48a2143794586208e4466d40bdedf4c26dc0610",
+    "snapshot_metadata": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/analysis/pure_thf/r1/snapshot/metadata.json",
+      "sha256": "446fcb89e229c4531d0027c47452fa59fa17bf214df26506e8dcd85b463db794"
+    },
+    "snapshot_xyz_sha256": "ad71b5802204043a9e3782ccbbb5fae5753a7bf08489b923dc019360568d8e35",
+    "spec": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/specs/pure_thf/r1.json",
+      "sha256": "4002add53fa1bc7c600798c90934ea8e8586c5a7e5585929ab3e75e1879bb6de"
+    }
+  },
+  "structure": {
+    "atom_count_including_li_and_ghost": 834,
+    "cell": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/candidates/separated/cell.inc",
+      "sha256": "e8415048e807d19c497763aaa48a2143794586208e4466d40bdedf4c26dc0610"
+    },
+    "ghost_basis_center_count": 1,
+    "li_atom_index_cp2k": 1,
+    "solvent_atom_count": 832,
+    "xyz": {
+      "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/candidates/separated/coordinates.xyz",
+      "sha256": "571c9358561636d1ec1da8a8db03990e2a0025df3676b74814744272c0bf97ca"
+    }
+  },
+  "system_id": "pure_thf",
+  "target_li_cavity_distance_angstrom": 6.0,
+  "tolerance_angstrom": 2.0
+}

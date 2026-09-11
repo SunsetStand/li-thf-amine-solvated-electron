@@ -1,0 +1,180 @@
+{
+  "campaign": "pilot",
+  "cdft_tolerance_electrons": 0.05,
+  "energy_definition": "E(li_plus_e_diabatic) - E(li0_diabatic)",
+  "interpretation": "Fixed-geometry, same-electron-count paired cDFT execution check. Neither the sign nor magnitude is a solvated-electron stability result.",
+  "kind": "stage_b_mechanism_smoke",
+  "methods": {
+    "path": "/data/home/wangcx/li-thf-amine-solvated-electron/configs/methods.yaml",
+    "sha256": "c20323aaddcfca60b6a359aa0d04effb95b36c3d1b42a8357759ee68611039a9"
+  },
+  "ready": true,
+  "records": [
+    {
+      "amine": "eda",
+      "candidate_id": "separated",
+      "complete_pair": true,
+      "delta_energy_hartree_li_plus_e_minus_li0": 0.018675412553875503,
+      "fixed_geometry_diabatic_gap_ev": 0.5081838643066795,
+      "ready": true,
+      "replica": 1,
+      "states": [
+        {
+          "amine": "eda",
+          "candidate_id": "separated",
+          "cdft_constraint_gate": {
+            "constraint_strength": -0.455548928322,
+            "converged": true,
+            "current_electrons": 2.969287908158,
+            "deviation_electrons": -0.030712091842000078,
+            "energy_hartree": -3117.3402362893,
+            "expected_target_electrons": 3.0,
+            "iteration": 3,
+            "problems": [],
+            "reported_deviation_electrons": -0.03071,
+            "rms_gradient": 0.031,
+            "target_electrons": 3.0,
+            "tolerance_electrons": 0.05
+          },
+          "converged": true,
+          "energy_hartree": -3117.3402362892894,
+          "input": {
+            "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/mechanism_smoke/separated/li0_diabatic/cp2k.inp",
+            "sha256": "597269b7e82bb9e4a2523d317800752b6d77875519222172731f205c6cb4ba54"
+          },
+          "interpretation": "Numerical neutral-Li diabatic reference in the same neutral doublet cell.",
+          "li_target_valence_electrons": 3.0,
+          "normal_termination": true,
+          "output": {
+            "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/mechanism_smoke/separated/li0_diabatic/cp2k.out",
+            "sha256": "66605b63464008bd80786a56c4ad1dd3c65d877fe4fa51b33ea85ba111ab90a2"
+          },
+          "problems": [],
+          "replica": 1,
+          "state_id": "li0_diabatic",
+          "system_id": "eda_1p5m"
+        },
+        {
+          "amine": "eda",
+          "candidate_id": "separated",
+          "cdft_constraint_gate": {
+            "constraint_strength": 1.258508344656,
+            "converged": true,
+            "current_electrons": 2.045021367901,
+            "deviation_electrons": 0.04502136790100009,
+            "energy_hartree": -3117.3215608767,
+            "expected_target_electrons": 2.0,
+            "iteration": 4,
+            "problems": [],
+            "reported_deviation_electrons": 0.04502,
+            "rms_gradient": 0.045,
+            "target_electrons": 2.0,
+            "tolerance_electrons": 0.05
+          },
+          "converged": true,
+          "energy_hartree": -3117.3215608767355,
+          "input": {
+            "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/mechanism_smoke/separated/li_plus_e_diabatic/cp2k.inp",
+            "sha256": "79372a12900ce7f09d47cdc00383c0be8d6f7163f16544d73f6a84f67ad7cdea"
+          },
+          "interpretation": "Numerical Li+ plus excess-electron diabatic state in the same neutral doublet cell.",
+          "li_target_valence_electrons": 2.0,
+          "normal_termination": true,
+          "output": {
+            "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/mechanism_smoke/separated/li_plus_e_diabatic/cp2k.out",
+            "sha256": "ddd22187570f54d68a84dd1ed6300ccded56fdc94754b757b1e8c4c1ad335999"
+          },
+          "problems": [],
+          "replica": 1,
+          "state_id": "li_plus_e_diabatic",
+          "system_id": "eda_1p5m"
+        }
+      ],
+      "system_id": "eda_1p5m"
+    },
+    {
+      "amine": null,
+      "candidate_id": "separated",
+      "complete_pair": true,
+      "delta_energy_hartree_li_plus_e_minus_li0": 0.0716512714629971,
+      "fixed_geometry_diabatic_gap_ev": 1.9497304227957517,
+      "ready": true,
+      "replica": 1,
+      "states": [
+        {
+          "amine": null,
+          "candidate_id": "separated",
+          "cdft_constraint_gate": {
+            "constraint_strength": -0.346633177331,
+            "converged": true,
+            "current_electrons": 2.992804421057,
+            "deviation_electrons": -0.007195578943000047,
+            "energy_hartree": -2793.0418222763,
+            "expected_target_electrons": 3.0,
+            "iteration": 5,
+            "problems": [],
+            "reported_deviation_electrons": -0.007196,
+            "rms_gradient": 0.0072,
+            "target_electrons": 3.0,
+            "tolerance_electrons": 0.05
+          },
+          "converged": true,
+          "energy_hartree": -2793.041822276325,
+          "input": {
+            "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/mechanism_smoke/separated/li0_diabatic/cp2k.inp",
+            "sha256": "c4464a886b419963476fd70ab46a4af3f2ef7db00ab9e4abbe7620e0332b701e"
+          },
+          "interpretation": "Numerical neutral-Li diabatic reference in the same neutral doublet cell.",
+          "li_target_valence_electrons": 3.0,
+          "normal_termination": true,
+          "output": {
+            "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/mechanism_smoke/separated/li0_diabatic/cp2k.out",
+            "sha256": "9cdb851341eeb76bcdac5710d5f898578d8ffa4311124a258930def6d092a68a"
+          },
+          "problems": [],
+          "replica": 1,
+          "state_id": "li0_diabatic",
+          "system_id": "pure_thf"
+        },
+        {
+          "amine": null,
+          "candidate_id": "separated",
+          "cdft_constraint_gate": {
+            "constraint_strength": 1.457386634296,
+            "converged": true,
+            "current_electrons": 2.035839353097,
+            "deviation_electrons": 0.035839353096999815,
+            "energy_hartree": -2792.9701710049,
+            "expected_target_electrons": 2.0,
+            "iteration": 3,
+            "problems": [],
+            "reported_deviation_electrons": 0.03584,
+            "rms_gradient": 0.036,
+            "target_electrons": 2.0,
+            "tolerance_electrons": 0.05
+          },
+          "converged": true,
+          "energy_hartree": -2792.970171004862,
+          "input": {
+            "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/mechanism_smoke/separated/li_plus_e_diabatic/cp2k.inp",
+            "sha256": "8d326960b97b3cf8a8b7ea64137c6a16686ba5cabad467578d76afbc0be110df"
+          },
+          "interpretation": "Numerical Li+ plus excess-electron diabatic state in the same neutral doublet cell.",
+          "li_target_valence_electrons": 2.0,
+          "normal_termination": true,
+          "output": {
+            "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/mechanism_smoke/separated/li_plus_e_diabatic/cp2k.out",
+            "sha256": "ed8f517813e699bf4ae208dfff9b70b1d787f946b0cb923477226689997f86a5"
+          },
+          "problems": [],
+          "replica": 1,
+          "state_id": "li_plus_e_diabatic",
+          "system_id": "pure_thf"
+        }
+      ],
+      "system_id": "pure_thf"
+    }
+  ],
+  "schema_version": 1,
+  "scientific_status": "NUMERICAL_MECHANISM_SMOKE_ONLY_NOT_A_STABILITY_OR_LOCALIZATION_RESULT"
+}

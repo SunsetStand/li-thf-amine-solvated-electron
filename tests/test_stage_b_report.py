@@ -14,6 +14,7 @@ from solvelec.cube import CubeData, write_cube
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "reports" / "stage_b" / "build_report.py"
+PUBLISHED = ROOT / "reports" / "stage_b"
 SYSTEMS = ("pure_thf", "eda_1p5m")
 STATES = ("li0_diabatic", "li_plus_e_diabatic")
 
@@ -317,6 +318,34 @@ def create_fixture(root: Path) -> tuple[Path, Path]:
 
 
 class StageBReportTests(unittest.TestCase):
+    def test_published_report_matches_server_provenance(self) -> None:
+        metrics = json.loads((PUBLISHED / "stage_b_metrics.json").read_text(encoding="utf-8"))
+        provenance = json.loads(
+            (PUBLISHED / "report_provenance.json").read_text(encoding="utf-8")
+        )
+        self.assertTrue(metrics["ready"])
+        self.assertTrue(provenance["ready"])
+        self.assertEqual(metrics["source_file_count"], 93)
+        self.assertEqual(
+            metrics["scientific_status"],
+            "COMPLETED_NUMERICAL_STAGE_B_PILOT_NOT_PRODUCTION_MECHANISM",
+        )
+        self.assertAlmostEqual(
+            metrics["mechanism"]["gaps_ev"]["pure_thf"], 1.9497304227957517
+        )
+        self.assertAlmostEqual(
+            metrics["mechanism"]["gaps_ev"]["eda_1p5m"], 0.5081838643066795
+        )
+
+        published_files = {path.name: path for path in PUBLISHED.rglob("*") if path.is_file()}
+        self.assertEqual(len(provenance["products"]), 7)
+        for product in provenance["products"]:
+            with self.subTest(product=product["path"]):
+                local = published_files[Path(product["path"]).name]
+                self.assertEqual(local.stat().st_size, product["size_bytes"])
+                self.assertEqual(_sha256(local), product["sha256"])
+        self.assertEqual(len(PdfReader(str(PUBLISHED / "stage_b_report_zh.pdf")).pages), 10)
+
     def test_complete_report_builds_with_hash_validated_fixture(self) -> None:
         module = _load_script()
         with tempfile.TemporaryDirectory() as directory:

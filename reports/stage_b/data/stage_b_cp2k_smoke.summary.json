@@ -1,0 +1,73 @@
+{
+  "campaign": "pilot",
+  "kind": "stage_b_cp2k_smoke",
+  "ready": true,
+  "records": [
+    {
+      "amine": null,
+      "candidate_id": "separated",
+      "cdft_constraint_gate": {
+        "constraint_strength": 1.457386634296,
+        "converged": true,
+        "current_electrons": 2.035839353097,
+        "deviation_electrons": 0.035839353096999815,
+        "energy_hartree": -2792.9701710049,
+        "expected_target_electrons": 2.0,
+        "iteration": 3,
+        "problems": [],
+        "reported_deviation_electrons": 0.03584,
+        "rms_gradient": 0.036,
+        "target_electrons": 2.0,
+        "tolerance_electrons": 0.05
+      },
+      "converged": true,
+      "energy_hartree": -2792.9701710048616,
+      "input": {
+        "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/smoke/separated/cp2k.inp",
+        "sha256": "b8b9d940449fe279aa7de2036979626d1c89f56402f968273debccbe40879901"
+      },
+      "normal_termination": true,
+      "output": {
+        "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/pure_thf/r1/smoke/separated/cp2k.out",
+        "sha256": "3d673587c10512060c2b033e3c3075d3864003ba6daee9b6858c5eca03b26c3c"
+      },
+      "problems": [],
+      "replica": 1,
+      "system_id": "pure_thf"
+    },
+    {
+      "amine": "eda",
+      "candidate_id": "separated",
+      "cdft_constraint_gate": {
+        "constraint_strength": 1.258508344656,
+        "converged": true,
+        "current_electrons": 2.045021367901,
+        "deviation_electrons": 0.04502136790100009,
+        "energy_hartree": -3117.3215608767,
+        "expected_target_electrons": 2.0,
+        "iteration": 4,
+        "problems": [],
+        "reported_deviation_electrons": 0.04502,
+        "rms_gradient": 0.045,
+        "target_electrons": 2.0,
+        "tolerance_electrons": 0.05
+      },
+      "converged": true,
+      "energy_hartree": -3117.3215608767355,
+      "input": {
+        "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/smoke/separated/cp2k.inp",
+        "sha256": "d803daf8362f18fec5578e8fb9a86ee9afad964bffcbfedaa4ad7ca179b0553d"
+      },
+      "normal_termination": true,
+      "output": {
+        "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r1/smoke/separated/cp2k.out",
+        "sha256": "e87cbae713c5c64bc376eb0edb77b8b2a88cb6ff13afff9b2c24ecaab2806af7"
+      },
+      "problems": [],
+      "replica": 1,
+      "system_id": "eda_1p5m"
+    }
+  ],
+  "schema_version": 1,
+  "scientific_status": "NUMERICAL_SMOKE_ONLY_NOT_A_LOCALIZATION_RESULT"
+}

@@ -1,0 +1,3 @@
+system_id,replica,candidate_id,ready,signed_integral_electrons,accumulation_integral_electrons,depletion_magnitude_integral_electrons,rearranged_electrons_half_l1,li_density_change_electrons,interstitial_accumulation_fraction,ghost_cavity_accumulation_fraction
+pure_thf,1,separated,True,-7.437520434820655e-05,1.811119972225866,1.8111943474302148,1.8111571598280403,-1.0153918149384389,0.23738640717911863,0.016319430273536113
+eda_1p5m,1,separated,True,0.0004665729894943807,1.8386857125379996,1.8382191395485052,1.8384524260432524,-1.136636546889667,0.23477761902691327,0.025082329341010793

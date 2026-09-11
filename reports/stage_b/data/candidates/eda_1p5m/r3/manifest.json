@@ -1,0 +1,615 @@
+{
+  "amine": "eda",
+  "candidate_count": 3,
+  "candidate_ids": [
+    "compact",
+    "separated",
+    "distant"
+  ],
+  "candidates": [
+    {
+      "achieved_li_cavity_distance_angstrom": 3.459099160269572,
+      "amine": "eda",
+      "candidate_id": "compact",
+      "cavity_basis_site": {
+        "cartesian_angstrom": [
+          7.7693370183308925,
+          16.435136000315346,
+          0.2988206545511881
+        ],
+        "fractional": [
+          0.3611111111111111,
+          0.7638888888888888,
+          0.013888888888888888
+        ],
+        "radius_angstrom": 1.7845271188866934,
+        "rank": 11
+      },
+      "li_site": {
+        "cartesian_angstrom": [
+          5.677592436472576,
+          13.745750109354654,
+          0.8964619636535645
+        ],
+        "fractional": [
+          0.2638888888888889,
+          0.6388888888888888,
+          0.041666666666666664
+        ],
+        "radius_angstrom": 1.8228650175615664,
+        "rank": 7
+      },
+      "metadata": {
+        "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r3/candidates/compact/metadata.json",
+        "sha256": "db881b6744c6a0440bf7d4e38a9222c324f699b28c37cff75e7b32e7f2578cbe"
+      },
+      "ready": true,
+      "replica": 3,
+      "schema_version": 1,
+      "scientific_status": "GEOMETRIC_SEED_NOT_LOCALIZATION_EVIDENCE",
+      "snapshot_id": "eda_1p5m_r3_t10300ps",
+      "source": {
+        "methods": {
+          "path": "/data/home/wangcx/li-thf-amine-solvated-electron/configs/methods.yaml",
+          "sha256": "c20323aaddcfca60b6a359aa0d04effb95b36c3d1b42a8357759ee68611039a9"
+        },
+        "snapshot_cell_sha256": "a0eedeeb6966057dce5b507fc50b9eff4010d60490f5a0678edae851e7d067d2",
+        "snapshot_metadata": {
+          "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/analysis/eda_1p5m/r3/snapshot/metadata.json",
+          "sha256": "cdb0c3e389dd86664a33c41e9726f386f2af4698009a47427811eb8fd609ee5b"
+        },
+        "snapshot_xyz_sha256": "1cf06b272d22865961e94ad06115edca3fce0591c41953c1df32eb3ad7151c68",
+        "spec": {
+          "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/specs/eda_1p5m/r3.json",
+          "sha256": "614ae71a64fde441e78d594e2e3df2b4f52de1e70543eacbe509e38f5c47a0f9"
+        }
+      },
+      "structure": {
+        "atom_count_including_li_and_ghost": 942,
+        "cell": {
+          "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r3/candidates/compact/cell.inc",
+          "sha256": "a0eedeeb6966057dce5b507fc50b9eff4010d60490f5a0678edae851e7d067d2"
+        },
+        "ghost_basis_center_count": 1,
+        "li_atom_index_cp2k": 1,
+        "solvent_atom_count": 940,
+        "xyz": {
+          "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r3/candidates/compact/coordinates.xyz",
+          "sha256": "8d72a04c35a3c7495cdae4b9e4578ee8ec8b7825de16103ab6a6c18490ed526e"
+        }
+      },
+      "system_id": "eda_1p5m",
+      "target_li_cavity_distance_angstrom": 3.5,
+      "tolerance_angstrom": 1.5
+    },
+    {
+      "achieved_li_cavity_distance_angstrom": 6.006220822522745,
+      "amine": "eda",
+      "candidate_id": "separated",
+      "cavity_basis_site": {
+        "cartesian_angstrom": [
+          11.952826182047525,
+          3.884668509165447,
+          19.722163200378418
+        ],
+        "fractional": [
+          0.5555555555555555,
+          0.18055555555555555,
+          0.9166666666666667
+        ],
+        "radius_angstrom": 1.726219851403019,
+        "rank": 15
+      },
+      "li_site": {
+        "cartesian_angstrom": [
+          14.343391418457031,
+          5.079951127370199,
+          14.343391418457033
+        ],
+        "fractional": [
+          0.6666666666666666,
+          0.2361111111111111,
+          0.6666666666666667
+        ],
+        "radius_angstrom": 1.8411799716652044,
+        "rank": 6
+      },
+      "metadata": {
+        "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r3/candidates/separated/metadata.json",
+        "sha256": "eff931ea8fcd6b1c1520ee7012eee58f1b4903ff4e07daafcea0d863c81a5c73"
+      },
+      "ready": true,
+      "replica": 3,
+      "schema_version": 1,
+      "scientific_status": "GEOMETRIC_SEED_NOT_LOCALIZATION_EVIDENCE",
+      "snapshot_id": "eda_1p5m_r3_t10300ps",
+      "source": {
+        "methods": {
+          "path": "/data/home/wangcx/li-thf-amine-solvated-electron/configs/methods.yaml",
+          "sha256": "c20323aaddcfca60b6a359aa0d04effb95b36c3d1b42a8357759ee68611039a9"
+        },
+        "snapshot_cell_sha256": "a0eedeeb6966057dce5b507fc50b9eff4010d60490f5a0678edae851e7d067d2",
+        "snapshot_metadata": {
+          "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/analysis/eda_1p5m/r3/snapshot/metadata.json",
+          "sha256": "cdb0c3e389dd86664a33c41e9726f386f2af4698009a47427811eb8fd609ee5b"
+        },
+        "snapshot_xyz_sha256": "1cf06b272d22865961e94ad06115edca3fce0591c41953c1df32eb3ad7151c68",
+        "spec": {
+          "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/specs/eda_1p5m/r3.json",
+          "sha256": "614ae71a64fde441e78d594e2e3df2b4f52de1e70543eacbe509e38f5c47a0f9"
+        }
+      },
+      "structure": {
+        "atom_count_including_li_and_ghost": 942,
+        "cell": {
+          "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r3/candidates/separated/cell.inc",
+          "sha256": "a0eedeeb6966057dce5b507fc50b9eff4010d60490f5a0678edae851e7d067d2"
+        },
+        "ghost_basis_center_count": 1,
+        "li_atom_index_cp2k": 1,
+        "solvent_atom_count": 940,
+        "xyz": {
+          "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r3/candidates/separated/coordinates.xyz",
+          "sha256": "32422d17cf2dc72a99418c14150a95df6dcf278bb7299136cc5a4496ed644b3a"
+        }
+      },
+      "system_id": "eda_1p5m",
+      "target_li_cavity_distance_angstrom": 6.0,
+      "tolerance_angstrom": 2.0
+    },
+    {
+      "achieved_li_cavity_distance_angstrom": 9.009331233784119,
+      "amine": "eda",
+      "candidate_id": "distant",
+      "cavity_basis_site": {
+        "cartesian_angstrom": [
+          4.781130472819012,
+          1.1952826182047533,
+          14.044570763905845
+        ],
+        "fractional": [
+          0.22222222222222224,
+          0.05555555555555555,
+          0.6527777777777779
+        ],
+        "radius_angstrom": 1.6946401272407006,
+        "rank": 16
+      },
+      "li_site": {
+        "cartesian_angstrom": [
+          9.562260945638023,
+          16.13631534576416,
+          17.92923927307129
+        ],
+        "fractional": [
+          0.4444444444444444,
+          0.75,
+          0.8333333333333333
+        ],
+        "radius_angstrom": 1.7362723327394625,
+        "rank": 14
+      },
+      "metadata": {
+        "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r3/candidates/distant/metadata.json",
+        "sha256": "a5db1b67cc91dd380aade1cc7626fe18694d21380d38564f6ff9c13525f1ceea"
+      },
+      "ready": true,
+      "replica": 3,
+      "schema_version": 1,
+      "scientific_status": "GEOMETRIC_SEED_NOT_LOCALIZATION_EVIDENCE",
+      "snapshot_id": "eda_1p5m_r3_t10300ps",
+      "source": {
+        "methods": {
+          "path": "/data/home/wangcx/li-thf-amine-solvated-electron/configs/methods.yaml",
+          "sha256": "c20323aaddcfca60b6a359aa0d04effb95b36c3d1b42a8357759ee68611039a9"
+        },
+        "snapshot_cell_sha256": "a0eedeeb6966057dce5b507fc50b9eff4010d60490f5a0678edae851e7d067d2",
+        "snapshot_metadata": {
+          "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/analysis/eda_1p5m/r3/snapshot/metadata.json",
+          "sha256": "cdb0c3e389dd86664a33c41e9726f386f2af4698009a47427811eb8fd609ee5b"
+        },
+        "snapshot_xyz_sha256": "1cf06b272d22865961e94ad06115edca3fce0591c41953c1df32eb3ad7151c68",
+        "spec": {
+          "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/specs/eda_1p5m/r3.json",
+          "sha256": "614ae71a64fde441e78d594e2e3df2b4f52de1e70543eacbe509e38f5c47a0f9"
+        }
+      },
+      "structure": {
+        "atom_count_including_li_and_ghost": 942,
+        "cell": {
+          "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r3/candidates/distant/cell.inc",
+          "sha256": "a0eedeeb6966057dce5b507fc50b9eff4010d60490f5a0678edae851e7d067d2"
+        },
+        "ghost_basis_center_count": 1,
+        "li_atom_index_cp2k": 1,
+        "solvent_atom_count": 940,
+        "xyz": {
+          "path": "/data/home/storage/Backup_Data/wangcx/li-thf-amine-solvated-electron/runs/pilot/stage_b/eda_1p5m/r3/candidates/distant/coordinates.xyz",
+          "sha256": "c6649de6e6a9245a5ad0315a8b385eaac665297df8a336aee22fd488620c25dc"
+        }
+      },
+      "system_id": "eda_1p5m",
+      "target_li_cavity_distance_angstrom": 9.0,
+      "tolerance_angstrom": 2.5
+    }
+  ],
+  "configuration": {
+    "candidate_pairs": [
+      {
+        "id": "compact",
+        "target_li_cavity_distance_angstrom": 3.5,
+        "tolerance_angstrom": 1.5
+      },
+      {
+        "id": "separated",
+        "target_li_cavity_distance_angstrom": 6.0,
+        "tolerance_angstrom": 2.0
+      },
+      {
+        "id": "distant",
+        "target_li_cavity_distance_angstrom": 9.0,
+        "tolerance_angstrom": 2.5
+      }
+    ],
+    "candidate_site_count": 24,
+    "minimum_site_separation_angstrom": 1.5,
+    "minimum_surface_clearance_angstrom": 0.25,
+    "note": "Li and ghost centers are deterministic geometric seeds, not observed electron positions.",
+    "smoke_candidate_id": "separated",
+    "smoke_replicas_per_system": 1,
+    "void_grid_points_per_axis": 12,
+    "void_refinement_levels": 2
+  },
+  "methods": {
+    "path": "/data/home/wangcx/li-thf-amine-solvated-electron/configs/methods.yaml",
+    "sha256": "c20323aaddcfca60b6a359aa0d04effb95b36c3d1b42a8357759ee68611039a9"
+  },
+  "ready": true,
+  "replica": 3,
+  "schema_version": 1,
+  "scientific_status": "CANDIDATE_BANK_ONLY",
+  "snapshot_id": "eda_1p5m_r3_t10300ps",
+  "system_id": "eda_1p5m",
+  "void_search": {
+    "heavy_atom_count": 356,
+    "site_count": 24,
+    "sites": [
+      {
+        "cartesian_angstrom": [
+          7.470516363779706,
+          14.343391418457033,
+          0.5976413091023762
+        ],
+        "fractional": [
+          0.34722222222222227,
+          0.6666666666666667,
+          0.027777777777777776
+        ],
+        "radius_angstrom": 1.89125149873256,
+        "rank": 1
+      },
+      {
+        "cartesian_angstrom": [
+          4.7811304728190125,
+          12.251646836598715,
+          20.618625164031982
+        ],
+        "fractional": [
+          0.22222222222222224,
+          0.5694444444444444,
+          0.9583333333333334
+        ],
+        "radius_angstrom": 1.884303329309372,
+        "rank": 2
+      },
+      {
+        "cartesian_angstrom": [
+          11.952826182047525,
+          19.423342545827232,
+          10.757543563842773
+        ],
+        "fractional": [
+          0.5555555555555555,
+          0.9027777777777779,
+          0.5
+        ],
+        "radius_angstrom": 1.8835620423465886,
+        "rank": 3
+      },
+      {
+        "cartesian_angstrom": [
+          2.5616483068066067e-16,
+          2.091744581858317,
+          2.0917445818583174
+        ],
+        "fractional": [
+          0.0,
+          0.09722222222222221,
+          0.09722222222222224
+        ],
+        "radius_angstrom": 1.8718950707078321,
+        "rank": 4
+      },
+      {
+        "cartesian_angstrom": [
+          15.239853382110597,
+          11.65400552749634,
+          18.526880582173668
+        ],
+        "fractional": [
+          0.7083333333333334,
+          0.5416666666666666,
+          0.8611111111111112
+        ],
+        "radius_angstrom": 1.8601510856209982,
+        "rank": 5
+      },
+      {
+        "cartesian_angstrom": [
+          14.343391418457031,
+          5.079951127370199,
+          14.343391418457033
+        ],
+        "fractional": [
+          0.6666666666666666,
+          0.2361111111111111,
+          0.6666666666666667
+        ],
+        "radius_angstrom": 1.8411799716652044,
+        "rank": 6
+      },
+      {
+        "cartesian_angstrom": [
+          5.677592436472576,
+          13.745750109354654,
+          0.8964619636535645
+        ],
+        "fractional": [
+          0.2638888888888889,
+          0.6388888888888888,
+          0.041666666666666664
+        ],
+        "radius_angstrom": 1.8228650175615664,
+        "rank": 7
+      },
+      {
+        "cartesian_angstrom": [
+          6.275233745574953,
+          16.435136000315346,
+          12.849288145701088
+        ],
+        "fractional": [
+          0.2916666666666667,
+          0.7638888888888888,
+          0.5972222222222221
+        ],
+        "radius_angstrom": 1.808153725465006,
+        "rank": 8
+      },
+      {
+        "cartesian_angstrom": [
+          20.91744581858317,
+          12.251646836598713,
+          12.550467491149902
+        ],
+        "fractional": [
+          0.9722222222222222,
+          0.5694444444444444,
+          0.5833333333333334
+        ],
+        "radius_angstrom": 1.8045904883747006,
+        "rank": 9
+      },
+      {
+        "cartesian_angstrom": [
+          6.574054400126141,
+          8.366978327433268,
+          13.446929454803467
+        ],
+        "fractional": [
+          0.3055555555555556,
+          0.3888888888888889,
+          0.625
+        ],
+        "radius_angstrom": 1.797881531314949,
+        "rank": 10
+      },
+      {
+        "cartesian_angstrom": [
+          7.7693370183308925,
+          16.435136000315346,
+          0.2988206545511881
+        ],
+        "fractional": [
+          0.3611111111111111,
+          0.7638888888888888,
+          0.013888888888888888
+        ],
+        "radius_angstrom": 1.7845271188866934,
+        "rank": 11
+      },
+      {
+        "cartesian_angstrom": [
+          5.378771781921388,
+          1.4941032727559416,
+          12.550467491149902
+        ],
+        "fractional": [
+          0.25,
+          0.06944444444444445,
+          0.5833333333333334
+        ],
+        "radius_angstrom": 1.7595091554164493,
+        "rank": 12
+      },
+      {
+        "cartesian_angstrom": [
+          8.66579898198446,
+          17.33159796396891,
+          19.12452189127604
+        ],
+        "fractional": [
+          0.4027777777777778,
+          0.8055555555555555,
+          0.8888888888888888
+        ],
+        "radius_angstrom": 1.7539392500106235,
+        "rank": 13
+      },
+      {
+        "cartesian_angstrom": [
+          9.562260945638023,
+          16.13631534576416,
+          17.92923927307129
+        ],
+        "fractional": [
+          0.4444444444444444,
+          0.75,
+          0.8333333333333333
+        ],
+        "radius_angstrom": 1.7362723327394625,
+        "rank": 14
+      },
+      {
+        "cartesian_angstrom": [
+          11.952826182047525,
+          3.884668509165447,
+          19.722163200378418
+        ],
+        "fractional": [
+          0.5555555555555555,
+          0.18055555555555555,
+          0.9166666666666667
+        ],
+        "radius_angstrom": 1.726219851403019,
+        "rank": 15
+      },
+      {
+        "cartesian_angstrom": [
+          4.781130472819012,
+          1.1952826182047533,
+          14.044570763905845
+        ],
+        "fractional": [
+          0.22222222222222224,
+          0.05555555555555555,
+          0.6527777777777779
+        ],
+        "radius_angstrom": 1.6946401272407006,
+        "rank": 16
+      },
+      {
+        "cartesian_angstrom": [
+          12.84928814570109,
+          17.6304186185201,
+          10.458722909291586
+        ],
+        "fractional": [
+          0.5972222222222221,
+          0.8194444444444444,
+          0.4861111111111111
+        ],
+        "radius_angstrom": 1.6676490996952957,
+        "rank": 17
+      },
+      {
+        "cartesian_angstrom": [
+          13.745750109354656,
+          21.21626647313436,
+          4.482309818267822
+        ],
+        "fractional": [
+          0.6388888888888888,
+          0.9861111111111112,
+          0.20833333333333334
+        ],
+        "radius_angstrom": 1.6440333257889066,
+        "rank": 18
+      },
+      {
+        "cartesian_angstrom": [
+          6.872875054677329,
+          12.251646836598715,
+          20.020983854929604
+        ],
+        "fractional": [
+          0.3194444444444444,
+          0.5694444444444444,
+          0.9305555555555555
+        ],
+        "radius_angstrom": 1.5985811673463879,
+        "rank": 19
+      },
+      {
+        "cartesian_angstrom": [
+          11.056364218393963,
+          5.378771781921388,
+          18.526880582173668
+        ],
+        "fractional": [
+          0.5138888888888888,
+          0.25,
+          0.8611111111111112
+        ],
+        "radius_angstrom": 1.5965600716498498,
+        "rank": 20
+      },
+      {
+        "cartesian_angstrom": [
+          13.148108800252281,
+          15.837494691212973,
+          11.056364218393961
+        ],
+        "fractional": [
+          0.6111111111111112,
+          0.7361111111111112,
+          0.5138888888888888
+        ],
+        "radius_angstrom": 1.5953952168740344,
+        "rank": 21
+      },
+      {
+        "cartesian_angstrom": [
+          8.06815767288208,
+          2.390565236409506,
+          12.550467491149902
+        ],
+        "fractional": [
+          0.375,
+          0.1111111111111111,
+          0.5833333333333334
+        ],
+        "radius_angstrom": 1.5943622627220477,
+        "rank": 22
+      },
+      {
+        "cartesian_angstrom": [
+          1.1952826182047538,
+          1.4941032727559422,
+          21.21626647313436
+        ],
+        "fractional": [
+          0.05555555555555555,
+          0.06944444444444445,
+          0.9861111111111112
+        ],
+        "radius_angstrom": 1.5839076165889614,
+        "rank": 23
+      },
+      {
+        "cartesian_angstrom": [
+          5.677592436472576,
+          16.733956654866535,
+          0.5976413091023762
+        ],
+        "fractional": [
+          0.2638888888888889,
+          0.7777777777777778,
+          0.027777777777777776
+        ],
+        "radius_angstrom": 1.582298547871314,
+        "rank": 24
+      }
+    ]
+  }
+}

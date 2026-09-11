@@ -1,0 +1,40 @@
+{
+  "campaign": "pilot",
+  "consistent_candidate_ids": true,
+  "kind": "stage_b_candidates",
+  "ready": true,
+  "record_count": 6,
+  "schema_version": 1,
+  "scientific_status": "CANDIDATE_BANK_ONLY",
+  "systems": {
+    "eda_1p5m": {
+      "amine": "eda",
+      "candidate_ids": [
+        "compact",
+        "distant",
+        "separated"
+      ],
+      "ready": true,
+      "replicas": [
+        1,
+        2,
+        3
+      ]
+    },
+    "pure_thf": {
+      "amine": null,
+      "candidate_ids": [
+        "compact",
+        "distant",
+        "separated"
+      ],
+      "ready": true,
+      "replicas": [
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  "unique_system_replica_records": true
+}

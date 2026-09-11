@@ -11,3 +11,9 @@ reports/stage_a/data/** -text
 reports/stage_a/data/**/*.csv text eol=lf
 reports/stage_a/figures/*.png binary
 reports/stage_a/*.pdf binary
+reports/stage_b/data/** -text
+reports/stage_b/data/**/*.csv binary
+reports/stage_b/figures/*.png binary
+reports/stage_b/*.pdf binary
+reports/stage_b/stage_b_metrics.json -text
+reports/stage_b/report_provenance.json -text
