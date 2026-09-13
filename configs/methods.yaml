@@ -135,6 +135,36 @@
     },
     "interpretation": "Li-free, PFAS-free, fixed-nuclei excess-electron screening. Multiple ghost-basis locations are independent basis/initial-condition probes; no cDFT or spatial restraint is permitted. A successful run is not evidence of equilibrium stability, Li ionization thermodynamics, or PFAS reaction kinetics."
   },
+  "stage_b2c_preferential_smoke": {
+    "scientific_status": "NUMERICAL_PREFERENTIAL_SOLVATION_SMOKE_ONLY",
+    "smoke_systems": ["pure_thf", "eda_1p5m", "eda_3m"],
+    "source_campaigns": {
+      "pure_thf": "pilot",
+      "eda_1p5m": "pilot",
+      "eda_3m": "eda3m_pilot"
+    },
+    "smoke_replicas_per_system": 1,
+    "seed_roles": ["eda_rich", "eda_poor"],
+    "states": [
+      {"id": "neutral", "charge": 0, "multiplicity": 1, "uks": false},
+      {"id": "anion", "charge": -1, "multiplicity": 2, "uks": true}
+    ],
+    "local_shell_radii_angstrom": [4.0, 6.0, 8.0],
+    "selection_radius_angstrom": 6.0,
+    "minimum_seed_separation_angstrom": 2.0,
+    "energy_tie_tolerance_ev": 0.05,
+    "functional": "PBE-D3(BJ)",
+    "basis_set": "DZVP-MOLOPT-SR-GTH",
+    "ghost_basis_set": "TZV2P-MOLOPT-GTH-q1",
+    "potential": "GTH-PBE",
+    "cutoff_ry": 400,
+    "rel_cutoff_ry": 50,
+    "eps_scf": "1.0E-5",
+    "max_scf": 160,
+    "cube_stride": 2,
+    "cavity_probe_radius_angstrom": 4.0,
+    "interpretation": "Li-free, PFAS-free, fixed-nuclei screening of whether pre-existing EDA-rich solvent fluctuations preferentially accept an unconstrained excess electron. Each seed uses a matched neutral/anion single-point pair on identical nuclei and ghost basis center."
+  },
   "cp2k": {
     "functional": "PBE0-D3",
     "exact_exchange_fraction": 0.25,

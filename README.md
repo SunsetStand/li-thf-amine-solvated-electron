@@ -175,6 +175,7 @@ one-step Stage-B target are:
 ./run.sh submit --campaign pilot --target stage_b_localization
 ./run.sh submit --campaign pilot --target stage_b_report
 ./run.sh submit --campaign pilot --target stage_b2_intrinsic_smoke
+./run.sh submit --campaign pilot --target stage_b2c_preferential_smoke
 ```
 
 After the cube-only localization gate succeeds, `stage_b_report` creates the
@@ -208,6 +209,15 @@ constraint, and runs a charge -1 doublet from two different ghost-basis seed
 locations in pure THF and 1.5 M EDA/THF. This four-CP2K-job target is a frozen-
 nuclei numerical probe, not evidence of equilibrium electron stability or PFAS
 kinetics. See [`docs/stage-b2.md`](docs/stage-b2.md).
+
+Stage B2C extends that vertical test to pre-existing preferential solvation.
+It keeps the accepted 1.5 M pilot unchanged, adds a separate `eda3m_pilot`
+source ensemble, and selects EDA-rich versus EDA-poor instantaneous void
+environments in pure THF, 1.5 M EDA/THF, and 3 M EDA/THF. Each seed is evaluated
+as a matched neutral-singlet/anion-doublet fixed-geometry pair, so the reported
+`E(neutral)-E(anion)` is a within-geometry vertical attachment proxy rather
+than an invalid comparison of absolute energies across compositions. No
+electron-position constraint or geometry optimization is used.
 
 ## What is implemented in v0.1
 

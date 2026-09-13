@@ -26,6 +26,7 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(len(campaign_matrix("mixed_smoke", campaign, systems)), 1)
         self.assertEqual(len(campaign_matrix("hbond_smoke", campaign, systems)), 2)
         self.assertEqual(len(campaign_matrix("pilot", campaign, systems)), 6)
+        self.assertEqual(len(campaign_matrix("eda3m_pilot", campaign, systems)), 3)
         self.assertEqual(len(campaign_matrix("hbond_pilot", campaign, systems)), 6)
         self.assertEqual(len(campaign_matrix("production", campaign, systems)), 33)
 
@@ -94,6 +95,33 @@ class ConfigTests(unittest.TestCase):
             * settings["smoke_replicas_per_system"]
             * settings["void_seed_count"],
             4,
+        )
+
+    def test_stage_b2c_uses_three_ensembles_and_matched_state_pairs(self) -> None:
+        campaign, _systems, methods = load_repository_configs(ROOT)
+        settings = methods["stage_b2c_preferential_smoke"]
+        self.assertEqual(
+            settings["scientific_status"],
+            "NUMERICAL_PREFERENTIAL_SOLVATION_SMOKE_ONLY",
+        )
+        self.assertEqual(settings["smoke_systems"], ["pure_thf", "eda_1p5m", "eda_3m"])
+        self.assertEqual(
+            settings["source_campaigns"],
+            {"pure_thf": "pilot", "eda_1p5m": "pilot", "eda_3m": "eda3m_pilot"},
+        )
+        self.assertEqual(campaign["campaigns"]["eda3m_pilot"]["systems"], ["eda_3m"])
+        states = {
+            record["id"]: (record["charge"], record["multiplicity"], record["uks"])
+            for record in settings["states"]
+        }
+        self.assertEqual(states, {"neutral": (0, 1, False), "anion": (-1, 2, True)})
+        self.assertEqual(settings["seed_roles"], ["eda_rich", "eda_poor"])
+        self.assertEqual(
+            len(settings["smoke_systems"])
+            * settings["smoke_replicas_per_system"]
+            * len(settings["seed_roles"])
+            * len(settings["states"]),
+            12,
         )
 
 

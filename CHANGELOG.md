@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add Stage B2C fixed-nuclei preferential-solvation smoke screening for pure
+  THF, EDA 1.5 M, and EDA 3 M, using deterministic EDA-rich/poor void seeds,
+  matched neutral/anion CP2K pairs, and spin-density/local-composition audits.
+- Add an isolated `eda3m_pilot` source campaign so the accepted two-system
+  pilot and its existing Stage-B reports remain immutable.
+
 - Add count-defined `pure_eda` and 1:1 molar `eda_1to1` Stage-A campaigns.
 - Analyze EDA--EDA and EDA--THF hydrogen bonds relative to the periodic cavity
   proxy, with CSV/JSON audit records, SVG projections, local PDB, and PyMOL view.

@@ -85,3 +85,71 @@ capture kinetics. A production decision needs at least a better
 self-interaction-controlled method, cell-size convergence, neutral reference
 and detachment/attachment energetics, nuclear relaxation or dynamics, and
 independent wavefunction/topological analysis.
+
+## Stage B2C: pre-existing preferential solvation
+
+Stage B2C tests a narrower, physically cleaner follow-up than fixing an
+electron during geometry optimization: do ordinary solvent fluctuations that
+are already locally EDA-rich accept an unconstrained excess electron more
+favorably than EDA-poor fluctuations? It compares three solvent ensembles:
+
+- pure THF, as a composition-degenerate reference;
+- THF/EDA 1.5 M;
+- THF/EDA 3 M.
+
+The accepted `pilot` bank remains unchanged. A separate `eda3m_pilot`
+campaign generates the 3 M classical ensemble, Stage-A snapshot, and Stage-B
+void bank. Stage B2C then reads the three accepted banks as immutable inputs
+and publishes its combined smoke result below `runs/pilot/`.
+
+For each system and replica-1 snapshot, all ranked voids are characterized by
+the mole fraction of EDA molecular heavy-atom centers within 4, 6, and 8
+angstrom. The 6-angstrom shell deterministically selects one `eda_rich` and
+one `eda_poor` basis seed. Pure THF uses two distinct voids whose EDA fraction
+is identically zero; it cannot express an EDA-rich preference.
+
+Each seed receives two CP2K `RUN_TYPE ENERGY` calculations on identical fixed
+nuclei and the same ghost basis center:
+
+- a neutral closed-shell singlet;
+- an unconstrained charge -1 doublet, with electron and spin-density cubes.
+
+The within-seed proxy `E(neutral) - E(anion)` is reported in eV. A larger value
+means more favorable vertical electron attachment within that matched pair.
+It is not valid to compare the raw total energies of different compositions.
+The analysis also recomputes local EDA content at the final positive-spin
+centroid and sums positive spin fractions over EDA and THF molecules.
+
+### Slurm sequence
+
+First create and accept the missing 3 M EDA source bank:
+
+```bash
+./run.sh dry-run --campaign eda3m_pilot --target classical_pilot
+./run.sh submit --campaign eda3m_pilot --target classical_pilot
+./run.sh submit --campaign eda3m_pilot --target classical_analysis
+./run.sh submit --campaign eda3m_pilot --target snapshot_bank
+./run.sh submit --campaign eda3m_pilot --target stage_b_candidates
+```
+
+After each controller completes and its summary is `ready: true`, preview and
+submit the combined B2C smoke:
+
+```bash
+./run.sh dry-run --campaign pilot --target stage_b2c_preferential_smoke
+./run.sh inspect
+./run.sh submit --campaign pilot --target stage_b2c_preferential_smoke
+```
+
+With all three candidate banks accepted, the incremental B2C dry-run contains
+29 jobs: 3 seed selectors, 6 paired renderers, 12 CP2K single points, 6 pair
+analyses, 1 summary, and 1 checksum gate. It must contain exactly six neutral
+and six anion CP2K jobs and no GROMACS job.
+
+Success requires `stage_b2c_preferential_smoke.summary.json` with `ready: true`
+and a matching `stage_b2c_preferential_smoke.done`. This remains a numerical
+smoke screen. PBE delocalization error, the uncorrected charged periodic cell,
+one snapshot per composition, and the absence of Li/PFAS prohibit a production
+stability, ionization, or kinetic conclusion. It tests pre-existing solvent
+selection only; electron-induced nuclear reorganization is deliberately not
+claimed.

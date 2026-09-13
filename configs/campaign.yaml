@@ -28,6 +28,11 @@
       "replicas": [1, 2, 3],
       "stages": ["spec", "inputs", "classical_md", "cdft", "vde", "analysis"]
     },
+    "eda3m_pilot": {
+      "systems": ["eda_3m"],
+      "replicas": [1, 2, 3],
+      "stages": ["spec", "inputs", "classical_md", "analysis"]
+    },
     "hbond_pilot": {
       "systems": ["pure_eda", "eda_1to1"],
       "replicas": [1, 2, 3],

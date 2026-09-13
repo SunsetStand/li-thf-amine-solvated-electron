@@ -56,7 +56,9 @@ class SlurmSafetyTests(unittest.TestCase):
         snakefile = SNAKEFILE.read_text(encoding="utf-8")
         self.assertIn("input_bundle|classical_smoke|classical_pilot", runner)
         self.assertIn("classical_analysis|snapshot_bank|hbond_stage_a", runner)
-        self.assertIn('if CAMPAIGN not in {"pilot", "hbond_pilot"}', snakefile)
+        self.assertIn(
+            'if CAMPAIGN not in {"pilot", "eda3m_pilot", "hbond_pilot"}', snakefile
+        )
         self.assertIn('if CAMPAIGN != "hbond_pilot"', snakefile)
         self.assertIn("hbond_analysis_handoff", snakefile)
         self.assertIn("classical_pilot.done", snakefile)
@@ -166,6 +168,21 @@ class SlurmSafetyTests(unittest.TestCase):
         self.assertNotIn("electron_cube=lambda", intrinsic_rules)
         self.assertNotIn("gmx", intrinsic_rules.lower())
         self.assertNotIn("mpirun -np", intrinsic_rules)
+
+        preferential_rules = (
+            ROOT / "workflow" / "rules" / "61_stage_b2c_preferential.smk"
+        ).read_text(encoding="utf-8")
+        self.assertIn("stage_b2c_preferential_smoke", runner)
+        self.assertIn("stage_b2c_candidate_gate", preferential_rules)
+        self.assertIn("run_stage_b2c_preferential_neutral:", profile)
+        self.assertIn("run_stage_b2c_preferential_anion:", profile)
+        self.assertEqual(preferential_rules.count("bash {STAGE_RUNNER:q} cdft --"), 2)
+        self.assertEqual(
+            preferential_rules.count("{resources.mpi} -n {resources.tasks} cp2k.psmp"), 2
+        )
+        self.assertNotIn("gmx", preferential_rules.lower())
+        self.assertNotIn("&CDFT", preferential_rules.upper())
+        self.assertNotIn("mpirun -np", preferential_rules)
 
     def test_tmc_mpi_launcher_enforces_the_slurm_allocation(self) -> None:
         launcher = TMC_MPI_LAUNCHER.read_text(encoding="utf-8")

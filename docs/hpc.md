@@ -185,6 +185,8 @@ Finally, preview the input bundle, smoke chains, or restricted classical pilot:
 ./run.sh dry-run --campaign pilot --target stage_b_localization
 ./run.sh dry-run --campaign pilot --target stage_b_report
 ./run.sh dry-run --campaign pilot --target stage_b2_intrinsic_smoke
+./run.sh dry-run --campaign eda3m_pilot --target classical_pilot
+./run.sh dry-run --campaign pilot --target stage_b2c_preferential_smoke
 ./run.sh submit --campaign smoke --target classical_smoke
 ```
 
@@ -222,6 +224,7 @@ single-command numerical smoke chain:
 ./run.sh submit --campaign pilot --target stage_b_localization
 ./run.sh submit --campaign pilot --target stage_b_report
 ./run.sh submit --campaign pilot --target stage_b2_intrinsic_smoke
+./run.sh submit --campaign pilot --target stage_b2c_preferential_smoke
 ```
 
 For a fresh run, the second command alone schedules both layers. Its DAG must
@@ -257,6 +260,14 @@ removes Li, and launches two unconstrained charge -1 doublets for each of the
 two pilot solvents. Its incremental DAG contains 16 jobs, including exactly
 four CP2K runs and no GROMACS jobs. See `docs/stage-b2.md` for the scientific
 boundary and acceptance checks.
+
+`stage_b2c_preferential_smoke` additionally needs the independently accepted
+`eda3m_pilot` classical-analysis, snapshot-bank, and Stage-B candidate gates.
+Once those and the existing `pilot` candidate bank are present, its incremental
+DAG has 29 jobs: six neutral plus six anion CP2K single points and 17 lightweight
+selection/render/analysis/gate jobs. It contains no GROMACS job. The output is
+written under the `pilot` run root, while source paths and checksums retain the
+cross-campaign provenance. See the Stage B2C section of `docs/stage-b2.md`.
 
 MPI rules use Snakemake's standard `mpi` and `tasks` resources. The reusable
 rule defaults to `mpirun`, and the generic Slurm profile overrides the launcher

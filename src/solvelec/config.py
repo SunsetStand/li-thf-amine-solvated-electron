@@ -468,6 +468,92 @@ def validate_repository_configs(root: Path | None = None) -> list[str]:
         or not str(experiment.get("provenance", "")).strip()
     ):
         errors.append("Stage-B2 intrinsic experiment context is incomplete or inconsistent")
+    preferential = methods.get("stage_b2c_preferential_smoke", {})
+    if preferential.get("scientific_status") != (
+        "NUMERICAL_PREFERENTIAL_SOLVATION_SMOKE_ONLY"
+    ):
+        errors.append("Stage-B2C status must remain explicitly preferential-smoke-only")
+    try:
+        smoke_systems = [str(value) for value in preferential["smoke_systems"]]
+        source_campaigns = {
+            str(system): str(source)
+            for system, source in preferential["source_campaigns"].items()
+        }
+        if smoke_systems != ["pure_thf", "eda_1p5m", "eda_3m"]:
+            raise ValueError
+        if set(source_campaigns) != set(smoke_systems):
+            raise ValueError
+        for system in smoke_systems:
+            source = source_campaigns[system]
+            if system not in campaign["campaigns"][source]["systems"]:
+                raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append(
+            "Stage-B2C systems must map pure THF, EDA 1.5 M, and EDA 3 M "
+            "to source campaigns that contain them"
+        )
+    try:
+        if [str(value) for value in preferential["seed_roles"]] != [
+            "eda_rich",
+            "eda_poor",
+        ]:
+            raise ValueError
+        states = {
+            str(record["id"]): (
+                int(record["charge"]),
+                int(record["multiplicity"]),
+                bool(record["uks"]),
+            )
+            for record in preferential["states"]
+        }
+        if states != {"neutral": (0, 1, False), "anion": (-1, 2, True)}:
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append(
+            "Stage-B2C must define EDA-rich/poor seeds and a neutral-singlet/anion-doublet pair"
+        )
+    try:
+        replica_count = int(preferential["smoke_replicas_per_system"])
+        if replica_count <= 0 or replica_count != float(
+            preferential["smoke_replicas_per_system"]
+        ):
+            raise ValueError
+        for system, source in preferential["source_campaigns"].items():
+            if system not in preferential["smoke_systems"]:
+                raise ValueError
+            replicas = campaign["campaigns"][source].get("replicas", campaign["replicas"])
+            if replica_count > len(replicas):
+                raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append("Stage-B2C replica count exceeds one or more source campaign banks")
+    try:
+        radii = [float(value) for value in preferential["local_shell_radii_angstrom"]]
+        selection_radius = float(preferential["selection_radius_angstrom"])
+        if not radii or any(value <= 0 for value in radii) or len(radii) != len(set(radii)):
+            raise ValueError
+        if selection_radius not in radii:
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append(
+            "Stage-B2C local shells must be unique, positive, and include selection radius"
+        )
+    for key in (
+        "minimum_seed_separation_angstrom",
+        "energy_tie_tolerance_ev",
+        "cutoff_ry",
+        "rel_cutoff_ry",
+        "eps_scf",
+        "max_scf",
+        "cube_stride",
+        "cavity_probe_radius_angstrom",
+    ):
+        try:
+            if float(preferential[key]) <= 0:
+                raise ValueError
+        except (KeyError, TypeError, ValueError):
+            errors.append(f"methods.stage_b2c_preferential_smoke.{key} must be positive")
+    if not str(preferential.get("interpretation", "")).strip():
+        errors.append("methods.stage_b2c_preferential_smoke.interpretation is required")
     cp2k = methods.get("cp2k", {})
     try:
         if cp2k["li_potential"] != "GTH-PBE-q3":

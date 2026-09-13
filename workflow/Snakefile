@@ -42,6 +42,9 @@ PREPARE_STAGE_B = (ROOT / "workflow" / "scripts" / "prepare_stage_b.py").as_posi
 PREPARE_STAGE_B2_INTRINSIC = (
     ROOT / "workflow" / "scripts" / "prepare_stage_b2_intrinsic.py"
 ).as_posix()
+PREPARE_STAGE_B2C_PREFERENTIAL = (
+    ROOT / "workflow" / "scripts" / "prepare_stage_b2c_preferential.py"
+).as_posix()
 ANALYZE_STAGE_B_LOCALIZATION = (
     ROOT / "workflow" / "scripts" / "analyze_stage_b_localization.py"
 ).as_posix()
@@ -182,6 +185,34 @@ STAGE_B2_INTRINSIC_OUTPUTS = [path.replace("cp2k.inp", "cp2k.out") for path in S
 STAGE_B2_INTRINSIC_ANALYSES = [
     path.replace("cp2k.inp", "analysis.json") for path in STAGE_B2_INTRINSIC_INPUTS
 ]
+STAGE_B2C_SETTINGS = METHOD_CATALOG["stage_b2c_preferential_smoke"]
+STAGE_B2C_SYSTEMS = [str(value) for value in STAGE_B2C_SETTINGS["smoke_systems"]]
+STAGE_B2C_SOURCE_CAMPAIGNS = {
+    str(system): str(source)
+    for system, source in STAGE_B2C_SETTINGS["source_campaigns"].items()
+}
+STAGE_B2C_REPLICA_COUNT = int(STAGE_B2C_SETTINGS["smoke_replicas_per_system"])
+STAGE_B2C_PAIRS = [
+    (system, int(replica))
+    for system in STAGE_B2C_SYSTEMS
+    for replica in sorted(
+        int(value)
+        for value in config["campaigns"][STAGE_B2C_SOURCE_CAMPAIGNS[system]].get(
+            "replicas", config.get("replicas", [1])
+        )
+    )[:STAGE_B2C_REPLICA_COUNT]
+]
+STAGE_B2C_REPLICAS = sorted({replica for _system, replica in STAGE_B2C_PAIRS})
+STAGE_B2C_SEED_ROLES = [str(value) for value in STAGE_B2C_SETTINGS["seed_roles"]]
+STAGE_B2C_STATES = [str(value["id"]) for value in STAGE_B2C_SETTINGS["states"]]
+STAGE_B2C_ANALYSES = [
+    (
+        f"{RUN_ROOT}/{CAMPAIGN}/stage_b2c_preferential/{system}/r{replica}/"
+        f"{seed_role}/analysis.json"
+    )
+    for system, replica in STAGE_B2C_PAIRS
+    for seed_role in STAGE_B2C_SEED_ROLES
+]
 
 
 def stage_b2_intrinsic_project(system, replica, seed):
@@ -195,6 +226,21 @@ def stage_b2_intrinsic_directory(system, replica, seed):
 def stage_b2_intrinsic_cube(system, replica, seed, density_kind):
     project = stage_b2_intrinsic_project(system, replica, seed)
     return f"{stage_b2_intrinsic_directory(system, replica, seed)}/{project}-{density_kind}-1_0.cube"
+
+
+def stage_b2c_directory(system, replica, seed_role, state=None):
+    base = f"{RUN_ROOT}/{CAMPAIGN}/stage_b2c_preferential/{system}/r{replica}/{seed_role}"
+    return base if state is None else f"{base}/{state}"
+
+
+def stage_b2c_project(system, replica, seed_role, state):
+    return f"{system}_r{replica}_{seed_role}_{state}_stage_b2c_preferential_smoke"
+
+
+def stage_b2c_cube(system, replica, seed_role, density_kind):
+    directory = stage_b2c_directory(system, replica, seed_role, "anion")
+    project = stage_b2c_project(system, replica, seed_role, "anion")
+    return f"{directory}/{project}-{density_kind}-1_0.cube"
 
 
 def stage_b_mechanism_directory(system, replica, state):
@@ -300,10 +346,10 @@ def pilot_checkpoint_argument(wildcards):
 
 
 def require_pilot_campaign(_wildcards):
-    if CAMPAIGN not in {"pilot", "hbond_pilot"}:
+    if CAMPAIGN not in {"pilot", "eda3m_pilot", "hbond_pilot"}:
         raise ValueError(
-            "classical pilot/analysis targets require campaign 'pilot' or "
-            f"'hbond_pilot', not {CAMPAIGN!r}"
+            "classical pilot/analysis targets require campaign 'pilot', "
+            f"'eda3m_pilot', or 'hbond_pilot', not {CAMPAIGN!r}"
         )
     return CAMPAIGN
 
@@ -391,6 +437,45 @@ def stage_b2_intrinsic_artifact(path):
     return artifact.as_posix()
 
 
+def stage_b2c_source_campaign(system):
+    try:
+        return STAGE_B2C_SOURCE_CAMPAIGNS[str(system)]
+    except KeyError as exc:
+        raise ValueError(f"Stage-B2C has no source campaign for {system!r}") from exc
+
+
+def stage_b2c_candidate_gate(wildcards):
+    if CAMPAIGN != "pilot":
+        raise ValueError(
+            f"stage_b2c_preferential_smoke must publish under campaign 'pilot', not {CAMPAIGN!r}"
+        )
+    source = stage_b2c_source_campaign(wildcards.system)
+    definition = config["campaigns"].get(source, {})
+    if wildcards.system not in definition.get("systems", []):
+        raise ValueError(
+            f"Stage-B2C source campaign {source!r} does not contain {wildcards.system!r}"
+        )
+    summary = Path(f"{RUN_ROOT}/{source}/stage_b_candidates.summary.json")
+    gate = Path(f"{RUN_ROOT}/{source}/stage_b_candidates.done")
+    for label, path in (("summary", summary), ("gate", gate)):
+        if not path.is_file():
+            raise ValueError(
+                f"stage_b2c_preferential_smoke requires accepted {source} candidate {label}: {path}"
+            )
+    tokens = gate.read_text(encoding="utf-8").split()
+    digest = hashlib.sha256(summary.read_bytes()).hexdigest()
+    if tokens != ["sha256", digest, summary.name]:
+        raise ValueError(f"Stage-B2C candidate gate does not match {source} summary")
+    return gate.as_posix()
+
+
+def stage_b2c_artifact(path):
+    artifact = Path(path)
+    if not artifact.is_file():
+        raise ValueError(f"Stage-B2C immutable handoff is missing: {artifact}")
+    return artifact.as_posix()
+
+
 def stage_b_report_handoff(_wildcards):
     if CAMPAIGN not in {"pilot", "production"}:
         raise ValueError(
@@ -432,4 +517,5 @@ include: "rules/56_stage_b_mechanism_smoke.smk"
 include: "rules/57_stage_b_localization.smk"
 include: "rules/58_stage_b_report.smk"
 include: "rules/59_stage_b2_intrinsic.smk"
+include: "rules/61_stage_b2c_preferential.smk"
 include: "rules/70_report.smk"

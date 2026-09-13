@@ -186,6 +186,63 @@ def render_stage_b2_intrinsic_cp2k(
     output.write_text(rendered.rstrip() + "\n", encoding="utf-8")
 
 
+def render_stage_b2c_preferential_cp2k(
+    template_path: str | Path,
+    output_path: str | Path,
+    *,
+    project: str,
+    coordinates_path: str | Path,
+    cell_path: str | Path,
+    method: Mapping[str, Any],
+    state: Mapping[str, Any],
+) -> None:
+    """Render one member of a fixed-geometry neutral/anion Stage-B2C pair."""
+
+    if method.get("scientific_status") != "NUMERICAL_PREFERENTIAL_SOLVATION_SMOKE_ONLY":
+        raise ValueError("Stage-B2C method must remain explicitly smoke-only")
+    state_id = str(state.get("id", ""))
+    allowed = {
+        "neutral": (0, 1, False),
+        "anion": (-1, 2, True),
+    }
+    charge = int(state.get("charge", 99))
+    multiplicity = int(state.get("multiplicity", 99))
+    uks = bool(state.get("uks"))
+    if state_id not in allowed or (charge, multiplicity, uks) != allowed[state_id]:
+        raise ValueError("Stage-B2C states must be neutral singlet and charge -1 doublet")
+    density_print = ""
+    if state_id == "anion":
+        stride = int(method["cube_stride"])
+        density_print = f"""      &E_DENSITY_CUBE
+        STRIDE {stride} {stride} {stride}
+      &END E_DENSITY_CUBE"""
+    substitutions = {
+        "project": project,
+        "coordinates_path": Path(coordinates_path).resolve().as_posix(),
+        "cell_path": Path(cell_path).resolve().as_posix(),
+        "charge": charge,
+        "multiplicity": multiplicity,
+        "uks": "TRUE" if uks else "FALSE",
+        "basis_set": method["basis_set"],
+        "ghost_basis_set": method["ghost_basis_set"],
+        "potential": method["potential"],
+        "cutoff_ry": method["cutoff_ry"],
+        "rel_cutoff_ry": method["rel_cutoff_ry"],
+        "eps_scf": method["eps_scf"],
+        "max_scf": int(method["max_scf"]),
+        "density_print_block": density_print,
+    }
+    rendered = _load_template(template_path).substitute(substitutions)
+    upper = rendered.upper()
+    if "&CDFT" in upper or "&CONSTRAINT" in upper:
+        raise ValueError("Stage-B2C smoke must not contain localization constraints")
+    if "&KIND LI" in upper:
+        raise ValueError("Stage-B2C smoke must not define a Li kind")
+    output = Path(output_path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(rendered.rstrip() + "\n", encoding="utf-8")
+
+
 def render_orca(
     template_path: str | Path,
     output_path: str | Path,
