@@ -187,6 +187,7 @@ Finally, preview the input bundle, smoke chains, or restricted classical pilot:
 ./run.sh dry-run --campaign pilot --target stage_b2_intrinsic_smoke
 ./run.sh dry-run --campaign eda3m_pilot --target classical_pilot
 ./run.sh dry-run --campaign pilot --target stage_b2c_preferential_smoke
+./run.sh dry-run --campaign pilot --target stage_b2c_preferential_production
 ./run.sh submit --campaign smoke --target classical_smoke
 ```
 
@@ -225,6 +226,7 @@ single-command numerical smoke chain:
 ./run.sh submit --campaign pilot --target stage_b_report
 ./run.sh submit --campaign pilot --target stage_b2_intrinsic_smoke
 ./run.sh submit --campaign pilot --target stage_b2c_preferential_smoke
+./run.sh submit --campaign pilot --target stage_b2c_preferential_production
 ```
 
 For a fresh run, the second command alone schedules both layers. Its DAG must
@@ -268,6 +270,15 @@ DAG has 29 jobs: six neutral plus six anion CP2K single points and 17 lightweigh
 selection/render/analysis/gate jobs. It contains no GROMACS job. The output is
 written under the `pilot` run root, while source paths and checksums retain the
 cross-campaign provenance. See the Stage B2C section of `docs/stage-b2.md`.
+
+`stage_b2c_preferential_production` requires that accepted smoke summary and
+checksum gate. It treats replica 1 as immutable baseline data and schedules only
+replicas 2 and 3: 6 seed selectors, 12 renderers, 24 CP2K single points, 12 pair
+analyses, 1 ensemble summary, and 1 checksum gate (56 jobs). The final summary
+contains all three replicas per composition and reports the paired
+rich-minus-poor attachment proxy with sample dispersion and an exploratory 95%
+Student-t interval. It does not rerun the 12 smoke CP2K jobs and remains a
+fixed-nuclei ensemble screen rather than a free-energy calculation.
 
 MPI rules use Snakemake's standard `mpi` and `tasks` resources. The reusable
 rule defaults to `mpirun`, and the generic Slurm profile overrides the launcher

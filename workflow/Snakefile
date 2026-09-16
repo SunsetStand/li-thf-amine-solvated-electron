@@ -192,17 +192,33 @@ STAGE_B2C_SOURCE_CAMPAIGNS = {
     for system, source in STAGE_B2C_SETTINGS["source_campaigns"].items()
 }
 STAGE_B2C_REPLICA_COUNT = int(STAGE_B2C_SETTINGS["smoke_replicas_per_system"])
-STAGE_B2C_PAIRS = [
-    (system, int(replica))
-    for system in STAGE_B2C_SYSTEMS
-    for replica in sorted(
-        int(value)
-        for value in config["campaigns"][STAGE_B2C_SOURCE_CAMPAIGNS[system]].get(
-            "replicas", config.get("replicas", [1])
-        )
-    )[:STAGE_B2C_REPLICA_COUNT]
+STAGE_B2C_PRODUCTION_REPLICA_COUNT = int(
+    STAGE_B2C_SETTINGS["production_replicas_per_system"]
+)
+
+
+def stage_b2c_pairs(replica_count):
+    return [
+        (system, int(replica))
+        for system in STAGE_B2C_SYSTEMS
+        for replica in sorted(
+            int(value)
+            for value in config["campaigns"][STAGE_B2C_SOURCE_CAMPAIGNS[system]].get(
+                "replicas", config.get("replicas", [1])
+            )
+        )[:replica_count]
+    ]
+
+
+STAGE_B2C_PAIRS = stage_b2c_pairs(STAGE_B2C_REPLICA_COUNT)
+STAGE_B2C_PRODUCTION_PAIRS = stage_b2c_pairs(STAGE_B2C_PRODUCTION_REPLICA_COUNT)
+STAGE_B2C_PRODUCTION_INCREMENTAL_PAIRS = [
+    pair for pair in STAGE_B2C_PRODUCTION_PAIRS if pair not in set(STAGE_B2C_PAIRS)
 ]
 STAGE_B2C_REPLICAS = sorted({replica for _system, replica in STAGE_B2C_PAIRS})
+STAGE_B2C_PRODUCTION_REPLICAS = sorted(
+    {replica for _system, replica in STAGE_B2C_PRODUCTION_PAIRS}
+)
 STAGE_B2C_SEED_ROLES = [str(value) for value in STAGE_B2C_SETTINGS["seed_roles"]]
 STAGE_B2C_STATES = [str(value["id"]) for value in STAGE_B2C_SETTINGS["states"]]
 STAGE_B2C_ANALYSES = [
@@ -211,6 +227,14 @@ STAGE_B2C_ANALYSES = [
         f"{seed_role}/analysis.json"
     )
     for system, replica in STAGE_B2C_PAIRS
+    for seed_role in STAGE_B2C_SEED_ROLES
+]
+STAGE_B2C_PRODUCTION_INCREMENTAL_ANALYSES = [
+    (
+        f"{RUN_ROOT}/{CAMPAIGN}/stage_b2c_preferential/{system}/r{replica}/"
+        f"{seed_role}/analysis.json"
+    )
+    for system, replica in STAGE_B2C_PRODUCTION_INCREMENTAL_PAIRS
     for seed_role in STAGE_B2C_SEED_ROLES
 ]
 

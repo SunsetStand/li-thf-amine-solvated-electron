@@ -179,6 +179,14 @@ set-resources:
     cpus_per_task: 4
     mem_mb: 4000
     runtime: 60
+  summarize_stage_b2c_preferential_production:
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
+  stage_b2c_preferential_production:
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
   cp2k_cdft:
     tasks: 32
     mpi: srun

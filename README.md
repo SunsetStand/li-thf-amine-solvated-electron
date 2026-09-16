@@ -176,12 +176,20 @@ one-step Stage-B target are:
 ./run.sh submit --campaign pilot --target stage_b_report
 ./run.sh submit --campaign pilot --target stage_b2_intrinsic_smoke
 ./run.sh submit --campaign pilot --target stage_b2c_preferential_smoke
+./run.sh submit --campaign pilot --target stage_b2c_preferential_production
 ```
 
 After the cube-only localization gate succeeds, `stage_b_report` creates the
 complete Chinese Stage-B PDF, five figures, compact audit data, metrics, and a
 SHA-256 provenance manifest. It is a two-job lightweight target and does not
 schedule CP2K or GROMACS. See [reports/stage_b/README.md](reports/stage_b/README.md).
+
+After the accepted Stage-B2C smoke, `stage_b2c_preferential_production`
+reuses its replica-1 records without resubmitting those CP2K jobs and adds
+replicas 2 and 3 for every composition. The final 18 rich/poor pair records
+represent 36 matched neutral/anion single points. The summary reports paired
+replica means, sample standard deviations, and exploratory 95% Student-t
+intervals; it remains a fixed-nuclei ensemble screen rather than a free energy.
 
 The second command includes the first, so a fresh run needs only `stage_b`.
 Passing it proves the CP2K/cDFT execution chain, not the existence or stability

@@ -245,7 +245,8 @@ rule summarize_stage_b2c_preferential_smoke:
         runtime=60,
     shell:
         "bash {STAGE_RUNNER:q} trajectory_analysis -- {PYTHON} {input.script:q} summary "
-        "--campaign {CAMPAIGN:q} --methods {input.methods:q} --records {input.records:q} "
+        "--campaign {CAMPAIGN:q} --summary-mode smoke --methods {input.methods:q} "
+        "--records {input.records:q} "
         "--expected-systems {params.systems} --expected-replicas {params.replicas} "
         "--expected-seed-roles {params.seed_roles} --output {output:q}"
 
@@ -257,6 +258,51 @@ rule stage_b2c_preferential_smoke:
         runtime=STAGE_RUNTIME_INPUTS,
     output:
         f"{RUN_ROOT}/{CAMPAIGN}/stage_b2c_preferential_smoke.done"
+    threads: 4
+    resources:
+        mem_mb=4000,
+        runtime=60,
+    shell:
+        "bash {STAGE_RUNNER:q} trajectory_analysis -- {PYTHON} {input.script:q} gate "
+        "--summary {input.summary:q} --output {output:q}"
+
+
+rule summarize_stage_b2c_preferential_production:
+    input:
+        records=STAGE_B2C_PRODUCTION_INCREMENTAL_ANALYSES,
+        methods="configs/methods.yaml",
+        script=PREPARE_STAGE_B2C_PREFERENTIAL,
+        runtime=STAGE_RUNTIME_INPUTS,
+    output:
+        f"{RUN_ROOT}/{CAMPAIGN}/stage_b2c_preferential_production.summary.json"
+    params:
+        systems=" ".join(shlex.quote(value) for value in STAGE_B2C_SYSTEMS),
+        replicas=" ".join(str(value) for value in STAGE_B2C_PRODUCTION_REPLICAS),
+        seed_roles=" ".join(shlex.quote(value) for value in STAGE_B2C_SEED_ROLES),
+        baseline_summary=(
+            f"{RUN_ROOT}/{CAMPAIGN}/stage_b2c_preferential_smoke.summary.json"
+        ),
+        baseline_gate=f"{RUN_ROOT}/{CAMPAIGN}/stage_b2c_preferential_smoke.done",
+    threads: 4
+    resources:
+        mem_mb=4000,
+        runtime=60,
+    shell:
+        "bash {STAGE_RUNNER:q} trajectory_analysis -- {PYTHON} {input.script:q} summary "
+        "--campaign {CAMPAIGN:q} --summary-mode production --methods {input.methods:q} "
+        "--baseline-summary {params.baseline_summary:q} "
+        "--baseline-gate {params.baseline_gate:q} --records {input.records:q} "
+        "--expected-systems {params.systems} --expected-replicas {params.replicas} "
+        "--expected-seed-roles {params.seed_roles} --output {output:q}"
+
+
+rule stage_b2c_preferential_production:
+    input:
+        summary=rules.summarize_stage_b2c_preferential_production.output,
+        script=PREPARE_STAGE_B2C_PREFERENTIAL,
+        runtime=STAGE_RUNTIME_INPUTS,
+    output:
+        f"{RUN_ROOT}/{CAMPAIGN}/stage_b2c_preferential_production.done"
     threads: 4
     resources:
         mem_mb=4000,

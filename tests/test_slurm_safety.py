@@ -173,9 +173,12 @@ class SlurmSafetyTests(unittest.TestCase):
             ROOT / "workflow" / "rules" / "61_stage_b2c_preferential.smk"
         ).read_text(encoding="utf-8")
         self.assertIn("stage_b2c_preferential_smoke", runner)
+        self.assertIn("stage_b2c_preferential_production", runner)
         self.assertIn("stage_b2c_candidate_gate", preferential_rules)
         self.assertIn("run_stage_b2c_preferential_neutral:", profile)
         self.assertIn("run_stage_b2c_preferential_anion:", profile)
+        self.assertIn("summarize_stage_b2c_preferential_production:", profile)
+        self.assertIn("--baseline-summary", preferential_rules)
         self.assertEqual(preferential_rules.count("bash {STAGE_RUNNER:q} cdft --"), 2)
         self.assertEqual(
             preferential_rules.count("{resources.mpi} -n {resources.tasks} cp2k.psmp"), 2

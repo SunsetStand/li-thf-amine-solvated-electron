@@ -139,6 +139,8 @@ submit the combined B2C smoke:
 ./run.sh dry-run --campaign pilot --target stage_b2c_preferential_smoke
 ./run.sh inspect
 ./run.sh submit --campaign pilot --target stage_b2c_preferential_smoke
+./run.sh dry-run --campaign pilot --target stage_b2c_preferential_production
+./run.sh submit --campaign pilot --target stage_b2c_preferential_production
 ```
 
 With all three candidate banks accepted, the incremental B2C dry-run contains
@@ -153,3 +155,14 @@ one snapshot per composition, and the absence of Li/PFAS prohibit a production
 stability, ionization, or kinetic conclusion. It tests pre-existing solvent
 selection only; electron-induced nuclear reorganization is deliberately not
 claimed.
+
+The production target retains that fixed-nuclei interpretation while adding
+replicas 2 and 3 from each accepted source ensemble. Replica 1 is imported from
+the checksum-gated smoke summary and is not recomputed. The incremental DAG has
+56 jobs, including 24 new CP2K single points; together with the smoke baseline,
+the final audit covers 36 matched neutral/anion calculations and 18 rich/poor
+pair analyses. For each composition the summary reports the three paired
+rich-minus-poor values, their mean, sample standard deviation, standard error,
+and an exploratory 95% Student-t interval. Statistical significance is not a
+workflow success criterion: an interval overlapping zero is a valid,
+scientifically inconclusive result.

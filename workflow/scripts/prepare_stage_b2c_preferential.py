@@ -6,9 +6,10 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import re
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -487,23 +488,157 @@ def _selection_fraction(record: dict[str, Any], selection_radius: float) -> floa
     return float(value) if value is not None else None
 
 
+_T_CRITICAL_975 = {
+    1: 12.7062047364,
+    2: 4.3026527297,
+    3: 3.1824463053,
+    4: 2.7764451052,
+    5: 2.5705818356,
+    6: 2.4469118511,
+    7: 2.3646242510,
+    8: 2.3060041352,
+    9: 2.2621571629,
+    10: 2.2281388520,
+}
+
+
+def _paired_statistics(values: list[float]) -> dict[str, Any]:
+    count = len(values)
+    if count == 0:
+        return {
+            "values": [],
+            "count": 0,
+            "mean": None,
+            "sample_standard_deviation": None,
+            "standard_error": None,
+            "confidence_interval_95": None,
+            "confidence_interval_method": None,
+        }
+    average = float(sum(values) / count)
+    if count == 1:
+        return {
+            "values": values,
+            "count": 1,
+            "mean": average,
+            "sample_standard_deviation": None,
+            "standard_error": None,
+            "confidence_interval_95": None,
+            "confidence_interval_method": None,
+        }
+    variance = sum((value - average) ** 2 for value in values) / (count - 1)
+    sample_standard_deviation = math.sqrt(variance)
+    standard_error = sample_standard_deviation / math.sqrt(count)
+    degrees_of_freedom = count - 1
+    critical = _T_CRITICAL_975.get(degrees_of_freedom, 1.9599639845)
+    margin = critical * standard_error
+    return {
+        "values": values,
+        "count": count,
+        "mean": average,
+        "sample_standard_deviation": sample_standard_deviation,
+        "standard_error": standard_error,
+        "confidence_interval_95": [average - margin, average + margin],
+        "confidence_interval_method": (
+            f"two-sided Student t interval, df={degrees_of_freedom}"
+        ),
+    }
+
+
+def _ensemble_statistics(comparisons: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for comparison in comparisons:
+        grouped[str(comparison["system_id"])].append(comparison)
+    results: list[dict[str, Any]] = []
+    for system_id, group in sorted(grouped.items()):
+        ordered = sorted(group, key=lambda record: int(record["replica"]))
+        deltas = [
+            float(record["vertical_attachment_proxy_ev"]["rich_minus_poor"])
+            for record in ordered
+            if record["vertical_attachment_proxy_ev"]["rich_minus_poor"] is not None
+        ]
+        fraction_contrasts = [
+            float(record["selection_amine_mole_fraction"]["eda_rich"])
+            - float(record["selection_amine_mole_fraction"]["eda_poor"])
+            for record in ordered
+            if record["selection_amine_mole_fraction"]["eda_rich"] is not None
+            and record["selection_amine_mole_fraction"]["eda_poor"] is not None
+        ]
+        delta_statistics = _paired_statistics(deltas)
+        interval = delta_statistics["confidence_interval_95"]
+        composition_degenerate = all(
+            bool(record["composition_degenerate_reference"]) for record in ordered
+        )
+        if composition_degenerate:
+            ensemble_preference = "composition_degenerate_reference"
+        elif interval is None:
+            ensemble_preference = "insufficient_replicas_for_interval"
+        elif interval[0] > 0:
+            ensemble_preference = "eda_rich_ci_excludes_zero"
+        elif interval[1] < 0:
+            ensemble_preference = "eda_poor_ci_excludes_zero"
+        else:
+            ensemble_preference = "inconclusive_ci_overlaps_zero"
+        results.append(
+            {
+                "system_id": system_id,
+                "amine": ordered[0].get("amine"),
+                "replicas": [int(record["replica"]) for record in ordered],
+                "replica_count": len(ordered),
+                "paired_rich_minus_poor_ev": delta_statistics,
+                "selection_amine_fraction_contrast": _paired_statistics(
+                    fraction_contrasts
+                ),
+                "preference_counts": dict(
+                    sorted(
+                        Counter(
+                            str(record["preference_at_smoke_tolerance"])
+                            for record in ordered
+                        ).items()
+                    )
+                ),
+                "composition_degenerate_reference": composition_degenerate,
+                "ensemble_preference": ensemble_preference,
+            }
+        )
+    return results
+
+
 def run_summary(args: argparse.Namespace) -> int:
     records = [_read_json(path) for path in args.records]
+    summary_mode = str(getattr(args, "summary_mode", "smoke"))
+    if summary_mode not in {"smoke", "production"}:
+        raise ValueError(f"unsupported Stage-B2C summary mode: {summary_mode}")
+    baseline: dict[str, Any] | None = None
+    baseline_records: list[dict[str, Any]] = []
+    if summary_mode == "production":
+        baseline_summary = getattr(args, "baseline_summary", None)
+        baseline_gate = getattr(args, "baseline_gate", None)
+        if not baseline_summary or not baseline_gate:
+            raise ValueError("production summary requires the accepted smoke summary and gate")
+        _validate_checksum_gate(baseline_summary, baseline_gate)
+        baseline = _read_json(baseline_summary)
+        if baseline.get("scientific_status") != SCIENTIFIC_STATUS:
+            raise ValueError("production baseline is not the accepted Stage-B2C smoke")
+        baseline_records = list(baseline.get("records", []))
+        records = [*baseline_records, *records]
     expected = {
         (system, int(replica), seed_role)
         for system in args.expected_systems
         for replica in args.expected_replicas
         for seed_role in args.expected_seed_roles
     }
-    observed = {
+    observed_keys = [
         (
             str(record.get("system_id")),
             int(record.get("replica", -1)),
             str(record.get("seed_role")),
         )
         for record in records
-    }
+    ]
+    observed = set(observed_keys)
     problems: list[str] = []
+    if len(observed_keys) != len(observed):
+        problems.append("duplicate system/replica/seed-role records are present")
     if observed != expected:
         problems.append(
             "observed system/replica/seed-role keys differ from expected: "
@@ -580,18 +715,28 @@ def run_summary(args: argparse.Namespace) -> int:
                 },
             }
         )
+    ensemble_statistics = _ensemble_statistics(comparisons)
+    if summary_mode == "smoke":
+        scientific_status = SCIENTIFIC_STATUS
+        kind = "stage_b2c_preferential_solvation_smoke"
+    else:
+        scientific_status = str(method["production_scientific_status"])
+        kind = "stage_b2c_preferential_solvation_production"
     _write_json(
         args.output,
         {
             "schema_version": 1,
             "campaign": args.campaign,
-            "kind": "stage_b2c_preferential_solvation_smoke",
+            "kind": kind,
+            "summary_mode": summary_mode,
             "ready": not problems,
-            "scientific_status": SCIENTIFIC_STATUS,
+            "scientific_status": scientific_status,
             "problems": problems,
             "record_count": len(records),
             "expected_record_count": len(expected),
+            "baseline_record_count": len(baseline_records),
             "comparisons": comparisons,
+            "ensemble_statistics": ensemble_statistics,
             "records": records,
             "interpretation": method["interpretation"],
             "method_limitations": [
@@ -606,7 +751,20 @@ def run_summary(args: argparse.Namespace) -> int:
                 "matched neutral/anion geometry",
                 "PFAS and Li are absent, so no Li-ionization or PFAS capture kinetics "
                 "conclusion is permitted",
+                "three replicas provide only an exploratory paired t interval and do not "
+                "establish a converged thermodynamic free energy",
             ],
+            "baseline_smoke": (
+                {
+                    "summary": {
+                        "path": str(Path(args.baseline_summary).resolve()),
+                        "sha256": sha256_file(args.baseline_summary),
+                    },
+                    "gate": str(Path(args.baseline_gate).resolve()),
+                }
+                if baseline is not None
+                else None
+            ),
             "methods": {
                 "path": str(Path(args.methods).resolve()),
                 "sha256": sha256_file(args.methods),
@@ -671,6 +829,9 @@ def build_parser() -> argparse.ArgumentParser:
     analyze.set_defaults(func=run_analyze)
     summary = subparsers.add_parser("summary")
     summary.add_argument("--campaign", required=True)
+    summary.add_argument("--summary-mode", choices=("smoke", "production"), default="smoke")
+    summary.add_argument("--baseline-summary")
+    summary.add_argument("--baseline-gate")
     summary.add_argument("--methods", required=True)
     summary.add_argument("--records", nargs="+", required=True)
     summary.add_argument("--expected-systems", nargs="+", required=True)

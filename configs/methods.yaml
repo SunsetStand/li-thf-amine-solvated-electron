@@ -144,6 +144,8 @@
       "eda_3m": "eda3m_pilot"
     },
     "smoke_replicas_per_system": 1,
+    "production_replicas_per_system": 3,
+    "production_scientific_status": "NUMERICAL_PREFERENTIAL_SOLVATION_ENSEMBLE_SCREEN_ONLY",
     "seed_roles": ["eda_rich", "eda_poor"],
     "states": [
       {"id": "neutral", "charge": 0, "multiplicity": 1, "uks": false},

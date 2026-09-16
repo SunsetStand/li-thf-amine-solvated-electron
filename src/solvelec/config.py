@@ -513,19 +513,31 @@ def validate_repository_configs(root: Path | None = None) -> list[str]:
             "Stage-B2C must define EDA-rich/poor seeds and a neutral-singlet/anion-doublet pair"
         )
     try:
-        replica_count = int(preferential["smoke_replicas_per_system"])
-        if replica_count <= 0 or replica_count != float(
-            preferential["smoke_replicas_per_system"]
+        smoke_replica_count = int(preferential["smoke_replicas_per_system"])
+        production_replica_count = int(preferential["production_replicas_per_system"])
+        if (
+            smoke_replica_count <= 0
+            or smoke_replica_count != float(preferential["smoke_replicas_per_system"])
+            or production_replica_count <= smoke_replica_count
+            or production_replica_count
+            != float(preferential["production_replicas_per_system"])
         ):
             raise ValueError
         for system, source in preferential["source_campaigns"].items():
             if system not in preferential["smoke_systems"]:
                 raise ValueError
             replicas = campaign["campaigns"][source].get("replicas", campaign["replicas"])
-            if replica_count > len(replicas):
+            if production_replica_count > len(replicas):
                 raise ValueError
     except (KeyError, TypeError, ValueError):
-        errors.append("Stage-B2C replica count exceeds one or more source campaign banks")
+        errors.append(
+            "Stage-B2C production replica count must exceed the smoke count without "
+            "exceeding any source campaign bank"
+        )
+    if preferential.get("production_scientific_status") != (
+        "NUMERICAL_PREFERENTIAL_SOLVATION_ENSEMBLE_SCREEN_ONLY"
+    ):
+        errors.append("Stage-B2C production status must remain explicitly ensemble-screen-only")
     try:
         radii = [float(value) for value in preferential["local_shell_radii_angstrom"]]
         selection_radius = float(preferential["selection_radius_angstrom"])

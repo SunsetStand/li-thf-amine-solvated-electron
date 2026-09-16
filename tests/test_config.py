@@ -116,12 +116,21 @@ class ConfigTests(unittest.TestCase):
         }
         self.assertEqual(states, {"neutral": (0, 1, False), "anion": (-1, 2, True)})
         self.assertEqual(settings["seed_roles"], ["eda_rich", "eda_poor"])
+        self.assertEqual(settings["smoke_replicas_per_system"], 1)
+        self.assertEqual(settings["production_replicas_per_system"], 3)
         self.assertEqual(
             len(settings["smoke_systems"])
             * settings["smoke_replicas_per_system"]
             * len(settings["seed_roles"])
             * len(settings["states"]),
             12,
+        )
+        self.assertEqual(
+            len(settings["smoke_systems"])
+            * settings["production_replicas_per_system"]
+            * len(settings["seed_roles"])
+            * len(settings["states"]),
+            36,
         )
 
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import tempfile
@@ -196,6 +197,98 @@ class PreferentialSolvationTests(unittest.TestCase):
             self.assertGreater(
                 by_system["eda_3m"]["vertical_attachment_proxy_ev"]["rich_minus_poor"],
                 0,
+            )
+
+    def test_production_summary_reuses_smoke_and_reports_replica_interval(self) -> None:
+        module = _load_script()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+
+            def record(replica: int, role: str, energy: float) -> dict:
+                fraction = 0.6 if role == "eda_rich" else 0.0
+                return {
+                    "ready": True,
+                    "system_id": "eda_3m",
+                    "amine": "eda",
+                    "replica": replica,
+                    "seed_role": role,
+                    "composition_degenerate_reference": False,
+                    "local_composition_at_seed": {
+                        "shells": [
+                            {
+                                "radius_angstrom": radius,
+                                "amine_mole_fraction": fraction,
+                            }
+                            for radius in (4.0, 6.0, 8.0)
+                        ]
+                    },
+                    "energies": {"vertical_attachment_proxy_ev": energy},
+                    "positive_spin_fraction_by_component": {"eda": 0.1, "thf": 0.6},
+                }
+
+            baseline_summary = root / "smoke.summary.json"
+            _write_json(
+                baseline_summary,
+                {
+                    "ready": True,
+                    "scientific_status": "NUMERICAL_PREFERENTIAL_SOLVATION_SMOKE_ONLY",
+                    "records": [
+                        record(1, "eda_rich", 1.3),
+                        record(1, "eda_poor", 1.0),
+                    ],
+                },
+            )
+            baseline_gate = root / "smoke.done"
+            digest = hashlib.sha256(baseline_summary.read_bytes()).hexdigest()
+            baseline_gate.write_text(
+                f"sha256 {digest}  {baseline_summary.name}\n", encoding="utf-8"
+            )
+            incremental_paths: list[str] = []
+            for replica, rich_energy in ((2, 1.4), (3, 1.5)):
+                for role, energy in (
+                    ("eda_rich", rich_energy),
+                    ("eda_poor", 1.0),
+                ):
+                    path = root / f"r{replica}-{role}.json"
+                    _write_json(path, record(replica, role, energy))
+                    incremental_paths.append(str(path))
+            output = root / "production.summary.json"
+            self.assertEqual(
+                module.run_summary(
+                    SimpleNamespace(
+                        records=incremental_paths,
+                        expected_systems=["eda_3m"],
+                        expected_replicas=[1, 2, 3],
+                        expected_seed_roles=["eda_rich", "eda_poor"],
+                        methods=str(ROOT / "configs" / "methods.yaml"),
+                        campaign="pilot",
+                        summary_mode="production",
+                        baseline_summary=str(baseline_summary),
+                        baseline_gate=str(baseline_gate),
+                        output=str(output),
+                    )
+                ),
+                0,
+            )
+            summary = json.loads(output.read_text(encoding="utf-8"))
+            self.assertTrue(summary["ready"])
+            self.assertEqual(summary["baseline_record_count"], 2)
+            self.assertEqual(summary["record_count"], 6)
+            self.assertEqual(
+                summary["scientific_status"],
+                "NUMERICAL_PREFERENTIAL_SOLVATION_ENSEMBLE_SCREEN_ONLY",
+            )
+            ensemble = summary["ensemble_statistics"][0]
+            self.assertEqual(ensemble["replicas"], [1, 2, 3])
+            self.assertAlmostEqual(
+                ensemble["paired_rich_minus_poor_ev"]["mean"], 0.4
+            )
+            self.assertGreater(
+                ensemble["paired_rich_minus_poor_ev"]["confidence_interval_95"][0],
+                0.0,
+            )
+            self.assertEqual(
+                ensemble["ensemble_preference"], "eda_rich_ci_excludes_zero"
             )
 
 
