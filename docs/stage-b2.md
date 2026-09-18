@@ -141,6 +141,7 @@ submit the combined B2C smoke:
 ./run.sh submit --campaign pilot --target stage_b2c_preferential_smoke
 ./run.sh dry-run --campaign pilot --target stage_b2c_preferential_production
 ./run.sh submit --campaign pilot --target stage_b2c_preferential_production
+./run.sh submit --campaign pilot --target stage_b2c_method_benchmark
 ```
 
 With all three candidate banks accepted, the incremental B2C dry-run contains
@@ -166,3 +167,8 @@ rich-minus-poor values, their mean, sample standard deviation, standard error,
 and an exploratory 95% Student-t interval. Statistical significance is not a
 workflow success criterion: an interval overlapping zero is a valid,
 scientifically inconclusive result.
+
+The follow-up `stage_b2c_method_benchmark` checks whether the selected positive
+and negative replica extrema survive tighter PBE and PBE0/ADMM settings. It is
+documented separately in
+[`stage-b2c-method-benchmark.md`](stage-b2c-method-benchmark.md).

@@ -167,6 +167,54 @@
     "cavity_probe_radius_angstrom": 4.0,
     "interpretation": "Li-free, PFAS-free, fixed-nuclei screening of whether pre-existing EDA-rich solvent fluctuations preferentially accept an unconstrained excess electron. Each seed uses a matched neutral/anion single-point pair on identical nuclei and ghost basis center."
   },
+  "stage_b2c_method_benchmark": {
+    "scientific_status": "NUMERICAL_METHOD_SENSITIVITY_BENCHMARK_ONLY",
+    "source_scientific_status": "NUMERICAL_PREFERENTIAL_SOLVATION_ENSEMBLE_SCREEN_ONLY",
+    "systems": ["eda_1p5m", "eda_3m"],
+    "representative_replicas": {
+      "eda_1p5m": [2, 3],
+      "eda_3m": [1, 3]
+    },
+    "selection_labels": ["maximum_rich_minus_poor", "minimum_rich_minus_poor"],
+    "baseline_method_id": "pbe_screen",
+    "energy_order_tolerance_ev": 0.05,
+    "variants": [
+      {
+        "id": "pbe_converged",
+        "functional": "PBE-D3(BJ)",
+        "xc_family": "PBE",
+        "basis_set": "TZV2P-MOLOPT-GTH",
+        "ghost_basis_set": "TZV2P-MOLOPT-GTH-q1",
+        "potential": "GTH-PBE",
+        "cutoff_ry": 600,
+        "rel_cutoff_ry": 80,
+        "eps_scf": "1.0E-7",
+        "max_scf": 240,
+        "cube_stride": 2,
+        "admm": false,
+        "exact_exchange_fraction": 0.0
+      },
+      {
+        "id": "pbe0_admm",
+        "functional": "PBE0-D3(BJ)",
+        "xc_family": "PBE0",
+        "basis_set": "TZV2P-MOLOPT-GTH",
+        "ghost_basis_set": "TZV2P-MOLOPT-GTH-q1",
+        "aux_basis_set": "cFIT3",
+        "potential": "GTH-PBE",
+        "cutoff_ry": 600,
+        "rel_cutoff_ry": 80,
+        "eps_scf": "1.0E-7",
+        "max_scf": 240,
+        "cube_stride": 2,
+        "admm": true,
+        "exact_exchange_fraction": 0.25,
+        "hfx_cutoff_angstrom": 5.0,
+        "eps_schwarz": "1.0E-7"
+      }
+    ],
+    "interpretation": "Fixed-nuclei method-sensitivity benchmark on representative positive- and negative-delta Stage-B2C pairs. It tests numerical/basis convergence and PBE-to-PBE0 ordering stability; it is not a free energy, finite-size correction, structural-relaxation calculation, or proof of a bound solvated electron."
+  },
   "cp2k": {
     "functional": "PBE0-D3",
     "exact_exchange_fraction": 0.25,

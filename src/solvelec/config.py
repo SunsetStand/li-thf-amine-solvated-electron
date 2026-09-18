@@ -566,6 +566,87 @@ def validate_repository_configs(root: Path | None = None) -> list[str]:
             errors.append(f"methods.stage_b2c_preferential_smoke.{key} must be positive")
     if not str(preferential.get("interpretation", "")).strip():
         errors.append("methods.stage_b2c_preferential_smoke.interpretation is required")
+    benchmark = methods.get("stage_b2c_method_benchmark", {})
+    if benchmark.get("scientific_status") != (
+        "NUMERICAL_METHOD_SENSITIVITY_BENCHMARK_ONLY"
+    ):
+        errors.append("Stage-B2C method benchmark must remain explicitly diagnostic-only")
+    if benchmark.get("source_scientific_status") != preferential.get(
+        "production_scientific_status"
+    ):
+        errors.append("Stage-B2C method benchmark must consume the production screen")
+    try:
+        benchmark_systems = [str(value) for value in benchmark["systems"]]
+        if benchmark_systems != ["eda_1p5m", "eda_3m"]:
+            raise ValueError
+        representatives = {
+            str(system): [int(value) for value in replicas]
+            for system, replicas in benchmark["representative_replicas"].items()
+        }
+        if set(representatives) != set(benchmark_systems):
+            raise ValueError
+        for system, replicas in representatives.items():
+            if len(replicas) != 2 or len(set(replicas)) != 2 or min(replicas) <= 0:
+                raise ValueError
+            source = preferential["source_campaigns"][system]
+            bank = campaign["campaigns"][source].get("replicas", campaign["replicas"])
+            if not set(replicas).issubset({int(value) for value in bank}):
+                raise ValueError
+        if [str(value) for value in benchmark["selection_labels"]] != [
+            "maximum_rich_minus_poor",
+            "minimum_rich_minus_poor",
+        ]:
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append(
+            "Stage-B2C benchmark must select two distinct accepted replicas for each EDA system"
+        )
+    try:
+        variants = {str(record["id"]): record for record in benchmark["variants"]}
+        if set(variants) != {"pbe_converged", "pbe0_admm"}:
+            raise ValueError
+        for record in variants.values():
+            if record["basis_set"] != "TZV2P-MOLOPT-GTH":
+                raise ValueError
+            if record["ghost_basis_set"] != "TZV2P-MOLOPT-GTH-q1":
+                raise ValueError
+            if record["potential"] != "GTH-PBE":
+                raise ValueError
+            if float(record["cutoff_ry"]) < 600 or float(record["rel_cutoff_ry"]) < 80:
+                raise ValueError
+            if not 0 < float(record["eps_scf"]) <= 1.0e-7:
+                raise ValueError
+            if int(record["max_scf"]) < 200 or int(record["cube_stride"]) <= 0:
+                raise ValueError
+        pbe = variants["pbe_converged"]
+        if pbe["xc_family"] != "PBE" or pbe["admm"] is not False:
+            raise ValueError
+        if float(pbe["exact_exchange_fraction"]) != 0.0:
+            raise ValueError
+        pbe0 = variants["pbe0_admm"]
+        if pbe0["xc_family"] != "PBE0" or pbe0["admm"] is not True:
+            raise ValueError
+        if pbe0["aux_basis_set"] != "cFIT3":
+            raise ValueError
+        if float(pbe0["exact_exchange_fraction"]) != 0.25:
+            raise ValueError
+        if float(pbe0["hfx_cutoff_angstrom"]) <= 0:
+            raise ValueError
+        if float(pbe0["eps_schwarz"]) <= 0:
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append(
+            "Stage-B2C benchmark must define tight TZV2P PBE and PBE0/ADMM variants"
+        )
+    try:
+        if benchmark["baseline_method_id"] != "pbe_screen":
+            raise ValueError
+        if float(benchmark["energy_order_tolerance_ev"]) <= 0:
+            raise ValueError
+        if not str(benchmark["interpretation"]).strip():
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        errors.append("Stage-B2C benchmark baseline, tolerance, and interpretation are required")
     cp2k = methods.get("cp2k", {})
     try:
         if cp2k["li_potential"] != "GTH-PBE-q3":

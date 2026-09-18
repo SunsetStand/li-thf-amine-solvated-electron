@@ -336,9 +336,9 @@ workflow_target_from_args() {
     previous="${item}"
   done
   case "${target}" in
-    input_bundle|classical_smoke|classical_pilot|classical_analysis|snapshot_bank|hbond_stage_a|stage_b_candidates|stage_b|stage_b_mechanism_smoke|stage_b_localization|stage_b_report|stage_b2_intrinsic_smoke|stage_b2c_preferential_smoke|stage_b2c_preferential_production) ;;
+    input_bundle|classical_smoke|classical_pilot|classical_analysis|snapshot_bank|hbond_stage_a|stage_b_candidates|stage_b|stage_b_mechanism_smoke|stage_b_localization|stage_b_report|stage_b2_intrinsic_smoke|stage_b2c_preferential_smoke|stage_b2c_preferential_production|stage_b2c_method_benchmark) ;;
     *)
-      printf 'ERROR: unknown workflow target %s; choose input_bundle, classical_smoke, classical_pilot, classical_analysis, snapshot_bank, hbond_stage_a, stage_b_candidates, stage_b, stage_b_mechanism_smoke, stage_b_localization, stage_b_report, stage_b2_intrinsic_smoke, stage_b2c_preferential_smoke, or stage_b2c_preferential_production.\n' \
+      printf 'ERROR: unknown workflow target %s; choose input_bundle, classical_smoke, classical_pilot, classical_analysis, snapshot_bank, hbond_stage_a, stage_b_candidates, stage_b, stage_b_mechanism_smoke, stage_b_localization, stage_b_report, stage_b2_intrinsic_smoke, stage_b2c_preferential_smoke, stage_b2c_preferential_production, or stage_b2c_method_benchmark.\n' \
         "${target}" >&2
       return 2
       ;;
@@ -688,6 +688,8 @@ The fixed-nuclei EDA-rich/poor preferential-solvation Stage-B2C smoke is:
 ./run.sh submit --campaign pilot --target stage_b2c_preferential_smoke
 The three-replica Stage-B2C ensemble screen reuses the accepted smoke baseline:
 ./run.sh submit --campaign pilot --target stage_b2c_preferential_production
+The selected-extrema tight-PBE/PBE0 Stage-B2C method benchmark is:
+./run.sh submit --campaign pilot --target stage_b2c_method_benchmark
 EOF
     ;;
   *)

@@ -243,6 +243,129 @@ def render_stage_b2c_preferential_cp2k(
     output.write_text(rendered.rstrip() + "\n", encoding="utf-8")
 
 
+def render_stage_b2c_method_benchmark_cp2k(
+    template_path: str | Path,
+    output_path: str | Path,
+    *,
+    project: str,
+    coordinates_path: str | Path,
+    cell_path: str | Path,
+    method: Mapping[str, Any],
+    state: Mapping[str, Any],
+) -> None:
+    """Render one fixed-nuclei Stage-B2C method-benchmark state."""
+
+    if method.get("scientific_status") != (
+        "NUMERICAL_METHOD_SENSITIVITY_BENCHMARK_ONLY"
+    ):
+        raise ValueError("Stage-B2C benchmark method must remain explicitly diagnostic")
+    state_id = str(state.get("id", ""))
+    allowed = {
+        "neutral": (0, 1, False),
+        "anion": (-1, 2, True),
+    }
+    charge = int(state.get("charge", 99))
+    multiplicity = int(state.get("multiplicity", 99))
+    uks = bool(state.get("uks"))
+    if state_id not in allowed or (charge, multiplicity, uks) != allowed[state_id]:
+        raise ValueError("Stage-B2C benchmark states must be neutral singlet and anion doublet")
+
+    family = str(method.get("xc_family", "")).upper()
+    admm = bool(method.get("admm"))
+    fraction = float(method.get("exact_exchange_fraction", 0.0))
+    basis_files = "    BASIS_SET_FILE_NAME BASIS_MOLOPT"
+    aux_fit_line = ""
+    admm_block = ""
+    if family == "PBE":
+        if admm or fraction != 0.0:
+            raise ValueError("PBE benchmark variant must not enable exact exchange or ADMM")
+        xc_lines = [
+            "      &XC_FUNCTIONAL PBE",
+            "      &END XC_FUNCTIONAL",
+        ]
+        dispersion_reference = "PBE"
+    elif family == "PBE0":
+        if not admm or not 0.0 < fraction < 1.0:
+            raise ValueError("PBE0 benchmark variant requires ADMM and partial exact exchange")
+        basis_files += "\n    BASIS_SET_FILE_NAME BASIS_ADMM_MOLOPT"
+        aux_basis = str(method["aux_basis_set"])
+        aux_fit_line = f"      BASIS_SET AUX_FIT {aux_basis}"
+        admm_block = """    &AUXILIARY_DENSITY_MATRIX_METHOD
+      ADMM_TYPE ADMMS
+      EXCH_CORRECTION_FUNC PBEX
+    &END AUXILIARY_DENSITY_MATRIX_METHOD"""
+        xc_lines = [
+            "      &XC_FUNCTIONAL PBE",
+            "      &END XC_FUNCTIONAL",
+            "      &HF",
+            f"        FRACTION {fraction}",
+            "        &SCREENING",
+            f"          EPS_SCHWARZ {method['eps_schwarz']}",
+            "          SCREEN_ON_INITIAL_P TRUE",
+            "        &END SCREENING",
+            "        &INTERACTION_POTENTIAL",
+            "          POTENTIAL_TYPE TRUNCATED",
+            f"          CUTOFF_RADIUS {method['hfx_cutoff_angstrom']}",
+            "          T_C_G_DATA t_c_g.dat",
+            "        &END INTERACTION_POTENTIAL",
+            "        &MEMORY",
+            "          MAX_MEMORY 3000",
+            "          EPS_STORAGE_SCALING 0.1",
+            "        &END MEMORY",
+            "      &END HF",
+        ]
+        dispersion_reference = "PBE0"
+    else:
+        raise ValueError(f"unsupported Stage-B2C benchmark XC family: {family!r}")
+    xc_lines.extend(
+        [
+            "      &VDW_POTENTIAL",
+            "        POTENTIAL_TYPE PAIR_POTENTIAL",
+            "        &PAIR_POTENTIAL",
+            "          TYPE DFTD3(BJ)",
+            "          PARAMETER_FILE_NAME dftd3.dat",
+            f"          REFERENCE_FUNCTIONAL {dispersion_reference}",
+            "          R_CUTOFF 15.0",
+            "        &END PAIR_POTENTIAL",
+            "      &END VDW_POTENTIAL",
+        ]
+    )
+
+    density_print = ""
+    if state_id == "anion":
+        stride = int(method["cube_stride"])
+        density_print = f"""      &E_DENSITY_CUBE
+        STRIDE {stride} {stride} {stride}
+      &END E_DENSITY_CUBE"""
+    substitutions = {
+        "project": project,
+        "coordinates_path": Path(coordinates_path).resolve().as_posix(),
+        "cell_path": Path(cell_path).resolve().as_posix(),
+        "charge": charge,
+        "multiplicity": multiplicity,
+        "uks": "TRUE" if uks else "FALSE",
+        "basis_file_block": basis_files,
+        "basis_set": method["basis_set"],
+        "ghost_basis_set": method["ghost_basis_set"],
+        "aux_fit_line": aux_fit_line,
+        "potential": method["potential"],
+        "cutoff_ry": method["cutoff_ry"],
+        "rel_cutoff_ry": method["rel_cutoff_ry"],
+        "eps_scf": method["eps_scf"],
+        "max_scf": int(method["max_scf"]),
+        "admm_block": admm_block,
+        "xc_block": "\n".join(xc_lines),
+        "density_print_block": density_print,
+    }
+    rendered = _load_template(template_path).substitute(substitutions)
+    upper = rendered.upper()
+    if "&CDFT" in upper or "&CONSTRAINT" in upper or "&KIND LI" in upper:
+        raise ValueError("Stage-B2C benchmark must not contain Li or localization constraints")
+    output = Path(output_path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(rendered.rstrip() + "\n", encoding="utf-8")
+
+
 def render_orca(
     template_path: str | Path,
     output_path: str | Path,

@@ -188,6 +188,7 @@ Finally, preview the input bundle, smoke chains, or restricted classical pilot:
 ./run.sh dry-run --campaign eda3m_pilot --target classical_pilot
 ./run.sh dry-run --campaign pilot --target stage_b2c_preferential_smoke
 ./run.sh dry-run --campaign pilot --target stage_b2c_preferential_production
+./run.sh dry-run --campaign pilot --target stage_b2c_method_benchmark
 ./run.sh submit --campaign smoke --target classical_smoke
 ```
 
@@ -279,6 +280,12 @@ contains all three replicas per composition and reports the paired
 rich-minus-poor attachment proxy with sample dispersion and an exploratory 95%
 Student-t interval. It does not rerun the 12 smoke CP2K jobs and remains a
 fixed-nuclei ensemble screen rather than a free-energy calculation.
+
+`stage_b2c_method_benchmark` requires the accepted production summary and gate.
+It selects four EDA-system extrema and schedules 32 tight-PBE/PBE0 CP2K single
+points inside a 67-job DAG, with no GROMACS jobs and no baseline recomputation.
+See `docs/stage-b2c-method-benchmark.md` for method details and acceptance
+criteria.
 
 MPI rules use Snakemake's standard `mpi` and `tasks` resources. The reusable
 rule defaults to `mpirun`, and the generic Slurm profile overrides the launcher

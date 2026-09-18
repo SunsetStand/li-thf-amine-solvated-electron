@@ -177,6 +177,7 @@ one-step Stage-B target are:
 ./run.sh submit --campaign pilot --target stage_b2_intrinsic_smoke
 ./run.sh submit --campaign pilot --target stage_b2c_preferential_smoke
 ./run.sh submit --campaign pilot --target stage_b2c_preferential_production
+./run.sh submit --campaign pilot --target stage_b2c_method_benchmark
 ```
 
 After the cube-only localization gate succeeds, `stage_b_report` creates the
@@ -190,6 +191,12 @@ replicas 2 and 3 for every composition. The final 18 rich/poor pair records
 represent 36 matched neutral/anion single points. The summary reports paired
 replica means, sample standard deviations, and exploratory 95% Student-t
 intervals; it remains a fixed-nuclei ensemble screen rather than a free energy.
+
+`stage_b2c_method_benchmark` then reuses that accepted PBE baseline and tests
+the positive/negative extrema for EDA 1.5 M and 3 M with tight TZV2P PBE and
+PBE0/ADMM. It adds 32 CP2K single points without rerunning the production
+baseline. See
+[`docs/stage-b2c-method-benchmark.md`](docs/stage-b2c-method-benchmark.md).
 
 The second command includes the first, so a fresh run needs only `stage_b`.
 Passing it proves the CP2K/cDFT execution chain, not the existence or stability

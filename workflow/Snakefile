@@ -45,6 +45,9 @@ PREPARE_STAGE_B2_INTRINSIC = (
 PREPARE_STAGE_B2C_PREFERENTIAL = (
     ROOT / "workflow" / "scripts" / "prepare_stage_b2c_preferential.py"
 ).as_posix()
+STAGE_B2C_METHOD_BENCHMARK = (
+    ROOT / "workflow" / "scripts" / "stage_b2c_method_benchmark.py"
+).as_posix()
 ANALYZE_STAGE_B_LOCALIZATION = (
     ROOT / "workflow" / "scripts" / "analyze_stage_b_localization.py"
 ).as_posix()
@@ -237,6 +240,38 @@ STAGE_B2C_PRODUCTION_INCREMENTAL_ANALYSES = [
     for system, replica in STAGE_B2C_PRODUCTION_INCREMENTAL_PAIRS
     for seed_role in STAGE_B2C_SEED_ROLES
 ]
+STAGE_B2C_METHOD_BENCHMARK_SETTINGS = METHOD_CATALOG["stage_b2c_method_benchmark"]
+STAGE_B2C_METHOD_BENCHMARK_SYSTEMS = [
+    str(value) for value in STAGE_B2C_METHOD_BENCHMARK_SETTINGS["systems"]
+]
+STAGE_B2C_METHOD_BENCHMARK_REPLICAS = {
+    str(system): [int(value) for value in replicas]
+    for system, replicas in STAGE_B2C_METHOD_BENCHMARK_SETTINGS[
+        "representative_replicas"
+    ].items()
+}
+STAGE_B2C_METHOD_BENCHMARK_PAIRS = [
+    (system, replica)
+    for system in STAGE_B2C_METHOD_BENCHMARK_SYSTEMS
+    for replica in STAGE_B2C_METHOD_BENCHMARK_REPLICAS[system]
+]
+STAGE_B2C_METHOD_BENCHMARK_VARIANTS = [
+    str(record["id"])
+    for record in STAGE_B2C_METHOD_BENCHMARK_SETTINGS["variants"]
+]
+STAGE_B2C_METHOD_BENCHMARK_JOBS = [
+    (system, replica, seed_role, method_variant)
+    for system, replica in STAGE_B2C_METHOD_BENCHMARK_PAIRS
+    for seed_role in STAGE_B2C_SEED_ROLES
+    for method_variant in STAGE_B2C_METHOD_BENCHMARK_VARIANTS
+]
+STAGE_B2C_METHOD_BENCHMARK_ANALYSES = [
+    (
+        f"{RUN_ROOT}/{CAMPAIGN}/stage_b2c_method_benchmark/{system}/r{replica}/"
+        f"{seed_role}/{method_variant}/analysis.json"
+    )
+    for system, replica, seed_role, method_variant in STAGE_B2C_METHOD_BENCHMARK_JOBS
+]
 
 
 def stage_b2_intrinsic_project(system, replica, seed):
@@ -264,6 +299,37 @@ def stage_b2c_project(system, replica, seed_role, state):
 def stage_b2c_cube(system, replica, seed_role, density_kind):
     directory = stage_b2c_directory(system, replica, seed_role, "anion")
     project = stage_b2c_project(system, replica, seed_role, "anion")
+    return f"{directory}/{project}-{density_kind}-1_0.cube"
+
+
+def stage_b2c_method_benchmark_directory(
+    system, replica, seed_role, method_variant, state=None
+):
+    base = (
+        f"{RUN_ROOT}/{CAMPAIGN}/stage_b2c_method_benchmark/{system}/r{replica}/"
+        f"{seed_role}/{method_variant}"
+    )
+    return base if state is None else f"{base}/{state}"
+
+
+def stage_b2c_method_benchmark_project(
+    system, replica, seed_role, method_variant, state
+):
+    return (
+        f"{system}_r{replica}_{seed_role}_{method_variant}_{state}_"
+        "stage_b2c_method_benchmark"
+    )
+
+
+def stage_b2c_method_benchmark_cube(
+    system, replica, seed_role, method_variant, density_kind
+):
+    directory = stage_b2c_method_benchmark_directory(
+        system, replica, seed_role, method_variant, "anion"
+    )
+    project = stage_b2c_method_benchmark_project(
+        system, replica, seed_role, method_variant, "anion"
+    )
     return f"{directory}/{project}-{density_kind}-1_0.cube"
 
 
@@ -542,4 +608,5 @@ include: "rules/57_stage_b_localization.smk"
 include: "rules/58_stage_b_report.smk"
 include: "rules/59_stage_b2_intrinsic.smk"
 include: "rules/61_stage_b2c_preferential.smk"
+include: "rules/62_stage_b2c_method_benchmark.smk"
 include: "rules/70_report.smk"
