@@ -1,5 +1,7 @@
 executor: slurm
-jobs: 100
+jobs: 8
+resources:
+  cp2k_slots: 1
 latency-wait: 60
 printshellcmds: true
 rerun-incomplete: true
@@ -95,7 +97,7 @@ set-resources:
     runtime: 60
   run_stage_b_cp2k_smoke:
     slurm_partition: amd
-    tasks: 32
+    tasks: 8
     mpi: tmc-amd-mpirun.sh
     cpus_per_task: 1
     mem_mb: 128000
@@ -117,7 +119,7 @@ set-resources:
     runtime: 60
   run_stage_b_mechanism_smoke:
     slurm_partition: amd
-    tasks: 32
+    tasks: 8
     mpi: tmc-amd-mpirun.sh
     cpus_per_task: 1
     mem_mb: 128000
@@ -164,7 +166,7 @@ set-resources:
     runtime: 60
   run_stage_b2_intrinsic_smoke:
     slurm_partition: amd
-    tasks: 32
+    tasks: 8
     mpi: tmc-amd-mpirun.sh
     cpus_per_task: 1
     mem_mb: 128000
@@ -196,14 +198,14 @@ set-resources:
     runtime: 60
   run_stage_b2c_preferential_neutral:
     slurm_partition: amd
-    tasks: 32
+    tasks: 8
     mpi: tmc-amd-mpirun.sh
     cpus_per_task: 1
     mem_mb: 128000
     runtime: 720
   run_stage_b2c_preferential_anion:
     slurm_partition: amd
-    tasks: 32
+    tasks: 8
     mpi: tmc-amd-mpirun.sh
     cpus_per_task: 1
     mem_mb: 128000
@@ -245,14 +247,14 @@ set-resources:
     runtime: 60
   run_stage_b2c_method_benchmark_neutral:
     slurm_partition: amd
-    tasks: 32
+    tasks: 8
     mpi: tmc-amd-mpirun.sh
     cpus_per_task: 1
     mem_mb: 128000
     runtime: 1440
   run_stage_b2c_method_benchmark_anion:
     slurm_partition: amd
-    tasks: 32
+    tasks: 8
     mpi: tmc-amd-mpirun.sh
     cpus_per_task: 1
     mem_mb: 128000
@@ -274,14 +276,14 @@ set-resources:
     runtime: 60
   cp2k_cdft:
     slurm_partition: amd
-    tasks: 32
+    tasks: 8
     mpi: tmc-amd-mpirun.sh
     cpus_per_task: 1
     mem_mb: 128000
     runtime: 720
   cp2k_vde:
     slurm_partition: amd
-    tasks: 32
+    tasks: 8
     mpi: tmc-amd-mpirun.sh
     cpus_per_task: 1
     mem_mb: 128000

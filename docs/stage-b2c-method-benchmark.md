@@ -47,6 +47,12 @@ The expected dry-run total is 67 and the rule table must show 32 CP2K runs. Subm
 ./run.sh submit --campaign pilot --target stage_b2c_method_benchmark
 ```
 
+The number 32 above is the number of independent single-point calculations,
+not the CPU allocation per calculation. On TMC each CP2K job requests eight
+single-threaded MPI ranks, and the profile permits only one CP2K job to run at
+a time (`cp2k_slots=1`). Do not override this guard or raise the rank count
+without a representative 4/8/16/32-rank scaling benchmark and site approval.
+
 Inspect the controller using `./run.sh inspect JOBID`. Success requires both:
 
 - `runs/pilot/stage_b2c_method_benchmark.summary.json` with `ready: true`;

@@ -411,6 +411,19 @@ not below the repository: `/data/home/storage/Backup_Data/$USER/li-thf-amine-
 solvated-electron/runs`. The repository remains the working directory and holds
 only code, configuration, and small Slurm-controller logs.
 
+## CP2K resource safety
+
+All Stage B CP2K rules request eight single-threaded MPI ranks by default. Both
+Slurm profiles define a global `cp2k_slots=1` resource, so only one CP2K child
+job can be active from a workflow controller at a time. The profiles also cap
+the total number of active workflow jobs at eight.
+
+The number of independent single-point calculations in a target is not a
+justification for assigning that many ranks to each calculation. Increasing a
+CP2K job above eight ranks requires a representative 4/8/16/32-rank scaling
+test that records elapsed time, memory, and node load, followed by explicit
+site approval. Never bypass the CP2K slot guard for unattended production.
+
 ## Restarts and provenance
 
 - Keep GROMACS `.cpt` and CP2K restart/WFN files on scratch or project storage.

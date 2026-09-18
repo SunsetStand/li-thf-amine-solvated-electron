@@ -1,5 +1,7 @@
 executor: slurm
-jobs: 100
+jobs: 8
+resources:
+  cp2k_slots: 1
 latency-wait: 60
 printshellcmds: true
 rerun-incomplete: true
@@ -74,7 +76,7 @@ set-resources:
     mem_mb: 4000
     runtime: 60
   run_stage_b_cp2k_smoke:
-    tasks: 32
+    tasks: 8
     mpi: srun
     cpus_per_task: 1
     mem_mb: 128000
@@ -92,7 +94,7 @@ set-resources:
     mem_mb: 4000
     runtime: 60
   run_stage_b_mechanism_smoke:
-    tasks: 32
+    tasks: 8
     mpi: srun
     cpus_per_task: 1
     mem_mb: 128000
@@ -130,7 +132,7 @@ set-resources:
     mem_mb: 4000
     runtime: 60
   run_stage_b2_intrinsic_smoke:
-    tasks: 32
+    tasks: 8
     mpi: srun
     cpus_per_task: 1
     mem_mb: 128000
@@ -156,13 +158,13 @@ set-resources:
     mem_mb: 4000
     runtime: 60
   run_stage_b2c_preferential_neutral:
-    tasks: 32
+    tasks: 8
     mpi: srun
     cpus_per_task: 1
     mem_mb: 128000
     runtime: 720
   run_stage_b2c_preferential_anion:
-    tasks: 32
+    tasks: 8
     mpi: srun
     cpus_per_task: 1
     mem_mb: 128000
@@ -196,13 +198,13 @@ set-resources:
     mem_mb: 4000
     runtime: 60
   run_stage_b2c_method_benchmark_neutral:
-    tasks: 32
+    tasks: 8
     mpi: srun
     cpus_per_task: 1
     mem_mb: 128000
     runtime: 1440
   run_stage_b2c_method_benchmark_anion:
-    tasks: 32
+    tasks: 8
     mpi: srun
     cpus_per_task: 1
     mem_mb: 128000
@@ -220,12 +222,12 @@ set-resources:
     mem_mb: 4000
     runtime: 60
   cp2k_cdft:
-    tasks: 32
+    tasks: 8
     mpi: srun
     mem_mb: 128000
     runtime: 1440
   cp2k_vde:
-    tasks: 32
+    tasks: 8
     mpi: srun
     mem_mb: 128000
     runtime: 720

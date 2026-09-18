@@ -134,7 +134,8 @@ rule run_stage_b2c_preferential_neutral:
         seed_role="eda_(rich|poor)",
     threads: 1
     resources:
-        tasks=32,
+        tasks=8,
+        cp2k_slots=1,
         mpi="mpirun",
         mem_mb=128000,
         runtime=720,
@@ -174,7 +175,8 @@ rule run_stage_b2c_preferential_anion:
         seed_role="eda_(rich|poor)",
     threads: 1
     resources:
-        tasks=32,
+        tasks=8,
+        cp2k_slots=1,
         mpi="mpirun",
         mem_mb=128000,
         runtime=720,

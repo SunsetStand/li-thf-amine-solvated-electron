@@ -2,7 +2,10 @@
 
 This profile routes every Snakemake rule to the `amd` partition. Lightweight
 rules reserve four CPUs, following the site's four-CPU allocation guidance.
-Future MPI CP2K rules reserve 32 single-threaded ranks.
+MPI CP2K rules use eight single-threaded ranks by default, and the global
+`cp2k_slots=1` scheduler resource permits only one CP2K job at a time. Raising
+the rank count requires a documented 4/8/16/32-rank scaling benchmark and site
+approval; 32 ranks are never the unattended default.
 
 The TMC policy also places the Snakemake controller in a Slurm allocation.
 `run.sh` strips that parent allocation's `SLURM_*` variables from the Snakemake
