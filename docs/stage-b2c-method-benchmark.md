@@ -48,10 +48,12 @@ The expected dry-run total is 67 and the rule table must show 32 CP2K runs. Subm
 ```
 
 The number 32 above is the number of independent single-point calculations,
-not the CPU allocation per calculation. On TMC each CP2K job requests eight
-single-threaded MPI ranks, and the profile permits only one CP2K job to run at
-a time (`cp2k_slots=1`). Do not override this guard or raise the rank count
-without a representative 4/8/16/32-rank scaling benchmark and site approval.
+not the CPU allocation per calculation. On TMC each CP2K job requests twelve
+single-threaded MPI ranks. The `cp2k_slots=1` and `cpu_slots=12` guards prevent
+other child jobs from overlapping it; with the four-CPU controller, total
+workflow allocation is at most sixteen CPUs. Do not override these guards or
+raise the rank count without a representative scaling benchmark and site
+approval.
 
 Inspect the controller using `./run.sh inspect JOBID`. Success requires both:
 

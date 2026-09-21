@@ -57,8 +57,9 @@ rule run_stage_b_mechanism_smoke:
         state="[a-z][a-z0-9_]*",
     threads: 1
     resources:
-        tasks=8,
+        tasks=12,
         cp2k_slots=1,
+        cpu_slots=12,
         mpi="mpirun",
         mem_mb=128000,
         runtime=720,

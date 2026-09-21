@@ -132,8 +132,9 @@ rule run_stage_b2_intrinsic_smoke:
         seed="void_[0-9][0-9]",
     threads: 1
     resources:
-        tasks=8,
+        tasks=12,
         cp2k_slots=1,
+        cpu_slots=12,
         mpi="mpirun",
         mem_mb=128000,
         runtime=720,

@@ -91,8 +91,9 @@ rule run_stage_b2c_method_benchmark_neutral:
         method_variant="(pbe_converged|pbe0_admm)",
     threads: 1
     resources:
-        tasks=8,
+        tasks=12,
         cp2k_slots=1,
+        cpu_slots=12,
         mpi="mpirun",
         mem_mb=128000,
         runtime=1440,
@@ -137,8 +138,9 @@ rule run_stage_b2c_method_benchmark_anion:
         method_variant="(pbe_converged|pbe0_admm)",
     threads: 1
     resources:
-        tasks=8,
+        tasks=12,
         cp2k_slots=1,
+        cpu_slots=12,
         mpi="mpirun",
         mem_mb=128000,
         runtime=1440,

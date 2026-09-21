@@ -18,11 +18,13 @@ PROFILE_PATHS = (
 
 
 class Cp2kResourceSafetyTests(unittest.TestCase):
-    def test_all_cp2k_rules_use_eight_ranks_and_one_global_slot(self) -> None:
+    def test_cp2k_rules_fit_the_twelve_cpu_child_budget(self) -> None:
         combined = "\n".join(path.read_text(encoding="utf-8") for path in RULE_PATHS)
         self.assertNotIn("tasks=32", combined)
-        self.assertEqual(combined.count("tasks=8,"), 7)
+        self.assertNotIn("tasks=8", combined)
+        self.assertEqual(combined.count("tasks=12,"), 7)
         self.assertEqual(combined.count("cp2k_slots=1,"), 7)
+        self.assertEqual(combined.count("cpu_slots=12,"), 7)
 
     def test_slurm_profiles_cap_jobs_and_cp2k_concurrency(self) -> None:
         for path in PROFILE_PATHS:
@@ -30,8 +32,11 @@ class Cp2kResourceSafetyTests(unittest.TestCase):
                 profile = path.read_text(encoding="utf-8")
                 self.assertIn("jobs: 8", profile)
                 self.assertIn("resources:\n  cp2k_slots: 1", profile)
+                self.assertIn("  cpu_slots: 12", profile)
+                self.assertIn("  - cpu_slots=4", profile)
                 self.assertNotIn("tasks: 32", profile)
-                self.assertEqual(profile.count("tasks: 8"), 9)
+                self.assertNotIn("tasks: 8", profile)
+                self.assertEqual(profile.count("tasks: 12"), 9)
 
 
 if __name__ == "__main__":

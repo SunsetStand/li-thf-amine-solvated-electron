@@ -413,14 +413,17 @@ only code, configuration, and small Slurm-controller logs.
 
 ## CP2K resource safety
 
-All Stage B CP2K rules request eight single-threaded MPI ranks by default. Both
-Slurm profiles define a global `cp2k_slots=1` resource, so only one CP2K child
-job can be active from a workflow controller at a time. The profiles also cap
-the total number of active workflow jobs at eight.
+All Stage B CP2K rules request twelve single-threaded MPI ranks by default.
+Both Slurm profiles define global `cp2k_slots=1` and `cpu_slots=12` resources,
+so only one CP2K child job can be active and no lightweight child can overlap
+it. Other rules consume four `cpu_slots` by default, allowing at most three
+lightweight child jobs concurrently. Together with the four-CPU controller,
+the workflow therefore requests no more than sixteen CPUs at once. The
+profiles additionally cap the number of active child jobs at eight.
 
 The number of independent single-point calculations in a target is not a
 justification for assigning that many ranks to each calculation. Increasing a
-CP2K job above eight ranks requires a representative 4/8/16/32-rank scaling
+CP2K job above twelve ranks requires a representative 4/8/12/16-rank scaling
 test that records elapsed time, memory, and node load, followed by explicit
 site approval. Never bypass the CP2K slot guard for unattended production.
 
