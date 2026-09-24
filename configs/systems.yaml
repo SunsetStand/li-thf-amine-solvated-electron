@@ -14,6 +14,7 @@
       "smiles": "NCCN",
       "element_counts": {"C": 2, "H": 8, "N": 2},
       "residue": "EDA",
+      "nh_bond_count": 4,
       "molar_mass_g_mol": 60.100,
       "molar_volume_l_mol": 0.0669,
       "charge": 0
@@ -23,6 +24,7 @@
       "smiles": "CC(N)CN",
       "element_counts": {"C": 3, "H": 10, "N": 2},
       "residue": "P12",
+      "nh_bond_count": 4,
       "molar_mass_g_mol": 74.127,
       "molar_volume_l_mol": 0.0850,
       "charge": 0
@@ -32,6 +34,7 @@
       "smiles": "NCCCN",
       "element_counts": {"C": 3, "H": 10, "N": 2},
       "residue": "P13",
+      "nh_bond_count": 4,
       "molar_mass_g_mol": 74.127,
       "molar_volume_l_mol": 0.0842,
       "charge": 0
@@ -41,6 +44,7 @@
       "smiles": "NCCNCCN",
       "element_counts": {"C": 4, "H": 13, "N": 3},
       "residue": "DET",
+      "nh_bond_count": 5,
       "molar_mass_g_mol": 103.166,
       "molar_volume_l_mol": 0.1080,
       "charge": 0
@@ -50,6 +54,7 @@
       "smiles": "CN(C)CCN(C)C",
       "element_counts": {"C": 6, "H": 16, "N": 2},
       "residue": "TME",
+      "nh_bond_count": 0,
       "molar_mass_g_mol": 116.208,
       "molar_volume_l_mol": 0.1500,
       "charge": 0

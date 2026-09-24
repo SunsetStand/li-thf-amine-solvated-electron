@@ -33,6 +33,16 @@
       "replicas": [1, 2, 3],
       "stages": ["spec", "inputs", "classical_md", "analysis"]
     },
+    "amine_series_pilot": {
+      "systems": [
+        "12pda_1p5m", "12pda_3m",
+        "13pda_1p5m", "13pda_3m",
+        "deta_1p5m", "deta_3m",
+        "tmeda_1p5m", "tmeda_3m"
+      ],
+      "replicas": [1],
+      "stages": ["spec", "inputs", "classical_md", "analysis"]
+    },
     "hbond_pilot": {
       "systems": ["pure_eda", "eda_1to1"],
       "replicas": [1, 2, 3],

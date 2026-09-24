@@ -223,6 +223,68 @@ set-resources:
     cpus_per_task: 4
     mem_mb: 4000
     runtime: 60
+  analyze_stage_b3_existing_nh:
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 60
+  summarize_stage_b3_nh_reanalysis:
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
+  stage_b3_nh_reanalysis:
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
+  screen_stage_b3_amine_environment:
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 120
+  summarize_stage_b3_amine_environment:
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
+  stage_b3_amine_environment:
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
+  prepare_stage_b3_electronic_seeds:
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 120
+  render_stage_b3_electronic_pair:
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
+  run_stage_b3_electronic_neutral:
+    tasks: 12
+    mpi: srun
+    mem_mb: 128000
+    runtime: 720
+  run_stage_b3_electronic_anion:
+    tasks: 12
+    mpi: srun
+    mem_mb: 128000
+    runtime: 720
+  analyze_stage_b3_electronic_pair:
+    cpus_per_task: 4
+    mem_mb: 16000
+    runtime: 120
+  summarize_stage_b3_amine_pilot:
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
+  stage_b3_amine_pilot:
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
+  summarize_stage_b3_amine_series:
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
+  stage_b3_amine_series:
+    cpus_per_task: 4
+    mem_mb: 4000
+    runtime: 60
   cp2k_cdft:
     tasks: 12
     mpi: srun

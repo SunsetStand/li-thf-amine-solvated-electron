@@ -243,6 +243,35 @@ def render_stage_b2c_preferential_cp2k(
     output.write_text(rendered.rstrip() + "\n", encoding="utf-8")
 
 
+def render_stage_b3_amine_series_cp2k(
+    template_path: str | Path,
+    output_path: str | Path,
+    *,
+    project: str,
+    coordinates_path: str | Path,
+    cell_path: str | Path,
+    method: Mapping[str, Any],
+    state: Mapping[str, Any],
+) -> None:
+    """Render a fixed-nuclei Stage-B3 neutral/anion screening state."""
+
+    if method.get("scientific_status") != (
+        "NUMERICAL_AMINE_SERIES_NH_ASSOCIATION_SCREEN_ONLY"
+    ):
+        raise ValueError("Stage-B3 method must remain explicitly screening-only")
+    compatible = dict(method)
+    compatible["scientific_status"] = "NUMERICAL_PREFERENTIAL_SOLVATION_SMOKE_ONLY"
+    render_stage_b2c_preferential_cp2k(
+        template_path,
+        output_path,
+        project=project,
+        coordinates_path=coordinates_path,
+        cell_path=cell_path,
+        method=compatible,
+        state=state,
+    )
+
+
 def render_stage_b2c_method_benchmark_cp2k(
     template_path: str | Path,
     output_path: str | Path,

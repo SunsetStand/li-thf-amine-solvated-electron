@@ -57,7 +57,9 @@ class SlurmSafetyTests(unittest.TestCase):
         self.assertIn("input_bundle|classical_smoke|classical_pilot", runner)
         self.assertIn("classical_analysis|snapshot_bank|hbond_stage_a", runner)
         self.assertIn(
-            'if CAMPAIGN not in {"pilot", "eda3m_pilot", "hbond_pilot"}', snakefile
+            'if CAMPAIGN not in {"pilot", "eda3m_pilot", '
+            '"amine_series_pilot", "hbond_pilot"}',
+            snakefile,
         )
         self.assertIn('if CAMPAIGN != "hbond_pilot"', snakefile)
         self.assertIn("hbond_analysis_handoff", snakefile)
@@ -192,6 +194,26 @@ class SlurmSafetyTests(unittest.TestCase):
         self.assertNotIn("gmx", preferential_rules.lower())
         self.assertNotIn("&CDFT", preferential_rules.upper())
         self.assertNotIn("mpirun -np", preferential_rules)
+
+        stage_b3_rules = (
+            ROOT / "workflow" / "rules" / "63_stage_b3_amine_series.smk"
+        ).read_text(encoding="utf-8")
+        for target in (
+            "stage_b3_nh_reanalysis",
+            "stage_b3_amine_environment",
+            "stage_b3_amine_pilot",
+            "stage_b3_amine_series",
+        ):
+            self.assertIn(target, runner)
+        self.assertIn("stage_b3_b2c_production_gate", stage_b3_rules)
+        self.assertIn("stage_b3_candidate_gate", stage_b3_rules)
+        self.assertEqual(stage_b3_rules.count("bash {STAGE_RUNNER:q} cdft --"), 2)
+        self.assertEqual(
+            stage_b3_rules.count("{resources.mpi} -n {resources.tasks} cp2k.psmp"), 2
+        )
+        self.assertNotIn("gmx", stage_b3_rules.lower())
+        self.assertNotIn("&CDFT", stage_b3_rules.upper())
+        self.assertNotIn("mpirun -np", stage_b3_rules)
 
     def test_tmc_mpi_launcher_enforces_the_slurm_allocation(self) -> None:
         launcher = TMC_MPI_LAUNCHER.read_text(encoding="utf-8")

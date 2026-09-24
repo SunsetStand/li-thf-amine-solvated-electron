@@ -234,6 +234,13 @@ as a matched neutral-singlet/anion-doublet fixed-geometry pair, so the reported
 than an invalid comparison of absolute energies across compositions. No
 electron-position constraint or geometry optimization is used.
 
+Stage B3 adds the complete THF-rich amine panel and an explicit TMEDA
+N-H-free control. It first reanalyzes accepted B2C cubes without new CP2K,
+then screens N-H-facing versus control solvent fluctuations, and finally runs
+a deliberately small 12-single-point DETA/TMEDA electronic pilot. N-H metrics
+are reported as geometric association descriptors, not as proof of a
+classical hydrogen bond. See [`docs/stage-b3.md`](docs/stage-b3.md).
+
 ## What is implemented in v0.1
 
 - Config-driven 11-system matrix (pure THF plus five amines at 1.5/3.0 M).

@@ -27,6 +27,7 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(len(campaign_matrix("hbond_smoke", campaign, systems)), 2)
         self.assertEqual(len(campaign_matrix("pilot", campaign, systems)), 6)
         self.assertEqual(len(campaign_matrix("eda3m_pilot", campaign, systems)), 3)
+        self.assertEqual(len(campaign_matrix("amine_series_pilot", campaign, systems)), 8)
         self.assertEqual(len(campaign_matrix("hbond_pilot", campaign, systems)), 6)
         self.assertEqual(len(campaign_matrix("production", campaign, systems)), 33)
 
@@ -131,6 +132,34 @@ class ConfigTests(unittest.TestCase):
             * len(settings["seed_roles"])
             * len(settings["states"]),
             36,
+        )
+
+    def test_stage_b3_has_full_amine_panel_and_nh_free_control(self) -> None:
+        campaign, systems, methods = load_repository_configs(ROOT)
+        settings = methods["stage_b3_amine_series"]
+        self.assertEqual(
+            settings["scientific_status"],
+            "NUMERICAL_AMINE_SERIES_NH_ASSOCIATION_SCREEN_ONLY",
+        )
+        self.assertEqual(len(settings["environment_systems"]), 11)
+        self.assertEqual(
+            settings["electronic_pilot_systems"],
+            ["deta_3m", "tmeda_1p5m", "tmeda_3m"],
+        )
+        self.assertEqual(set(settings["source_campaigns"]), set(settings["environment_systems"]))
+        self.assertEqual(len(campaign["campaigns"]["amine_series_pilot"]["systems"]), 8)
+        self.assertEqual(settings["seed_roles"], ["nh_facing", "nh_control"])
+        self.assertEqual(
+            {
+                record["id"]: (record["charge"], record["multiplicity"], record["uks"])
+                for record in settings["states"]
+            },
+            {"neutral": (0, 1, False), "anion": (-1, 2, True)},
+        )
+        expected_nh = {"eda": 4, "12pda": 4, "13pda": 4, "deta": 5, "tmeda": 0}
+        self.assertEqual(
+            {name: record["nh_bond_count"] for name, record in systems["amines"].items()},
+            expected_nh,
         )
 
 
