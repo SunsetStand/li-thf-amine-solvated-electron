@@ -15,13 +15,28 @@ from pathlib import Path
 from typing import Any
 
 
+FAILURE_LOG_LINES = 40
+
+
+def log_tail(path: Path, line_count: int = FAILURE_LOG_LINES) -> str:
+    """Return a bounded diagnostic tail without failing on undecodable output."""
+    if not path.is_file():
+        return ""
+    lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    return "\n".join(lines[-line_count:])
+
+
 def run_checked(command: list[str], log: Path, *, append: bool = False) -> None:
     with log.open("a" if append else "w", encoding="utf-8") as handle:
         handle.write(f"$ {shlex.join(command)}\n")
         handle.flush()
         completed = subprocess.run(command, stdout=handle, stderr=subprocess.STDOUT, check=False)
     if completed.returncode != 0:
-        raise RuntimeError(f"command exited {completed.returncode}: {shlex.join(command)}")
+        tail = log_tail(log)
+        detail = f"\n--- tail of {log.name} ---\n{tail}" if tail else ""
+        raise RuntimeError(
+            f"command exited {completed.returncode}: {shlex.join(command)}{detail}"
+        )
 
 
 def build_commands(
@@ -146,6 +161,61 @@ def promote_outputs(workspace: Path, output_dir: Path, phase: str, extensions: l
     shutil.rmtree(workspace)
 
 
+def failure_artifact_names(phase: str) -> tuple[str, ...]:
+    return (
+        "grompp.log",
+        "mdrun.stdout.log",
+        f"{phase}.log",
+        f"{phase}.tpr",
+        f"{phase}.cpt",
+    )
+
+
+def clear_failure_artifacts(output_dir: Path, phase: str) -> None:
+    for name in failure_artifact_names(phase):
+        (output_dir / f"{name}.failed").unlink(missing_ok=True)
+    (output_dir / "failure.json").unlink(missing_ok=True)
+
+
+def preserve_failure_artifacts(
+    workspace: Path,
+    output_dir: Path,
+    phase: str,
+    error: Exception,
+    commands: list[list[str]],
+) -> list[Path]:
+    """Copy diagnostics to undeclared paths that Snakemake will not remove."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    clear_failure_artifacts(output_dir, phase)
+    retained: list[Path] = []
+    for name in failure_artifact_names(phase):
+        source = workspace / name
+        if not source.is_file() or source.stat().st_size == 0:
+            continue
+        destination = output_dir / f"{name}.failed"
+        shutil.copy2(source, destination)
+        retained.append(destination)
+    failure = output_dir / "failure.json"
+    failure.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "phase": phase,
+                "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
+                "error": str(error),
+                "commands": commands,
+                "retained_files": [str(path) for path in retained],
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    retained.append(failure)
+    return retained
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--phase", choices=["em", "nvt", "npt", "production"], required=True)
@@ -241,8 +311,25 @@ def main() -> int:
         if args.restartable:
             promote_outputs(workspace, output_dir, args.phase, extensions)
     except (OSError, RuntimeError, ValueError) as exc:
+        try:
+            retained = preserve_failure_artifacts(
+                workspace, output_dir, args.phase, exc, [grompp, mdrun]
+            )
+        except OSError as preservation_error:
+            retained = []
+            print(
+                f"WARNING: could not retain GROMACS failure artifacts: {preservation_error}",
+                file=sys.stderr,
+            )
         print(f"ERROR: {exc}", file=sys.stderr)
+        if retained:
+            print(
+                "Failure diagnostics retained at: "
+                + ", ".join(str(path) for path in retained),
+                file=sys.stderr,
+            )
         return 2
+    clear_failure_artifacts(output_dir, args.phase)
     return 0
 
 

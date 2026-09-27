@@ -95,4 +95,9 @@ sensitivity check.
 - `stage_b3_amine_series.summary.json`
 - matching checksum `.done` gates
 
+If a GROMACS stage fails, its engine logs are copied to undeclared
+`*.failed` files beside that stage, and `failure.json` records the Slurm job,
+commands, retained paths, and error. These diagnostics survive Snakemake's
+automatic removal of incomplete declared outputs.
+
 All large numerical data remain under the configured storage-backed run root.

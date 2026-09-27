@@ -100,6 +100,60 @@ class ClassicalWorkflowTests(unittest.TestCase):
         self.assertEqual(mdrun[mdrun.index("-ntomp") + 1], "4")
         self.assertEqual(mdrun[mdrun.index("-ntmpi") + 1], "1")
 
+    def test_failed_gromacs_command_reports_bounded_log_tail(self) -> None:
+        module = load_script("run_gromacs_stage")
+        with tempfile.TemporaryDirectory() as directory:
+            log = Path(directory) / "grompp.log"
+            command = [
+                module.sys.executable,
+                "-c",
+                (
+                    "import sys; "
+                    "print('\\n'.join(f'synthetic line {i}' for i in range(50))); "
+                    "sys.exit(7)"
+                ),
+            ]
+            with self.assertRaises(RuntimeError) as raised:
+                module.run_checked(command, log)
+
+            message = str(raised.exception)
+            self.assertIn("command exited 7", message)
+            self.assertIn("synthetic line 49", message)
+            self.assertNotIn("synthetic line 0", message)
+
+    def test_failed_gromacs_artifacts_are_copied_to_undeclared_paths(self) -> None:
+        module = load_script("run_gromacs_stage")
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "output"
+            workspace = output / ".resume"
+            workspace.mkdir(parents=True)
+            for name in ("grompp.log", "mdrun.stdout.log", "em.log", "em.tpr"):
+                (workspace / name).write_text(f"{name}\n", encoding="utf-8")
+
+            with patch.dict(module.os.environ, {"SLURM_JOB_ID": "synthetic-job"}):
+                retained = module.preserve_failure_artifacts(
+                    workspace,
+                    output,
+                    "em",
+                    RuntimeError("synthetic failure"),
+                    [["gmx", "grompp"], ["gmx", "mdrun"]],
+                )
+
+            retained_names = {path.name for path in retained}
+            self.assertIn("grompp.log.failed", retained_names)
+            self.assertIn("mdrun.stdout.log.failed", retained_names)
+            self.assertIn("em.log.failed", retained_names)
+            self.assertIn("em.tpr.failed", retained_names)
+            self.assertIn("failure.json", retained_names)
+            failure = module.json.loads(
+                (output / "failure.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(failure["slurm_job_id"], "synthetic-job")
+            self.assertEqual(failure["error"], "synthetic failure")
+            module.clear_failure_artifacts(output, "em")
+            self.assertFalse((output / "failure.json").exists())
+            self.assertFalse((output / "grompp.log.failed").exists())
+
     def test_production_gromacs_command_resumes_from_internal_checkpoint(self) -> None:
         module = load_script("run_gromacs_stage")
         _grompp, mdrun = module.build_commands(
