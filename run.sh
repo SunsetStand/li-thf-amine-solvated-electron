@@ -336,7 +336,7 @@ workflow_target_from_args() {
     previous="${item}"
   done
   case "${target}" in
-    input_bundle|classical_smoke|classical_pilot|classical_analysis|snapshot_bank|hbond_stage_a|stage_b_candidates|stage_b|stage_b_mechanism_smoke|stage_b_localization|stage_b_report|stage_b2_intrinsic_smoke|stage_b2c_preferential_smoke|stage_b2c_preferential_production|stage_b2c_method_benchmark|stage_b3_nh_reanalysis|stage_b3_amine_environment|stage_b3_amine_pilot|stage_b3_amine_series) ;;
+    input_bundle|classical_smoke|classical_pilot|amine_series_charge_repair_em|amine_series_charge_repair|classical_analysis|snapshot_bank|hbond_stage_a|stage_b_candidates|stage_b|stage_b_mechanism_smoke|stage_b_localization|stage_b_report|stage_b2_intrinsic_smoke|stage_b2c_preferential_smoke|stage_b2c_preferential_production|stage_b2c_method_benchmark|stage_b3_nh_reanalysis|stage_b3_amine_environment|stage_b3_amine_pilot|stage_b3_amine_series) ;;
     *)
       printf 'ERROR: unknown workflow target %s; choose input_bundle, classical_smoke, classical_pilot, classical_analysis, snapshot_bank, hbond_stage_a, stage_b_candidates, stage_b, stage_b_mechanism_smoke, stage_b_localization, stage_b_report, stage_b2_intrinsic_smoke, stage_b2c_preferential_smoke, stage_b2c_preferential_production, stage_b2c_method_benchmark, stage_b3_nh_reanalysis, stage_b3_amine_environment, stage_b3_amine_pilot, or stage_b3_amine_series.\n' \
         "${target}" >&2
@@ -694,6 +694,9 @@ The zero-new-CP2K Stage-B3 reanalysis of accepted B2C cubes is:
 ./run.sh submit --campaign pilot --target stage_b3_nh_reanalysis
 The missing amine source ensembles are prepared once before the full panel:
 ./run.sh submit --campaign amine_series_pilot --target classical_pilot
+For the 20942 charge-rounding repair, check the six EM stages first, then their pilot chains:
+./run.sh submit --campaign amine_series_pilot --target amine_series_charge_repair_em
+./run.sh submit --campaign amine_series_pilot --target amine_series_charge_repair
 ./run.sh submit --campaign amine_series_pilot --target classical_analysis
 ./run.sh submit --campaign amine_series_pilot --target snapshot_bank
 ./run.sh submit --campaign amine_series_pilot --target stage_b_candidates
