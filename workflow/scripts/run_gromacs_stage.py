@@ -7,13 +7,13 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shlex
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
-
 
 FAILURE_LOG_LINES = 40
 
@@ -171,12 +171,6 @@ def failure_artifact_names(phase: str) -> tuple[str, ...]:
     )
 
 
-def clear_failure_artifacts(output_dir: Path, phase: str) -> None:
-    for name in failure_artifact_names(phase):
-        (output_dir / f"{name}.failed").unlink(missing_ok=True)
-    (output_dir / "failure.json").unlink(missing_ok=True)
-
-
 def preserve_failure_artifacts(
     workspace: Path,
     output_dir: Path,
@@ -186,16 +180,27 @@ def preserve_failure_artifacts(
 ) -> list[Path]:
     """Copy diagnostics to undeclared paths that Snakemake will not remove."""
     output_dir.mkdir(parents=True, exist_ok=True)
-    clear_failure_artifacts(output_dir, phase)
+    retained_dir = output_dir
+    if (output_dir / "failure.json").exists() or any(
+        (output_dir / f"{name}.failed").exists() for name in failure_artifact_names(phase)
+    ):
+        job_id = re.sub(r"[^A-Za-z0-9_-]", "_", os.environ.get("SLURM_JOB_ID", "unknown"))
+        history = output_dir / "failure_history"
+        retained_dir = history / job_id
+        sequence = 1
+        while retained_dir.exists():
+            retained_dir = history / f"{job_id}-{sequence}"
+            sequence += 1
+        retained_dir.mkdir(parents=True)
     retained: list[Path] = []
     for name in failure_artifact_names(phase):
         source = workspace / name
         if not source.is_file() or source.stat().st_size == 0:
             continue
-        destination = output_dir / f"{name}.failed"
+        destination = retained_dir / f"{name}.failed"
         shutil.copy2(source, destination)
         retained.append(destination)
-    failure = output_dir / "failure.json"
+    failure = retained_dir / "failure.json"
     failure.write_text(
         json.dumps(
             {
@@ -329,7 +334,6 @@ def main() -> int:
                 file=sys.stderr,
             )
         return 2
-    clear_failure_artifacts(output_dir, args.phase)
     return 0
 
 
