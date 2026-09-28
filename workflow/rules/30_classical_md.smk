@@ -440,3 +440,37 @@ rule classical_pilot:
         runtime=60
     shell:
         "{PYTHON} {VALIDATE_CLASSICAL:q} gate --summary {input.summary:q} --output {output:q}"
+
+
+# Repair only the six molecule types/concentrations that failed grompp in 20942.
+# These targets leave the completed DETA pilot and campaign summary untouched.
+AMINE_SERIES_CHARGE_REPAIR_SYSTEMS = (
+    "12pda_1p5m", "12pda_3m", "13pda_1p5m", "13pda_3m",
+    "tmeda_1p5m", "tmeda_3m",
+)
+
+
+def amine_series_charge_repair_inputs(stage):
+    if CAMPAIGN != "amine_series_pilot":
+        raise ValueError("charge repair target requires campaign amine_series_pilot")
+    if not set(AMINE_SERIES_CHARGE_REPAIR_SYSTEMS) <= set(SYSTEMS):
+        raise ValueError("charge repair systems are missing from the campaign")
+    if stage == "em":
+        return [
+            f"{RUN_ROOT}/{CAMPAIGN}/classical/{system}/r1/pilot/em/em.gro"
+            for system in AMINE_SERIES_CHARGE_REPAIR_SYSTEMS
+        ]
+    return [
+        f"{RUN_ROOT}/{CAMPAIGN}/classical/{system}/r1/pilot/validation.json"
+        for system in AMINE_SERIES_CHARGE_REPAIR_SYSTEMS
+    ]
+
+
+rule amine_series_charge_repair_em:
+    input:
+        lambda _wildcards: amine_series_charge_repair_inputs("em")
+
+
+rule amine_series_charge_repair:
+    input:
+        lambda _wildcards: amine_series_charge_repair_inputs("pilot")
