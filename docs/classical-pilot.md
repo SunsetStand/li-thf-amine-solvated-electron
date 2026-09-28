@@ -96,3 +96,29 @@ Passing this target establishes solvent density and composition sampling for
 pure THF and THF/EDA. It does not pass the Li force-field gate or any electronic
 structure gate. The accepted frames become candidates for Li insertion and
 CP2K cDFT benchmarks in the next workflow phase.
+
+## Amine-series charge-rounding repair
+
+The `amine_series_pilot` trajectories also sample **neutral THF and neutral
+amines only**. The classical force field has neither Li nor an excess electron.
+For 1,2-PDA, 1,3-PDA, and TMEDA, the original AM1-BCC MOL2 atom charges can sum
+to about 0.001 elementary charge per molecule. Replication across a periodic
+box then triggers GROMACS's net-charge/PME warning before minimization starts.
+The topology builder keeps the original MOL2 files untouched, writes a local
+charge-balanced copy for TLeap only when the discrepancy is at most 0.002 e,
+and rejects larger discrepancies. It records each correction in the build
+manifest and checks the TLeap residue charges before conversion to GROMACS.
+
+To advance only the six affected systems, first dry-run and submit the EM gate.
+Inspect the resulting topology charges and GROMACS logs before submitting their
+pilot chains. Both targets use the normal Slurm controller and profile:
+
+```bash
+./run.sh dry-run --campaign amine_series_pilot --target amine_series_charge_repair_em
+./run.sh submit --campaign amine_series_pilot --target amine_series_charge_repair_em
+./run.sh dry-run --campaign amine_series_pilot --target amine_series_charge_repair
+./run.sh submit --campaign amine_series_pilot --target amine_series_charge_repair
+```
+
+Previous `*.failed` diagnostics are retained even after a successful retry;
+later failures are stored under `failure_history/` without overwriting them.
