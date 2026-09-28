@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import tempfile
 import unittest
+from decimal import Decimal
 from pathlib import Path
 from types import ModuleType
 from unittest.mock import patch
@@ -85,6 +86,50 @@ class ClassicalWorkflowTests(unittest.TestCase):
                 *outputs,
             )
 
+    def test_tleap_charge_balancing_preserves_source_and_neutralizes_roundoff(self) -> None:
+        module = load_script("build_gromacs_system")
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "amine.mol2"
+            destination = Path(directory) / "build" / "amine.mol2"
+            source.write_text(
+                "@<TRIPOS>ATOM\n"
+                "1 N1 0 0 0 n3 1 P13 -0.200000\n"
+                "2 C1 1 0 0 c3 1 P13 0.399000\n"
+                "3 N2 2 0 0 n3 1 P13 -0.200000 STATUS\n"
+                "@<TRIPOS>BOND\n",
+                encoding="utf-8",
+            )
+            original_content = source.read_text(encoding="utf-8")
+            used, raw_charge, largest_change = module.balanced_mol2(source, destination)
+            self.assertEqual(used, destination)
+            self.assertAlmostEqual(raw_charge, -0.001)
+            self.assertLess(largest_change, 0.000335)
+            self.assertEqual(source.read_text(encoding="utf-8"), original_content)
+            self.assertIn("STATUS", destination.read_text(encoding="utf-8"))
+
+            fields = destination.read_text(encoding="utf-8").splitlines()[1:4]
+            self.assertEqual(sum(Decimal(line.split()[8]) for line in fields), Decimal(0))
+
+            source.write_text(original_content.replace("0.399000", "0.401004"), encoding="utf-8")
+            used, raw_charge, _largest_change = module.balanced_mol2(source, destination)
+            self.assertEqual(used, destination)
+            self.assertAlmostEqual(raw_charge, 0.001004)
+            fields = destination.read_text(encoding="utf-8").splitlines()[1:4]
+            self.assertEqual(sum(Decimal(line.split()[8]) for line in fields), Decimal(0))
+
+    def test_tleap_charge_balancing_rejects_large_noninteger_charge(self) -> None:
+        module = load_script("build_gromacs_system")
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "bad.mol2"
+            destination = Path(directory) / "build" / "bad.mol2"
+            source.write_text(
+                "@<TRIPOS>ATOM\n1 C1 0 0 0 c3 1 BAD 0.100000\n@<TRIPOS>BOND\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "more than rounding"):
+                module.balanced_mol2(source, destination)
+            self.assertFalse(destination.exists())
+
     def test_npt_gromacs_command_uses_checkpoint_and_four_threads(self) -> None:
         module = load_script("run_gromacs_stage")
         grompp, mdrun = module.build_commands(
@@ -150,9 +195,23 @@ class ClassicalWorkflowTests(unittest.TestCase):
             )
             self.assertEqual(failure["slurm_job_id"], "synthetic-job")
             self.assertEqual(failure["error"], "synthetic failure")
-            module.clear_failure_artifacts(output, "em")
-            self.assertFalse((output / "failure.json").exists())
-            self.assertFalse((output / "grompp.log.failed").exists())
+            (workspace / "grompp.log").write_text("second failure\n", encoding="utf-8")
+            with patch.dict(module.os.environ, {"SLURM_JOB_ID": "synthetic-job"}):
+                retained_again = module.preserve_failure_artifacts(
+                    workspace,
+                    output,
+                    "em",
+                    RuntimeError("second failure"),
+                    [["gmx", "grompp"]],
+                )
+            self.assertIn(
+                output / "failure_history" / "synthetic-job" / "failure.json", retained_again
+            )
+            self.assertEqual(
+                (output / "failure_history" / "synthetic-job" / "grompp.log.failed").read_text(),
+                "second failure\n",
+            )
+            self.assertEqual((output / "grompp.log.failed").read_text(), "grompp.log\n")
 
     def test_production_gromacs_command_resumes_from_internal_checkpoint(self) -> None:
         module = load_script("run_gromacs_stage")
