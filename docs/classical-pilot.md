@@ -122,3 +122,30 @@ pilot chains. Both targets use the normal Slurm controller and profile:
 
 Previous `*.failed` diagnostics are retained even after a successful retry;
 later failures are stored under `failure_history/` without overwriting them.
+
+## Two-system 3 M concentration refinement
+
+The first 1,2-PDA and TMEDA 3 M pilots used 21 and 28 amines with 64 THF.
+Their measured production concentrations were 3.1018 and 3.1147 M, exceeding
+the unchanged 3.00 ± 0.05 M acceptance window. Their validation records remain
+failed and are not promoted to analysis or electronic snapshots.
+
+The separate `amine_series_count_refinement` campaign tries 20 1,2-PDA and
+27 TMEDA molecules, respectively. It retains 64 THF, the same target and
+validation tolerance, and stores new runs under its own campaign directory.
+Both the Packmol input and TLeap topology use the overridden counts. The
+original `amine_series_pilot` artifacts are preserved for audit.
+
+Preview the two-system DAG and submit through the normal Slurm controller:
+
+```bash
+./run.sh dry-run --campaign amine_series_count_refinement --target classical_pilot
+./run.sh submit --campaign amine_series_count_refinement --target classical_pilot
+```
+
+Inspect the completed job and both replica validation records before using
+either trajectory downstream. In particular, NPT may shrink the smaller boxes,
+so the new achieved concentrations cannot be guaranteed from the old volume.
+If one still misses ±0.05 M, retain its failed result and reconsider box size
+before further refinement. Stage B3 source selection remains unchanged until
+the new campaign passes validation.
