@@ -28,6 +28,7 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(len(campaign_matrix("pilot", campaign, systems)), 6)
         self.assertEqual(len(campaign_matrix("eda3m_pilot", campaign, systems)), 3)
         self.assertEqual(len(campaign_matrix("amine_series_pilot", campaign, systems)), 8)
+        self.assertEqual(len(campaign_matrix("amine_series_count_refinement", campaign, systems)), 2)
         self.assertEqual(len(campaign_matrix("hbond_pilot", campaign, systems)), 6)
         self.assertEqual(len(campaign_matrix("production", campaign, systems)), 33)
 
@@ -37,6 +38,21 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(spec.thf_count, 64)
         self.assertEqual(spec.amine_count_initial, 28)
         self.assertEqual(spec.li_electron_pairs, 1)
+
+        refined = make_system_spec(
+            "tmeda_3m", campaign, systems, "amine_series_count_refinement"
+        )
+        self.assertEqual(refined.amine_count_initial, 27)
+        self.assertEqual(refined.component_counts, {"thf": 64, "tmeda": 27})
+        self.assertEqual(refined.target_concentration_m, 3.0)
+        self.assertEqual(
+            make_system_spec("12pda_3m", campaign, systems,
+                             "amine_series_count_refinement").amine_count_initial, 20
+        )
+        self.assertEqual(
+            make_system_spec("12pda_3m", campaign, systems,
+                             "amine_series_pilot").amine_count_initial, 21
+        )
 
     def test_explicit_molar_ratio_and_neat_eda_specs(self) -> None:
         campaign, systems, _ = load_repository_configs(ROOT)
