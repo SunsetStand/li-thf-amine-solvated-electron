@@ -43,6 +43,12 @@
       "replicas": [1],
       "stages": ["spec", "inputs", "classical_md", "analysis"]
     },
+    "amine_series_count_refinement": {
+      "systems": ["12pda_3m", "tmeda_3m"],
+      "replicas": [1],
+      "amine_count_overrides": {"12pda_3m": 20, "tmeda_3m": 27},
+      "stages": ["spec", "inputs", "classical_md", "analysis"]
+    },
     "hbond_pilot": {
       "systems": ["pure_eda", "eda_1to1"],
       "replicas": [1, 2, 3],
