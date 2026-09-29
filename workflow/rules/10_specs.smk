@@ -4,5 +4,5 @@ rule composition_spec:
     output:
         f"{RUN_ROOT}/{CAMPAIGN}/specs/{{system}}/r{{replica}}.json"
     shell:
-        "{PYTHON} -m solvelec.cli write-spec --system {wildcards.system} "
+        "{PYTHON} -m solvelec.cli write-spec --campaign {CAMPAIGN:q} --system {wildcards.system} "
         "--replica {wildcards.replica} --output {output}"
