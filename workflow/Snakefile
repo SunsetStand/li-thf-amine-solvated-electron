@@ -418,7 +418,7 @@ def stage_b_mechanism_cube(system, replica, state, density_kind):
 def amine_for_system(system):
     from solvelec.config import make_system_spec
 
-    return make_system_spec(system, config, SYSTEM_CATALOG).amine
+    return make_system_spec(system, config, SYSTEM_CATALOG, CAMPAIGN).amine
 
 
 def molecule_record(molecule):
@@ -434,7 +434,7 @@ def molecule_path(molecule, suffix):
 def molecules_for_system(system):
     from solvelec.config import make_system_spec
 
-    spec = make_system_spec(system, config, SYSTEM_CATALOG)
+    spec = make_system_spec(system, config, SYSTEM_CATALOG, CAMPAIGN)
     return list(spec.component_counts)
 
 
@@ -459,7 +459,7 @@ def packmol_amine_argument(wildcards):
 def tleap_molecule_arguments(wildcards):
     from solvelec.config import make_system_spec
 
-    spec = make_system_spec(wildcards.system, config, SYSTEM_CATALOG)
+    spec = make_system_spec(wildcards.system, config, SYSTEM_CATALOG, CAMPAIGN)
     arguments = []
     for name in molecules_for_system(wildcards.system):
         record = molecule_record(name)
