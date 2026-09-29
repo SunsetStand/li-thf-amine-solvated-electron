@@ -70,7 +70,7 @@ def cmd_matrix(args: argparse.Namespace) -> int:
 def cmd_write_spec(args: argparse.Namespace) -> int:
     root = _root(args.root)
     campaign, systems, _ = load_repository_configs(root)
-    spec = make_system_spec(args.system, campaign, systems).as_dict()
+    spec = make_system_spec(args.system, campaign, systems, args.campaign).as_dict()
     spec["initial_box_angstrom"] = _initial_box_angstrom(spec, systems)
     spec["replica"] = args.replica
     output = Path(args.output)
@@ -97,7 +97,7 @@ def _initial_box_angstrom(spec: dict[str, Any], systems: dict[str, Any]) -> floa
 def cmd_render_packmol(args: argparse.Namespace) -> int:
     root = _root(args.root)
     campaign, systems, _ = load_repository_configs(root)
-    spec = make_system_spec(args.system, campaign, systems).as_dict()
+    spec = make_system_spec(args.system, campaign, systems, args.campaign).as_dict()
     box = args.box_angstrom or _initial_box_angstrom(spec, systems)
     amine_structure = args.amine_structure
     if spec["amine"]:
@@ -294,12 +294,14 @@ def build_parser() -> argparse.ArgumentParser:
     matrix.set_defaults(func=cmd_matrix)
 
     write_spec = sub.add_parser("write-spec")
+    write_spec.add_argument("--campaign")
     write_spec.add_argument("--system", required=True)
     write_spec.add_argument("--replica", type=int, required=True)
     write_spec.add_argument("--output", required=True)
     write_spec.set_defaults(func=cmd_write_spec)
 
     packmol = sub.add_parser("render-packmol")
+    packmol.add_argument("--campaign")
     packmol.add_argument("--system", required=True)
     packmol.add_argument("--replica", type=int, required=True)
     packmol.add_argument("--output", required=True)
