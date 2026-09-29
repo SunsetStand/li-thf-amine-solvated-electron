@@ -102,7 +102,8 @@ class SystemSpec:
 
 
 def make_system_spec(
-    system_id: str, campaign: dict[str, Any], systems: dict[str, Any]
+    system_id: str, campaign: dict[str, Any], systems: dict[str, Any],
+    campaign_name: str | None = None,
 ) -> SystemSpec:
     explicit = systems.get("compositions", {}).get(system_id)
     if explicit is not None:
@@ -156,6 +157,17 @@ def make_system_spec(
                 thf_molar_volume_l_mol=float(systems["thf"]["molar_volume_l_mol"]),
                 amine_molar_volume_l_mol=float(amines[amine]["molar_volume_l_mol"]),
             )
+            if campaign_name is not None:
+                overrides = campaign["campaigns"][campaign_name].get(
+                    "amine_count_overrides", {}
+                )
+                if system_id in overrides:
+                    override = overrides[system_id]
+                    if type(override) is not int or override <= 0:
+                        raise ConfigurationError(
+                            f"Invalid amine count override for {system_id!r}: {override!r}"
+                        )
+                    amine_count = override
         component_counts = {"thf": thf_count}
         if amine:
             component_counts[amine] = amine_count
@@ -185,10 +197,13 @@ def campaign_matrix(
             f"Unknown campaign {campaign_name!r}; choose from {sorted(campaigns)}"
         )
     definition = campaigns[campaign_name]
+    overrides = definition.get("amine_count_overrides", {})
+    if not isinstance(overrides, dict) or set(overrides) - set(definition["systems"]):
+        raise ConfigurationError("Amine count overrides must name campaign systems")
     replicas = definition.get("replicas", campaign.get("replicas", [1]))
     rows: list[tuple[SystemSpec, int]] = []
     for system_id in definition["systems"]:
-        spec = make_system_spec(system_id, campaign, systems)
+        spec = make_system_spec(system_id, campaign, systems, campaign_name)
         for replica in replicas:
             if int(replica) <= 0:
                 raise ConfigurationError("Replica identifiers must be positive integers")
