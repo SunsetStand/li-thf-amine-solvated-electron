@@ -58,7 +58,7 @@ class SlurmSafetyTests(unittest.TestCase):
         self.assertIn("classical_analysis|snapshot_bank|hbond_stage_a", runner)
         self.assertIn(
             'if CAMPAIGN not in {"pilot", "eda3m_pilot", '
-            '"amine_series_pilot", "hbond_pilot"}',
+            '"amine_series_pilot", "amine_series_count_refinement", "hbond_pilot"}',
             snakefile,
         )
         self.assertIn('if CAMPAIGN != "hbond_pilot"', snakefile)
