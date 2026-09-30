@@ -506,10 +506,10 @@ def pilot_checkpoint_argument(wildcards):
 
 
 def require_pilot_campaign(_wildcards):
-    if CAMPAIGN not in {"pilot", "eda3m_pilot", "amine_series_pilot", "hbond_pilot"}:
+    if CAMPAIGN not in {"pilot", "eda3m_pilot", "amine_series_pilot", "amine_series_count_refinement", "hbond_pilot"}:
         raise ValueError(
             "classical pilot/analysis targets require campaign 'pilot', "
-            f"'eda3m_pilot', 'amine_series_pilot', or 'hbond_pilot', not {CAMPAIGN!r}"
+            f"'eda3m_pilot', 'amine_series_pilot', 'amine_series_count_refinement', or 'hbond_pilot', not {CAMPAIGN!r}"
         )
     return CAMPAIGN
 
