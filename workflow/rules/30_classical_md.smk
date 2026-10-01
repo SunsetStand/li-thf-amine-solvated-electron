@@ -383,6 +383,7 @@ rule validate_classical_pilot_replica:
     input:
         spec=f"{RUN_ROOT}/{CAMPAIGN}/specs/{{system}}/r{{replica}}.json",
         methods="configs/methods.yaml",
+        acceptance_policy="configs/classical_acceptance.yaml",
         tpr=(
             f"{RUN_ROOT}/{CAMPAIGN}/classical/{{system}}/r{{replica}}/pilot/"
             "production/production.tpr"
@@ -407,6 +408,7 @@ rule validate_classical_pilot_replica:
         "--spec {input.spec:q} --methods {input.methods:q} --tpr {input.tpr:q} "
         "--trajectory {input.trajectory:q} --engine-validation {input.engine_validation:q} "
         "--concentration-tolerance-m {config[concentration_tolerance_m]} "
+        "--campaign {CAMPAIGN:q} --acceptance-policy {input.acceptance_policy:q} "
         "--output {output:q}"
 
 
