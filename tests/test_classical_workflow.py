@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import importlib.util
+import copy
+import json
 import tempfile
 import unittest
 from decimal import Decimal
@@ -344,6 +346,45 @@ class ClassicalWorkflowTests(unittest.TestCase):
         self.assertIsNone(metrics["target_concentration_m"])
         self.assertIsNone(metrics["suggested_amine_count"])
         self.assertEqual(metrics["achieved_amine_mole_fraction"], 0.5)
+
+    def test_scoped_concentration_acceptance_preserves_nominal_failure(self) -> None:
+        module = load_script("validate_classical_pilot")
+        policy = json.loads(
+            (ROOT / "configs" / "classical_acceptance.yaml").read_text()
+        )
+        spec = {"system_id": "tmeda_3m", "replica": 1,
+                "thf_count": 64, "amine_count_initial": 27}
+        base = {"ready": False, "checks": {
+            "concentration_within_tolerance": False, "density_half_stable": True,
+            "engine_converged": True}, "concentration_error_m": 0.05043136953247718}
+        accepted = module.apply_concentration_acceptance(
+            copy.deepcopy(base), spec,
+            "amine_series_count_refinement", policy, 0.05
+        )
+        self.assertTrue(accepted["ready"])
+        self.assertFalse(accepted["checks"]["concentration_within_tolerance"])
+        self.assertEqual(accepted["concentration_acceptance"]["observed_error_m"],
+                         base["concentration_error_m"])
+        summary = module.summarize_records(
+            [{"system_id": "tmeda_3m", "replica": 1,
+              "metrics": {**accepted, "mean_density_g_ml": 0.85}}], 0.03
+        )
+        self.assertTrue(summary["ready"])
+        self.assertEqual(
+            summary["systems"]["tmeda_3m"]["accepted_concentration_deviations"][0]["replica"], 1
+        )
+        for changed in (
+            {"campaign": "amine_series_pilot"},
+            {"spec": {**spec, "thf_count": 65}},
+            {"metrics": {**base, "concentration_error_m": 0.051}},
+            {"metrics": {**base, "checks": {**base["checks"], "engine_converged": False}}},
+        ):
+            result = module.apply_concentration_acceptance(
+                copy.deepcopy(changed.get("metrics", base)),
+                changed.get("spec", spec),
+                changed.get("campaign", "amine_series_count_refinement"), policy, 0.05
+            )
+            self.assertFalse(result["ready"])
 
 
 if __name__ == "__main__":
