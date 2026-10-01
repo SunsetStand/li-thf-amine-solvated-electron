@@ -4,17 +4,14 @@ rule analyze_classical_replica:
         script=ANALYZE_CLASSICAL,
         runtime=STAGE_RUNTIME_INPUTS,
         campaign_handoff=hbond_analysis_handoff,
+        classical_validation=existing_classical_validation,
     params:
         campaign=require_pilot_campaign,
-        # Stage A consumes a completed, validated pilot as an immutable data
-        # product. Keeping these paths in params deliberately prevents a newer
-        # analysis config/source file from scheduling the 20 ns MD producers.
+        # Require the existing pilot validation before constructing the DAG.
+        # Its input dependency then refreshes analysis if that validation
+        # changes, while the trajectory and TPR stay immutable handoffs.
         spec=lambda wildcards: (
             f"{RUN_ROOT}/{CAMPAIGN}/specs/{wildcards.system}/r{wildcards.replica}.json"
-        ),
-        classical_validation=lambda wildcards: (
-            f"{RUN_ROOT}/{CAMPAIGN}/classical/{wildcards.system}/r{wildcards.replica}/"
-            "pilot/validation.json"
         ),
         tpr=lambda wildcards: (
             f"{RUN_ROOT}/{CAMPAIGN}/classical/{wildcards.system}/r{wildcards.replica}/"
@@ -41,7 +38,7 @@ rule analyze_classical_replica:
     shell:
         "bash {STAGE_RUNNER:q} trajectory_analysis -- {PYTHON} {input.script:q} analyze "
         "--spec {params.spec:q} --methods {input.methods:q} "
-        "--classical-validation {params.classical_validation:q} --tpr {params.tpr:q} "
+        "--classical-validation {input.classical_validation:q} --tpr {params.tpr:q} "
         "--trajectory {params.trajectory:q} --timeseries {output.timeseries:q} "
         "--rdf {output.rdf:q} --hydrogen-bonds {output.hydrogen_bonds:q} "
         "--output {output.analysis:q}"
