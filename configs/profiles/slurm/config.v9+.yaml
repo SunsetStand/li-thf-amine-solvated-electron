@@ -256,12 +256,12 @@ set-resources:
     mem_mb: 4000
     runtime: 60
   run_stage_b3_electronic_neutral:
-    tasks: 12
+    tasks: 8
     mpi: srun
     mem_mb: 128000
     runtime: 720
   run_stage_b3_electronic_anion:
-    tasks: 12
+    tasks: 8
     mpi: srun
     mem_mb: 128000
     runtime: 720
