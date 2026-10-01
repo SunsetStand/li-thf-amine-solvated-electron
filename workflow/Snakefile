@@ -653,6 +653,21 @@ def stage_b3_source_campaign(system):
         raise ValueError(f"Stage-B3 has no source campaign for {system!r}") from exc
 
 
+def stage_b3_candidate_path(wildcards, filename):
+    source = stage_b3_source_campaign(wildcards.system)
+    if filename == "manifest":
+        filename = (
+            "candidates/manifest.json" if source == "amine_series_pilot"
+            else f"stage_b/{wildcards.system}/r{wildcards.replica}/candidates/manifest.json"
+        )
+    if source == "amine_series_pilot":
+        return (
+            f"{RUN_ROOT}/pilot/stage_b3/source_handoff/{source}/"
+            f"{wildcards.system}/r{wildcards.replica}/{filename}"
+        )
+    return f"{RUN_ROOT}/{source}/{filename}"
+
+
 def stage_b3_candidate_gate(wildcards):
     if CAMPAIGN != "pilot":
         raise ValueError(f"Stage-B3 must publish under campaign 'pilot', not {CAMPAIGN!r}")
@@ -660,11 +675,14 @@ def stage_b3_candidate_gate(wildcards):
     definition = config["campaigns"].get(source, {})
     if wildcards.system not in definition.get("systems", []):
         raise ValueError(f"Stage-B3 source campaign {source!r} lacks {wildcards.system!r}")
-    summary = Path(f"{RUN_ROOT}/{source}/stage_b_candidates.summary.json")
-    gate = Path(f"{RUN_ROOT}/{source}/stage_b_candidates.done")
+    summary = Path(stage_b3_candidate_path(wildcards, "stage_b_candidates.summary.json"))
+    gate = Path(stage_b3_candidate_path(wildcards, "stage_b_candidates.done"))
     for label, path in (("summary", summary), ("gate", gate)):
         if not path.is_file():
-            raise ValueError(f"Stage-B3 requires accepted {source} candidate {label}: {path}")
+            raise ValueError(
+                f"Stage-B3 requires accepted {source} candidate {label}: {path}; "
+                "prepare original amine sources with --campaign pilot --target stage_b3_source_handoff"
+            )
     tokens = gate.read_text(encoding="utf-8").split()
     digest = hashlib.sha256(summary.read_bytes()).hexdigest()
     if tokens != ["sha256", digest, summary.name]:
