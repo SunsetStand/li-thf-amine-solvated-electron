@@ -1,0 +1,12 @@
+{
+  "amine_series_count_refinement": {
+    "tmeda_3m": {
+      "1": {
+        "thf_count": 64,
+        "amine_count": 27,
+        "maximum_concentration_error_m": 0.0505,
+        "reason": "User accepted measured 3.050431369532477 M on 2026-10-01; nominal limit remains 0.05 M."
+      }
+    }
+  }
+}
