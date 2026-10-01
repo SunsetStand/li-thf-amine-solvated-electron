@@ -248,9 +248,9 @@ rule run_stage_b3_electronic_neutral:
         seed_role="nh_(facing|control)",
     threads: 1
     resources:
-        tasks=12,
+        tasks=8,
         cp2k_slots=1,
-        cpu_slots=12,
+        cpu_slots=8,
         mpi="mpirun",
         mem_mb=128000,
         runtime=720,
@@ -290,9 +290,9 @@ rule run_stage_b3_electronic_anion:
         seed_role="nh_(facing|control)",
     threads: 1
     resources:
-        tasks=12,
+        tasks=8,
         cp2k_slots=1,
-        cpu_slots=12,
+        cpu_slots=8,
         mpi="mpirun",
         mem_mb=128000,
         runtime=720,
