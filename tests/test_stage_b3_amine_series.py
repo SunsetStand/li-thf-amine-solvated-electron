@@ -6,6 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 from solvelec.rendering import render_stage_b3_amine_series_cp2k
 
@@ -27,6 +28,67 @@ def _write_json(path: Path, value: dict) -> None:
 
 
 class StageB3AmineSeriesTests(unittest.TestCase):
+    def test_source_handoff_rejects_superseded_failed_or_mismatched_sources(self) -> None:
+        module = _load_script()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            spec_path, validation_path = root / "spec.json", root / "validation.json"
+            tpr, trajectory = root / "production.tpr", root / "production.xtc"
+            tpr.write_bytes(b"immutable-tpr")
+            trajectory.write_bytes(b"immutable-trajectory")
+            args = SimpleNamespace(campaign="pilot", source_campaign="amine_series_pilot",
+                                   spec=str(spec_path), validation=str(validation_path),
+                                   tpr=str(tpr), trajectory=str(trajectory),
+                                   methods=str(ROOT / "configs/methods.yaml"), output_dir=str(root / "handoff"))
+            spec = {"system_id": "12pda_1p5m", "replica": 1}
+            validation = {**spec, "metrics": {"ready": True},
+                          "inputs": {key: str(getattr(args, key)) for key in ("spec", "tpr", "trajectory")}}
+            _write_json(spec_path, spec)
+            _write_json(validation_path, validation)
+            self.assertEqual(module.validate_source_handoff(args), spec)
+            for bad_spec, bad_validation in (
+                ({**spec, "system_id": "12pda_3m"}, validation),
+                (spec, {**validation, "metrics": {"ready": False}}),
+                (spec, {**validation, "replica": 2}),
+                (spec, {**validation, "inputs": {**validation["inputs"], "trajectory": str(tpr)}}),
+            ):
+                with self.subTest(spec=bad_spec, validation=bad_validation):
+                    _write_json(spec_path, bad_spec)
+                    _write_json(validation_path, bad_validation)
+                    with self.assertRaises(ValueError), patch.object(module.subprocess, "run") as execute:
+                        module.run_source_handoff(args)
+                    execute.assert_not_called()
+            self.assertEqual(tpr.read_bytes(), b"immutable-tpr")
+            self.assertEqual(trajectory.read_bytes(), b"immutable-trajectory")
+
+    def test_source_handoff_runs_only_analysis_snapshot_and_candidate_tools(self) -> None:
+        module = _load_script()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            validation = root / "validation.json"
+            _write_json(validation, {"metrics": {"ready": True}})
+            args = SimpleNamespace(campaign="pilot", source_campaign="amine_series_pilot",
+                                   spec=str(root / "spec.json"), validation=str(validation),
+                                   tpr="immutable.tpr", trajectory="immutable.xtc", methods="methods.json",
+                                   output_dir=str(root / "handoff"))
+            commands = []
+            def execute(command, *, check):
+                self.assertTrue(check)
+                commands.append(command)
+                output = Path(command[command.index("--output") + 1])
+                output.parent.mkdir(parents=True, exist_ok=True)
+                if command[2] == "gate":
+                    summary = Path(command[command.index("--summary") + 1])
+                    output.write_text(f"sha256 {module.sha256_file(summary)} {summary.name}\n")
+                else:
+                    _write_json(output, {"ready": True})
+            with patch.object(module, "validate_source_handoff"), patch.object(module.subprocess, "run", side_effect=execute):
+                self.assertEqual(module.run_source_handoff(args), 0)
+            self.assertEqual([command[2] for command in commands], ["analyze", "select", "prepare", "summary", "gate"])
+            self.assertTrue(all(Path(command[1]).name in ("analyze_classical_ensemble.py", "prepare_stage_b.py") for command in commands))
+            summary = json.loads((root / "handoff/stage_b_candidates.summary.json").read_text())
+            self.assertEqual(summary["source_validation"]["sha256"], module.sha256_file(validation))
+
     def test_renderer_keeps_pair_fixed_nuclei_li_free_and_unconstrained(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
