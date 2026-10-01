@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import os
+import re
 import shutil
 import stat
 import subprocess
@@ -67,6 +69,22 @@ class SlurmSafetyTests(unittest.TestCase):
         self.assertIn("gromacs_pilot_md:", TMC_PROFILE.read_text(encoding="utf-8"))
         self.assertIn("analyze_classical_replica:", TMC_PROFILE.read_text(encoding="utf-8"))
 
+    def test_stage_b3_uses_refined_sources_and_eight_cpu_jobs(self) -> None:
+        settings = json.loads((ROOT / "configs/methods.yaml").read_text())["stage_b3_amine_series"]
+        for system in ("12pda_3m", "tmeda_3m"):
+            self.assertEqual(settings["source_campaigns"][system], "amine_series_count_refinement")
+        self.assertEqual(settings["source_campaigns"]["deta_3m"], "amine_series_pilot")
+        rules = (ROOT / "workflow/rules/63_stage_b3_amine_series.smk").read_text()
+        profile = TMC_PROFILE.read_text()
+        for state in ("neutral", "anion"):
+            name = f"run_stage_b3_electronic_{state}"
+            rule = rules.split(f"rule {name}:", 1)[1].split("\n\nrule ", 1)[0]
+            allocation = re.split(r"\n  (?=\S)", profile.split(f"  {name}:\n", 1)[1], maxsplit=1)[0]
+            self.assertIn("tasks=8", rule)
+            self.assertIn("cpu_slots=8", rule)
+            self.assertIn("cp2k_slots=1", rule)
+            self.assertIn("tasks: 8", allocation)
+
     def test_stage_a_cannot_reschedule_completed_classical_md(self) -> None:
         rules = (ROOT / "workflow" / "rules" / "40_classical_analysis.smk").read_text(
             encoding="utf-8"
@@ -96,7 +114,6 @@ class SlurmSafetyTests(unittest.TestCase):
         profile = TMC_PROFILE.read_text(encoding="utf-8")
         self.assertIn("run_stage_b_cp2k_smoke:", profile)
         self.assertIn("tasks: 12", profile)
-        self.assertNotIn("tasks: 8", profile)
         self.assertNotIn("tasks: 32", profile)
         self.assertIn("resources:\n  cp2k_slots: 1", profile)
         self.assertIn("  cpu_slots: 12", profile)
