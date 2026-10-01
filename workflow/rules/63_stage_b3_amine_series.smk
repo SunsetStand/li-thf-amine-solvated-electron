@@ -1,3 +1,53 @@
+# Prepare only original amine sources still selected by Stage B3. All raw
+# trajectory paths are immutable params: this target has no MD producer edges.
+STAGE_B3_ORIGINAL_PAIRS = [
+    pair for pair in STAGE_B3_ENVIRONMENT_PAIRS
+    if stage_b3_source_campaign(pair[0]) == "amine_series_pilot"
+]
+STAGE_B3_SOURCE_HANDOFF_ROOT = f"{RUN_ROOT}/pilot/stage_b3/source_handoff/amine_series_pilot"
+
+
+rule prepare_stage_b3_source_handoff:
+    input:
+        methods="configs/methods.yaml",
+        scripts=[STAGE_B3_AMINE_SERIES, ANALYZE_CLASSICAL, PREPARE_STAGE_B],
+        runtime=STAGE_RUNTIME_INPUTS,
+    output:
+        manifest=f"{STAGE_B3_SOURCE_HANDOFF_ROOT}/{{system}}/r{{replica}}/candidates/manifest.json",
+        summary=f"{STAGE_B3_SOURCE_HANDOFF_ROOT}/{{system}}/r{{replica}}/stage_b_candidates.summary.json",
+        gate=f"{STAGE_B3_SOURCE_HANDOFF_ROOT}/{{system}}/r{{replica}}/stage_b_candidates.done",
+    params:
+        source_campaign=lambda wc: stage_b3_source_campaign(wc.system),
+        spec=lambda wc: stage_b3_artifact(f"{RUN_ROOT}/amine_series_pilot/specs/{wc.system}/r{wc.replica}.json"),
+        validation=lambda wc: stage_b3_artifact(f"{RUN_ROOT}/amine_series_pilot/classical/{wc.system}/r{wc.replica}/pilot/validation.json"),
+        tpr=lambda wc: stage_b3_artifact(f"{RUN_ROOT}/amine_series_pilot/classical/{wc.system}/r{wc.replica}/pilot/production/production.tpr"),
+        trajectory=lambda wc: stage_b3_artifact(f"{RUN_ROOT}/amine_series_pilot/classical/{wc.system}/r{wc.replica}/pilot/production/production.xtc"),
+        directory=lambda wc: f"{STAGE_B3_SOURCE_HANDOFF_ROOT}/{wc.system}/r{wc.replica}",
+    threads: 4
+    resources:
+        mem_mb=8000,
+        runtime=180,
+    shell:
+        "bash {STAGE_RUNNER:q} trajectory_analysis -- {PYTHON} {STAGE_B3_AMINE_SERIES:q} source-handoff "
+        "--campaign {CAMPAIGN:q} --source-campaign {params.source_campaign:q} "
+        "--spec {params.spec:q} --validation {params.validation:q} --tpr {params.tpr:q} "
+        "--trajectory {params.trajectory:q} --methods {input.methods:q} --output-dir {params.directory:q}"
+
+
+rule stage_b3_source_handoff:
+    input:
+        [f"{STAGE_B3_SOURCE_HANDOFF_ROOT}/{system}/r{replica}/stage_b_candidates.done"
+         for system, replica in STAGE_B3_ORIGINAL_PAIRS]
+    output:
+        f"{RUN_ROOT}/{CAMPAIGN}/stage_b3_source_handoff.done"
+    threads: 4
+    resources:
+        mem_mb=4000,
+        runtime=60,
+    shell:
+        "touch {output:q}"
+
+
 rule analyze_stage_b3_existing_nh:
     input:
         methods="configs/methods.yaml",
@@ -76,12 +126,10 @@ rule screen_stage_b3_amine_environment:
         source_campaign=lambda wildcards: stage_b3_source_campaign(wildcards.system),
         candidate_gate=stage_b3_candidate_gate,
         candidate_summary=lambda wildcards: stage_b3_artifact(
-            f"{RUN_ROOT}/{stage_b3_source_campaign(wildcards.system)}/"
-            "stage_b_candidates.summary.json"
+            stage_b3_candidate_path(wildcards, "stage_b_candidates.summary.json")
         ),
         candidate_manifest=lambda wildcards: stage_b3_artifact(
-            f"{RUN_ROOT}/{stage_b3_source_campaign(wildcards.system)}/stage_b/"
-            f"{wildcards.system}/r{wildcards.replica}/candidates/manifest.json"
+            stage_b3_candidate_path(wildcards, "manifest")
         ),
         spec=lambda wildcards: stage_b3_artifact(
             f"{RUN_ROOT}/{stage_b3_source_campaign(wildcards.system)}/specs/"
@@ -172,8 +220,7 @@ rule prepare_stage_b3_electronic_seeds:
         ],
     params:
         candidate_manifest=lambda wildcards: stage_b3_artifact(
-            f"{RUN_ROOT}/{stage_b3_source_campaign(wildcards.system)}/stage_b/"
-            f"{wildcards.system}/r{wildcards.replica}/candidates/manifest.json"
+            stage_b3_candidate_path(wildcards, "manifest")
         ),
         output_dir=lambda wildcards: (
             f"{RUN_ROOT}/{CAMPAIGN}/stage_b3/electronic/"
