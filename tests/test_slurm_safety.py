@@ -74,6 +74,9 @@ class SlurmSafetyTests(unittest.TestCase):
         analyze_rule, snapshot_rules = rules.split("rule summarize_classical_analysis:", 1)
         self.assertIn("tpr=lambda wildcards", analyze_rule)
         self.assertIn("trajectory=lambda wildcards", analyze_rule)
+        self.assertIn("classical_validation=existing_classical_validation", analyze_rule)
+        self.assertIn("--classical-validation {input.classical_validation:q}", analyze_rule)
+        self.assertIn("def existing_classical_validation", SNAKEFILE.read_text(encoding="utf-8"))
         self.assertNotIn("tpr=(", analyze_rule)
         self.assertNotIn("trajectory=(", analyze_rule)
         snapshot_rule = snapshot_rules.split("rule select_classical_snapshot:", 1)[1]
