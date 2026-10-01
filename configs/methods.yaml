@@ -183,13 +183,13 @@
       "eda_1p5m": "pilot",
       "eda_3m": "eda3m_pilot",
       "12pda_1p5m": "amine_series_pilot",
-      "12pda_3m": "amine_series_pilot",
+      "12pda_3m": "amine_series_count_refinement",
       "13pda_1p5m": "amine_series_pilot",
       "13pda_3m": "amine_series_pilot",
       "deta_1p5m": "amine_series_pilot",
       "deta_3m": "amine_series_pilot",
       "tmeda_1p5m": "amine_series_pilot",
-      "tmeda_3m": "amine_series_pilot"
+      "tmeda_3m": "amine_series_count_refinement"
     },
     "replicas_per_system": 1,
     "seed_roles": ["nh_facing", "nh_control"],
