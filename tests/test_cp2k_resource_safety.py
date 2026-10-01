@@ -22,10 +22,11 @@ class Cp2kResourceSafetyTests(unittest.TestCase):
     def test_cp2k_rules_fit_the_twelve_cpu_child_budget(self) -> None:
         combined = "\n".join(path.read_text(encoding="utf-8") for path in RULE_PATHS)
         self.assertNotIn("tasks=32", combined)
-        self.assertNotIn("tasks=8", combined)
-        self.assertEqual(combined.count("tasks=12,"), 9)
+        self.assertEqual(combined.count("tasks=8,"), 2)
+        self.assertEqual(combined.count("tasks=12,"), 7)
+        self.assertEqual(combined.count("cpu_slots=8,"), 2)
         self.assertEqual(combined.count("cp2k_slots=1,"), 9)
-        self.assertEqual(combined.count("cpu_slots=12,"), 9)
+        self.assertEqual(combined.count("cpu_slots=12,"), 7)
 
     def test_slurm_profiles_cap_jobs_and_cp2k_concurrency(self) -> None:
         for path in PROFILE_PATHS:
@@ -36,8 +37,8 @@ class Cp2kResourceSafetyTests(unittest.TestCase):
                 self.assertIn("  cpu_slots: 12", profile)
                 self.assertIn("  - cpu_slots=4", profile)
                 self.assertNotIn("tasks: 32", profile)
-                self.assertNotIn("tasks: 8", profile)
-                self.assertEqual(profile.count("tasks: 12"), 11)
+                self.assertEqual(profile.count("tasks: 8"), 2)
+                self.assertEqual(profile.count("tasks: 12"), 9)
 
 
 if __name__ == "__main__":
