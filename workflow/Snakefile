@@ -505,6 +505,16 @@ def pilot_checkpoint_argument(wildcards):
     return "" if not checkpoint_path else f"--checkpoint {shlex.quote(checkpoint_path)}"
 
 
+def existing_classical_validation(wildcards):
+    path = Path(
+        f"{RUN_ROOT}/{CAMPAIGN}/classical/{wildcards.system}/r{wildcards.replica}/"
+        "pilot/validation.json"
+    )
+    if not path.is_file():
+        raise ValueError(f"classical_analysis requires a completed pilot validation: {path}")
+    return path.as_posix()
+
+
 def require_pilot_campaign(_wildcards):
     if CAMPAIGN not in {"pilot", "eda3m_pilot", "amine_series_pilot", "amine_series_count_refinement", "hbond_pilot"}:
         raise ValueError(
