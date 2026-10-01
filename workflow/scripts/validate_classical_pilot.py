@@ -153,6 +153,10 @@ def summarize_records(
             "ready": all(checks.values()),
             "checks": checks,
             "replicas": sorted(int(row["replica"]) for row in group),
+            "accepted_concentration_deviations": [
+                {"replica": int(row["replica"]), **row["metrics"]["concentration_acceptance"]}
+                for row in group if "concentration_acceptance" in row["metrics"]
+            ],
             "mean_density_g_ml": mean_density,
             "replica_density_relative_span": replica_relative_span,
         }
@@ -180,6 +184,36 @@ def _read_trajectory(tpr: Path, trajectory: Path) -> tuple[float, list[float], l
 def _write_json(path: Path, value: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def apply_concentration_acceptance(
+    metrics: dict[str, Any], spec: dict[str, Any], campaign: str,
+    policy: dict[str, Any], nominal_tolerance_m: float,
+) -> dict[str, Any]:
+    """Record a narrow, explicit acceptance while retaining the failed nominal check."""
+    exception = policy.get(campaign, {}).get(spec["system_id"], {}).get(
+        str(spec["replica"])
+    )
+    if exception is None or metrics["checks"]["concentration_within_tolerance"]:
+        return metrics
+    error = metrics["concentration_error_m"]
+    if (
+        error is None
+        or int(spec["thf_count"]) != exception["thf_count"]
+        or int(spec["amine_count_initial"]) != exception["amine_count"]
+        or not nominal_tolerance_m < error <= exception["maximum_concentration_error_m"]
+        or not all(value for name, value in metrics["checks"].items()
+                   if name != "concentration_within_tolerance")
+    ):
+        return metrics
+    metrics["concentration_acceptance"] = {
+        "nominal_tolerance_m": nominal_tolerance_m,
+        "maximum_accepted_error_m": exception["maximum_concentration_error_m"],
+        "observed_error_m": error,
+        "reason": exception["reason"],
+    }
+    metrics["ready"] = True
+    return metrics
 
 
 def run_replica(args: argparse.Namespace) -> int:
@@ -210,6 +244,11 @@ def run_replica(args: argparse.Namespace) -> int:
             thf_count=int(spec["thf_count"]),
             target_amine_mole_fraction=float(spec["target_amine_mole_fraction"]),
             composition_basis=str(spec["composition_basis"]),
+        )
+        metrics = apply_concentration_acceptance(
+            metrics, spec, args.campaign,
+            json.loads(Path(args.acceptance_policy).read_text(encoding="utf-8")),
+            float(args.concentration_tolerance_m),
         )
         result = {
             "schema_version": 1,
@@ -275,6 +314,8 @@ def build_parser() -> argparse.ArgumentParser:
     replica.add_argument("--trajectory", required=True)
     replica.add_argument("--engine-validation", required=True)
     replica.add_argument("--concentration-tolerance-m", type=float, required=True)
+    replica.add_argument("--campaign", required=True)
+    replica.add_argument("--acceptance-policy", required=True)
     replica.add_argument("--output", required=True)
     replica.set_defaults(func=run_replica)
 
