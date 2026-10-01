@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -298,6 +299,79 @@ def run_reanalysis_summary(args: argparse.Namespace) -> int:
             ),
         },
     )
+    return 0
+
+
+def validate_source_handoff(args: argparse.Namespace) -> dict[str, Any]:
+    if args.campaign != "pilot" or args.source_campaign != "amine_series_pilot":
+        raise ValueError("source-handoff only prepares original amine sources under pilot")
+    spec = _read_json(args.spec)
+    methods = _read_json(args.methods)
+    sources = methods["stage_b3_amine_series"]["source_campaigns"]
+    if sources.get(spec["system_id"]) != args.source_campaign:
+        raise ValueError("source-handoff must not consume a superseded amine trajectory")
+    validation = _read_json(args.validation)
+    if not validation.get("metrics", {}).get("ready"):
+        raise ValueError(f"source pilot validation is not ready: {args.validation}")
+    if (validation.get("system_id"), int(validation.get("replica", -1))) != (
+        spec["system_id"], int(spec["replica"])
+    ):
+        raise ValueError("source validation and spec identify different system/replica")
+    for key in ("spec", "tpr", "trajectory"):
+        supplied = Path(getattr(args, key)).resolve()
+        recorded = validation.get("inputs", {}).get(key)
+        if not supplied.is_file() or recorded is None or Path(recorded).resolve() != supplied:
+            raise ValueError(f"source validation does not identify the supplied {key}")
+    return spec
+
+
+def run_source_handoff(args: argparse.Namespace) -> int:
+    validate_source_handoff(args)
+    directory = Path(args.output_dir).resolve()
+    directory.mkdir(parents=True, exist_ok=True)
+    scripts = Path(__file__).resolve().parent
+    analysis = directory / "analysis.json"
+    timeseries = directory / "timeseries.csv"
+    snapshot = directory / "snapshot"
+    manifest = directory / "candidates/manifest.json"
+    summary = directory / "stage_b_candidates.summary.json"
+    gate = directory / "stage_b_candidates.done"
+
+    def run(script: str, command: str, *arguments: object) -> None:
+        subprocess.run(
+            [sys.executable, str(scripts / script), command, *map(str, arguments)],
+            check=True,
+        )
+
+    run("analyze_classical_ensemble.py", "analyze",
+        "--spec", args.spec, "--methods", args.methods,
+        "--classical-validation", args.validation, "--tpr", args.tpr,
+        "--trajectory", args.trajectory, "--timeseries", timeseries,
+        "--rdf", directory / "rdf.csv", "--hydrogen-bonds", directory / "hydrogen_bonds.csv",
+        "--output", analysis)
+    if not _read_json(analysis).get("ready"):
+        raise ValueError(f"source trajectory analysis failed: {analysis}")
+    run("analyze_classical_ensemble.py", "select",
+        "--analysis", analysis, "--timeseries", timeseries, "--methods", args.methods,
+        "--tpr", args.tpr, "--trajectory", args.trajectory,
+        "--xyz", snapshot / "representative.xyz", "--cell", snapshot / "representative.cell.inc",
+        "--cavity-hbonds", snapshot / "cavity_hbonds.json", "--local-pdb", snapshot / "cavity_local.pdb",
+        "--pymol", snapshot / "cavity_hbonds.pml", "--svg", snapshot / "cavity_hbonds.svg",
+        "--output", snapshot / "metadata.json")
+    run("prepare_stage_b.py", "prepare",
+        "--spec", args.spec, "--snapshot-metadata", snapshot / "metadata.json",
+        "--xyz", snapshot / "representative.xyz", "--cell", snapshot / "representative.cell.inc",
+        "--methods", args.methods, "--output-dir", directory / "candidates", "--output", manifest)
+    run("prepare_stage_b.py", "summary", "--campaign", args.source_campaign,
+        "--output", summary, manifest)
+    record = _read_json(summary)
+    record["selection_scope"] = "single selected original amine system/replica for Stage B3"
+    record["source_validation"] = {
+        "path": str(Path(args.validation).resolve()), "sha256": sha256_file(args.validation)
+    }
+    _write_json(summary, record)
+    run("prepare_stage_b.py", "gate", "--summary", summary, "--output", gate)
+    _validate_checksum_gate(summary, gate)
     return 0
 
 
@@ -807,6 +881,12 @@ def build_parser() -> argparse.ArgumentParser:
     reanalysis_summary.add_argument("--records", nargs="+", required=True)
     reanalysis_summary.set_defaults(func=run_reanalysis_summary)
 
+    handoff = subparsers.add_parser("source-handoff")
+    for name in ("campaign", "source-campaign", "spec", "validation", "tpr",
+                 "trajectory", "methods", "output-dir"):
+        handoff.add_argument(f"--{name}", required=True)
+    handoff.set_defaults(func=run_source_handoff)
+
     screen = subparsers.add_parser("screen")
     screen.add_argument("--campaign", required=True)
     screen.add_argument("--source-campaign", required=True)
@@ -889,7 +969,7 @@ def main() -> int:
     args = build_parser().parse_args()
     try:
         return int(args.func(args))
-    except (KeyError, OSError, ValueError) as exc:
+    except (KeyError, OSError, ValueError, subprocess.CalledProcessError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
 
