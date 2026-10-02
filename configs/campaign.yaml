@@ -54,6 +54,11 @@
       "replicas": [1, 2, 3],
       "stages": ["spec", "inputs", "classical_md", "analysis"]
     },
+    "li_eda_tmeda": {
+      "systems": ["eda_3m", "tmeda_3m"],
+      "replicas": [1],
+      "stages": ["li_relaxation"]
+    },
     "production": {
       "systems": [
         "pure_thf",

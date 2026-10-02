@@ -677,4 +677,19 @@ def validate_repository_configs(root: Path | None = None) -> list[str]:
         thresholds.get("electron_count_max", 0)
     ):
         errors.append("electron_count_min must be smaller than electron_count_max")
+    from .li_relaxation import settings_from
+
+    try:
+        li = settings_from(methods)
+        definition = campaign["campaigns"][li["campaign"]]
+        if definition["systems"] != li["systems"] or definition["replicas"] != [1]:
+            raise ValueError("Li comparison campaign must select EDA/TMEDA replica 1")
+        for system, source in li["source_campaigns"].items():
+            source_definition = campaign["campaigns"][source]
+            if system not in source_definition["systems"] or (
+                li["source_replicas"][system] not in source_definition["replicas"]
+            ):
+                raise ValueError("Li comparison source system/replica is absent")
+    except (KeyError, TypeError, ValueError) as exc:
+        errors.append(f"Li relaxation settings are invalid: {exc}")
     return errors
