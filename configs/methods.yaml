@@ -265,6 +265,58 @@
     ],
     "interpretation": "Fixed-nuclei method-sensitivity benchmark on representative positive- and negative-delta Stage-B2C pairs. It tests numerical/basis convergence and PBE-to-PBE0 ordering stability; it is not a free energy, finite-size correction, structural-relaxation calculation, or proof of a bound solvated electron."
   },
+  "li_relaxation": {
+    "scientific_status": "FIXED_CELL_RELAXED_LI_ELECTRON_TRANSFER",
+    "campaign": "li_eda_tmeda",
+    "systems": ["eda_3m", "tmeda_3m"],
+    "source_campaigns": {
+      "eda_3m": "eda3m_pilot",
+      "tmeda_3m": "amine_series_count_refinement"
+    },
+    "source_replicas": {"eda_3m": 1, "tmeda_3m": 1},
+    "snapshots_per_system": 3,
+    "minimum_snapshot_separation_ps": 1000.0,
+    "li_n_distance_angstrom": 2.2,
+    "minimum_li_contact_scale": 1.0,
+    "state_targets": {"a": 3.0, "b": 2.0},
+    "cdft_tolerance_electrons": 0.001,
+    "energy_tolerance_ev": 0.02,
+    "cube_stride": 2,
+    "optimization_variant": "pbe0_admm",
+    "geometry": {
+      "max_iter": 200,
+      "max_force": 0.00045,
+      "rms_force": 0.0003,
+      "max_dr": 0.003,
+      "rms_dr": 0.0015
+    },
+    "variants": {
+      "pbe0_admm": {
+        "xc_family": "PBE0",
+        "exact_exchange_fraction": 0.25,
+        "basis_set": "TZV2P-MOLOPT-GTH",
+        "li_basis_set": "DZVP-MOLOPT-SR-GTH",
+        "aux_basis_set": "cFIT3",
+        "cutoff_ry": 600,
+        "rel_cutoff_ry": 80,
+        "eps_scf": "1.0E-7",
+        "max_scf": 240,
+        "hfx_cutoff_angstrom": 5.0,
+        "eps_schwarz": "1.0E-7"
+      },
+      "pbe_converged": {
+        "xc_family": "PBE",
+        "exact_exchange_fraction": 0.0,
+        "basis_set": "TZV2P-MOLOPT-GTH",
+        "li_basis_set": "DZVP-MOLOPT-SR-GTH",
+        "cutoff_ry": 600,
+        "rel_cutoff_ry": 80,
+        "eps_scf": "1.0E-7",
+        "max_scf": 240
+      }
+    },
+    "interpretation": "Compare charge-conserving Li donor/solvent electron states after fixed-cell relaxation. State targets are configurable Becke valence populations. No electron-position or N-H localization requirement."
+  },
   "cp2k": {
     "functional": "PBE0-D3",
     "exact_exchange_fraction": 0.25,
