@@ -295,3 +295,47 @@ set-resources:
     mpi: srun
     mem_mb: 128000
     runtime: 720
+  prepare_li_relaxation_seeds:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 120
+  render_li_relaxation_opt:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 120
+  render_li_relaxation_sp:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 120
+  analyze_li_relaxation_matrix:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 120
+  summarize_li_relaxation:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 120
+  validate_li_relaxation_summary:
+    slurm_partition: amd
+    cpus_per_task: 4
+    mem_mb: 8000
+    runtime: 120
+  run_li_relaxation_opt:
+    slurm_partition: amd
+    tasks: 8
+    mpi: tmc-amd-mpirun.sh
+    cpus_per_task: 1
+    mem_mb: 128000
+    runtime: 2880
+  run_li_relaxation_sp:
+    slurm_partition: amd
+    tasks: 8
+    mpi: tmc-amd-mpirun.sh
+    cpus_per_task: 1
+    mem_mb: 128000
+    runtime: 1440
