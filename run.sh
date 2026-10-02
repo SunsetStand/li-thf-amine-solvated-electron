@@ -336,9 +336,9 @@ workflow_target_from_args() {
     previous="${item}"
   done
   case "${target}" in
-    input_bundle|classical_smoke|classical_pilot|amine_series_charge_repair_em|amine_series_charge_repair|classical_analysis|snapshot_bank|hbond_stage_a|stage_b_candidates|stage_b|stage_b_mechanism_smoke|stage_b_localization|stage_b_report|stage_b2_intrinsic_smoke|stage_b2c_preferential_smoke|stage_b2c_preferential_production|stage_b2c_method_benchmark|stage_b3_source_handoff|stage_b3_nh_reanalysis|stage_b3_amine_environment|stage_b3_amine_pilot|stage_b3_amine_series) ;;
+    input_bundle|classical_smoke|classical_pilot|amine_series_charge_repair_em|amine_series_charge_repair|classical_analysis|snapshot_bank|hbond_stage_a|stage_b_candidates|stage_b|stage_b_mechanism_smoke|stage_b_localization|stage_b_report|stage_b2_intrinsic_smoke|stage_b2c_preferential_smoke|stage_b2c_preferential_production|stage_b2c_method_benchmark|stage_b3_source_handoff|stage_b3_nh_reanalysis|stage_b3_amine_environment|stage_b3_amine_pilot|stage_b3_amine_series|li_relaxation_inputs|li_relaxation_pilot|li_relaxation_benchmark|li_relaxation) ;;
     *)
-      printf 'ERROR: unknown workflow target %s; choose input_bundle, classical_smoke, classical_pilot, classical_analysis, snapshot_bank, hbond_stage_a, stage_b_candidates, stage_b, stage_b_mechanism_smoke, stage_b_localization, stage_b_report, stage_b2_intrinsic_smoke, stage_b2c_preferential_smoke, stage_b2c_preferential_production, stage_b2c_method_benchmark, stage_b3_source_handoff, stage_b3_nh_reanalysis, stage_b3_amine_environment, stage_b3_amine_pilot, or stage_b3_amine_series.\n' \
+      printf 'ERROR: unknown workflow target %s; choose input_bundle, classical_smoke, classical_pilot, classical_analysis, snapshot_bank, hbond_stage_a, stage_b_candidates, stage_b, stage_b_mechanism_smoke, stage_b_localization, stage_b_report, stage_b2_intrinsic_smoke, stage_b2c_preferential_smoke, stage_b2c_preferential_production, stage_b2c_method_benchmark, stage_b3_source_handoff, stage_b3_nh_reanalysis, stage_b3_amine_environment, stage_b3_amine_pilot, stage_b3_amine_series, li_relaxation_inputs, li_relaxation_pilot, li_relaxation_benchmark, or li_relaxation.\n' \
         "${target}" >&2
       return 2
       ;;
@@ -705,6 +705,10 @@ The lightweight eleven-system N-H environment panel is:
 The 12-single-point DETA/TMEDA electronic pilot and combined Stage-B3 gate are:
 ./run.sh submit --campaign pilot --target stage_b3_amine_pilot
 ./run.sh submit --campaign pilot --target stage_b3_amine_series
+The EDA/TMEDA Li electron-transfer and fixed-cell relaxation comparison is:
+./run.sh submit --campaign li_eda_tmeda --target li_relaxation_pilot
+./run.sh submit --campaign li_eda_tmeda --target li_relaxation
+See docs/li-relaxation.md for inputs, energies, and the optional method benchmark.
 EOF
     ;;
   *)

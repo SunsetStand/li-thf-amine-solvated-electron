@@ -18,6 +18,11 @@ scientific comparison.
 
 ## Quick start
 
+The EDA/TMEDA Li electron-transfer comparison reuses completed solvent trajectories,
+relaxes both charge-conserving electronic states, and reports vertical and relaxed
+energy differences. Start with `li_relaxation_pilot`; see
+[the calculation and run guide](docs/li-relaxation.md).
+
 On a workstation, commands run directly when `sbatch` is absent. On the TMC-AMD
 server, the same task-like commands automatically submit themselves to Slurm;
 only the lightweight shell wrapper and `sbatch` run on the login node:
