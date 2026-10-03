@@ -320,7 +320,8 @@ def render_stage_b2c_method_benchmark_cp2k(
         aux_basis = str(method["aux_basis_set"])
         aux_fit_line = f"      BASIS_SET AUX_FIT {aux_basis}"
         admm_block = """    &AUXILIARY_DENSITY_MATRIX_METHOD
-      ADMM_TYPE ADMMS
+      METHOD BASIS_PROJECTION
+      ADMM_PURIFICATION_METHOD MO_DIAG
       EXCH_CORRECTION_FUNC PBEX
     &END AUXILIARY_DENSITY_MATRIX_METHOD"""
         xc_lines = [
