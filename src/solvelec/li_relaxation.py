@@ -220,7 +220,8 @@ def render_input(
         basis_files += "\n    BASIS_SET_FILE_NAME BASIS_ADMM"
         aux = f"      BASIS_SET AUX_FIT {method['aux_basis_set']}"
         admm = """    &AUXILIARY_DENSITY_MATRIX_METHOD
-      ADMM_TYPE ADMMS
+      METHOD BASIS_PROJECTION
+      ADMM_PURIFICATION_METHOD MO_DIAG
       EXCH_CORRECTION_FUNC PBEX
     &END AUXILIARY_DENSITY_MATRIX_METHOD"""
         hf = f"""      &HF

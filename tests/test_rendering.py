@@ -39,7 +39,9 @@ class RenderingTests(unittest.TestCase):
             self.assertIn("TARGET 2.0", text)
             self.assertIn("POTENTIAL GTH-PBE-q3", text)
             self.assertIn("&BECKE_CONSTRAINT", text)
-            self.assertIn("ADMM_TYPE ADMMS", text)
+            self.assertIn("METHOD BASIS_PROJECTION", text)
+            self.assertIn("ADMM_PURIFICATION_METHOD MO_DIAG", text)
+            self.assertNotIn("ADMM_TYPE", text)
             self.assertIn("&E_DENSITY_CUBE", text)
             self.assertNotIn("&SPIN_DENSITY_CUBE", text)
 
