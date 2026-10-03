@@ -39,6 +39,8 @@ The default method is PBE0-D3(BJ)/ADMM with 25% exact exchange and 75% PBE
 exchange, TZV2P-MOLOPT-GTH on H/C/N/O, DZVP-MOLOPT-SR-GTH on Li, and cFIT3
 auxiliary bases from BASIS_ADMM. The GPW cutoffs are 600/80 Ry; the inner SCF
 tolerance is 10⁻⁷ Ha, and the Li population residual must be within 0.001 e.
+ADMM uses the CP2K 2023.2 input keywords `METHOD BASIS_PROJECTION` and
+`ADMM_PURIFICATION_METHOD MO_DIAG`, with `EXCH_CORRECTION_FUNC PBEX`.
 The HFX interaction is truncated at 5 Å and checked against each cell size.
 The orbital bases are atom-centered MOLOPT bases; a basis extension can be
 assessed separately if the first energy comparison warrants it.
